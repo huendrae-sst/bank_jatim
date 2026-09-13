@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL 15+ Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: jims_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: bank_jatim
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secretpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d bank_jatim"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis 7 Caching & Token Blacklist
+  redis:
+    image: redis:7-alpine
+    container_name: jims_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 3. RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: jims_rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: jims_user
+      RABBITMQ_DEFAULT_PASS: jims_secret
+    ports:
+      - "5672:5672"   # AMQP protocol
+      - "15672:15672" # Web Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 4. MinIO S3-Compatible Object Storage
+  minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: jims_minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+    ports:
+      - "9000:9000" # S3 API
+      - "9001:9001" # Web Console
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 5. Prometheus Metrics Scraper
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: jims_prometheus
+    restart: always
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+
+  # 6. Grafana Dashboards
+  grafana:
+    image: grafana/grafana:10.4.2
+    container_name: jims_grafana
+    restart: always
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  minio_data:
+  prometheus_data:
+  grafana_data:

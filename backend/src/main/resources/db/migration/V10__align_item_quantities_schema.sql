@@ -1,0 +1,56 @@
+-- =============================================================================
+-- Flyway Migration V10: Align Item Quantities Schema (order_items, pr_items, po_items, switching_items)
+-- =============================================================================
+
+-- 1. Order Items
+ALTER TABLE IF EXISTS order_items
+    ADD COLUMN IF NOT EXISTS qty_requested INTEGER NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS qty_approved INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_allocated INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_picked INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_packed INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_shipped INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_received INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS unit_price_ref NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS subtotal_ref NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- 2. Purchase Request Items
+ALTER TABLE IF EXISTS purchase_request_items
+    ADD COLUMN IF NOT EXISTS qty_requested INTEGER NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS qty_approved INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_ordered INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS estimated_unit_price NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS estimated_subtotal NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- 3. Purchase Order Items
+ALTER TABLE IF EXISTS purchase_order_items
+    ADD COLUMN IF NOT EXISTS purchase_request_item_id BIGINT REFERENCES purchase_request_items(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS qty_ordered INTEGER NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS qty_received INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS unit_price NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS subtotal NUMERIC(15, 2) NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- 4. Switching Stock Items
+ALTER TABLE IF EXISTS switching_stock_items
+    ADD COLUMN IF NOT EXISTS qty_requested INTEGER NOT NULL DEFAULT 1,
+    ADD COLUMN IF NOT EXISTS qty_approved INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_transferred INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_received INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- 5. Goods Receipt Items
+ALTER TABLE IF EXISTS goods_receipt_items
+    ADD COLUMN IF NOT EXISTS qty_received INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_accepted INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS qty_rejected INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS condition_notes TEXT;
+
+-- 6. Order Allocations
+ALTER TABLE IF EXISTS order_allocations
+    ADD COLUMN IF NOT EXISTS qty_allocated INTEGER NOT NULL DEFAULT 0,
+    ADD COLUMN IF NOT EXISTS allocation_type VARCHAR(50) NOT NULL DEFAULT 'DIRECT_WAREHOUSE',
+    ADD COLUMN IF NOT EXISTS switching_stock_id BIGINT REFERENCES switching_stocks(id) ON DELETE SET NULL,
+    ADD COLUMN IF NOT EXISTS status VARCHAR(50) NOT NULL DEFAULT 'RESERVED';
