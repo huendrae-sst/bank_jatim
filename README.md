@@ -1,16 +1,16 @@
 # Bank Jatim - JIMS (Jatim Inventory Management System)
-### Arsitektur Terpadu Enterprise: Vue.js 3 + Spring Boot 3
+### Arsitektur Terpadu Enterprise: Vue.js 3 + Spring Boot 4
 
 Sistem Informasi Manajemen Logistik, Pengadaan, Distribusi, dan Personalisasi Kartu Terpadu **PT Bank Pembangunan Daerah Jawa Timur Tbk (Bank Jatim)**.
 
 Aplikasi ini telah direfaktor dari arsitektur monolitik PHP (`jatim_php`) menjadi arsitektur modern terdesentralisasi:
 - **Frontend**: Vue.js 3 (Composition API) + Vite + Pinia + PrimeVue 4 + Axios + ECharts (vue-echarts)
-- **Backend Framework**: Spring Boot 3.3.x (Java 17 LTS)
+- **Backend Framework**: Spring Boot 4.1.1 (Java 21 LTS)
 - **API Style**: RESTful API + OpenAPI 3.0 (springdoc-openapi Swagger UI)
-- **Security**: Spring Security 6 + Stateless JWT + Role-Based Access Control (18 User Personas)
+- **Security**: Spring Security 7 + Stateless JWT + Role-Based Access Control (18 User Personas)
 - **Database**: PostgreSQL 15+
 - **Migrasi Skema DB**: Flyway (schema only; data demo tidak dijalankan di production)
-- **ORM**: Spring Data JPA (Hibernate 6)
+- **ORM**: Spring Data JPA (Hibernate 7)
 - **Caching**: Redis Caching & Token Blacklist
 - **Asynchronous Processing**: RabbitMQ 3.13 (Message Broker)
 - **Object Storage**: MinIO (S3-Compatible On-Premise)
@@ -32,7 +32,7 @@ bank_jatim/
 │   │   └── views/              # 14 views modul bisnis JIMS
 │   ├── package.json
 │   └── vite.config.js
-├── backend/                    # Enterprise REST API Service (Spring Boot 3)
+├── backend/                    # Enterprise REST API Service (Spring Boot 4.1.1)
 │   ├── src/main/java/com/bankjatim/jims/
 │   │   ├── common/             # ApiResponse, PageResponse, Exceptions
 │   │   ├── config/             # Security, JWT, Redis, RabbitMQ, MinIO, OpenAPI
@@ -72,10 +72,10 @@ Service yang akan berjalan:
 
 ---
 
-### 2. Menjalankan Backend (Spring Boot 3)
+### 2. Menjalankan Backend (Spring Boot 4.1.1)
 ```bash
 cd backend
-export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export JAVA_HOME="/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 mvn spring-boot:run
 ```
@@ -102,7 +102,7 @@ Backend production membaca koneksi database dari environment variable. Format `D
 
 ```bash
 cd backend
-export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export JAVA_HOME="/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 export SPRING_PROFILES_ACTIVE="prod"
 export DATABASE_URL="postgresql://admin:aninza@192.168.18.67:5432/bank_jatim"
@@ -138,7 +138,7 @@ Jalankan verifikasi sebelum deploy:
 
 ```bash
 cd backend
-export JAVA_HOME="/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home"
+export JAVA_HOME="/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 mvn test
 mvn spring-boot:run
