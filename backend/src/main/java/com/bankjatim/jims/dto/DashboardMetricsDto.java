@@ -20,14 +20,27 @@ public class DashboardMetricsDto {
     private long pendingApprovals;
     private long activeShipments;
     private BigDecimal totalInventoryValuation;
+    private BigDecimal availableInventoryValuation;
     private BigDecimal totalBudgetRemaining;
+    private BigDecimal totalBudgetRealized;
+    private double budgetUtilization;
     private double stockoutIncidentRate;
     private double fulfillmentSlaRate;
+    private long deliveredShipments;
+
+    // EWS Summary
+    private int ewsTotalAlerts;
+    private int ewsCriticalCount;
+    private int ewsReorderCount;
+    private BigDecimal ewsAtRiskValuation;
 
     // Charts data
     private List<String> months;
     private List<BigDecimal> monthlyProcurementCost;
     private List<BigDecimal> monthlyCostSaving;
+    private List<Map<String, Object>> categoryValuations;
     private Map<String, Integer> stockStatusDistribution;
     private List<Map<String, Object>> topOrderedItems;
+    private List<Map<String, Object>> branchBudgets;
+    private List<Map<String, Object>> recentOrders;
 }

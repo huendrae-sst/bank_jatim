@@ -20,72 +20,6 @@
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-arrow-left-right"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL PENGAJUAN</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ switchingList.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Alokasi Antar Cabang</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-clock-history"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">MENUNGGU APPROVAL</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ waitingCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 50%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Otorisasi Divisi Logistik</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-check2-all"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">SELESAI DITRANSFER</span>
-            <span class="info-box-number text-success fs-4 font-monospace">{{ completedCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Stok Diterima Cabang</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-boxes"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL TRANSFER</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ totalQty.toLocaleString('id-ID') }} <span class="fs-7 fw-normal">Unit</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 80%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Efisiensi Beban Belanja</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -329,6 +263,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const showModal = ref(false);
 const showDetailModal = ref(false);
@@ -351,8 +286,6 @@ const resetFilters = () => {
   currentPage.value = 1;
 };
 
-const switchingList = ref([]);
-
 const firstItem = (switching) => switching.items?.[0] || {};
 
 const mapSwitching = (switching) => ({
@@ -366,30 +299,40 @@ const mapSwitching = (switching) => ({
   reason: switching.recommendationReason || '-'
 });
 
+const switchingList = ref([]);
+
 const loadOptions = async () => {
-  const [organizationResponse, warehouseResponse, itemResponse] = await Promise.all([
-    api.get('/master/organizations'),
-    api.get('/master/warehouses'),
-    api.get('/master/items')
-  ]);
-  organizations.value = organizationResponse.data || [];
-  warehouses.value = warehouseResponse.data || [];
-  items.value = itemResponse.data || [];
+  try {
+    const [organizationResponse, warehouseResponse, itemResponse] = await Promise.allSettled([
+      api.get('/master/organizations'),
+      api.get('/master/warehouses'),
+      api.get('/master/items')
+    ]);
+    organizations.value = organizationResponse.status === 'fulfilled' && Array.isArray(organizationResponse.value.data) ? organizationResponse.value.data : [];
+    warehouses.value = warehouseResponse.status === 'fulfilled' && Array.isArray(warehouseResponse.value.data) ? warehouseResponse.value.data : [];
+    items.value = itemResponse.status === 'fulfilled' && Array.isArray(itemResponse.value.data) ? itemResponse.value.data : [];
+  } catch (e) {
+    console.warn('Failed loading options', e);
+    organizations.value = [];
+    warehouses.value = [];
+    items.value = [];
+  }
 };
 
 const loadSwitching = async () => {
-  const response = await api.get('/inventory/switching');
-  switchingList.value = (response.data || []).map(mapSwitching);
+  try {
+    const response = await api.get('/inventory/switching');
+    const data = response.data || [];
+    switchingList.value = Array.isArray(data) ? data.map(mapSwitching) : [];
+  } catch (e) {
+    console.warn('Failed loading switching from server:', e);
+    switchingList.value = [];
+  }
 };
 
 const loadPage = async () => {
   errorMessage.value = '';
-  try {
-    await Promise.all([loadOptions(), loadSwitching()]);
-  } catch (error) {
-    switchingList.value = [];
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat data switching stock.';
-  }
+  await Promise.allSettled([loadOptions(), loadSwitching()]);
 };
 
 const waitingCount = computed(() => {

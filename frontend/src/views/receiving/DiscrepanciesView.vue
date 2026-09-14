@@ -18,72 +18,6 @@
       </div>
     </div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-file-earmark-diff"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL KASUS SELISIH</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ records.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Tahun Anggaran 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-search"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">DALAM INVESTIGASI</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ inInvestigationCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 70%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Verifikasi Ekspedisi</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-check2-circle"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">KLAIM TERSELESAIKAN</span>
-            <span class="info-box-number text-success fs-4 font-monospace">{{ resolvedCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Kompensasi Disetujui</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-box-seam"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">AKUMULASI DEFISIT</span>
-            <span class="info-box-number text-danger fs-4 font-monospace">-20 <span class="fs-7 fw-normal">Pcs</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 30%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Total Fisik Kurang</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
@@ -355,6 +289,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const showCreateModal = ref(false);
 const showDetailModal = ref(false);
@@ -374,34 +309,37 @@ const resetFilters = () => {
   currentPage.value = 1;
 };
 
-const records = ref([]);
-
 const mapStatus = (status) => {
-  if (status === 'RESOLVED' || status === 'CLAIMED') return 'SELESAI / KLAIM';
+  if (status === 'RESOLVED' || status === 'CLAIMED' || status === 'SELESAI') return 'SELESAI / KLAIM';
   return 'INVESTIGASI LOGISTIK';
 };
 
 const mapDiscrepancy = (record) => ({
   id: record.id,
-  bapNo: record.beritaAcaraNumber || `BAP-${record.id}`,
-  shipmentNo: record.receivingNumber || '-',
-  branch: record.orderNumber || '-',
-  item: record.item?.name || '-',
+  bapNo: record.beritaAcaraNumber || record.bapNumber || `BAP-${record.id}`,
+  shipmentNo: record.receivingNumber || record.shipmentNumber || record.shipmentNo || '-',
+  branch: record.branchName || record.branch || record.orderNumber || '-',
+  item: record.item?.name || record.itemName || record.item || '-',
   qtyExpected: Number(record.qtyExpected || 0),
   qtyActual: Number(record.qtyActual || 0),
-  discrepancy: Number(record.qtyActual || 0) - Number(record.qtyExpected || 0),
-  reason: record.resolutionNotes || record.discrepancyType || '-',
-  status: mapStatus(record.resolutionStatus)
+  discrepancy: Number(record.qtyDiscrepancy || (Number(record.qtyActual || 0) - Number(record.qtyExpected || 0))),
+  reason: record.resolutionNotes || record.notes || record.reason || record.discrepancyType || '-',
+  status: mapStatus(record.resolutionStatus || record.status)
 });
+
+const records = ref([]);
 
 const loadDiscrepancies = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/receiving/discrepancies');
-    records.value = (response.data || []).map(mapDiscrepancy);
+    const data = response.data?.content || response.data || [];
+    if (Array.isArray(data) && data.length > 0) {
+      records.value = data.map(mapDiscrepancy);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat data selisih/kerusakan dari server.';
     records.value = [];
+    console.warn('Failed loading discrepancies from backend:', error);
   }
 };
 

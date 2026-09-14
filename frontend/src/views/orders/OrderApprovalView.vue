@@ -46,16 +46,6 @@
               <i class="bi bi-check2-circle me-1"></i> Riwayat Persetujuan
             </button>
           </li>
-          <li class="nav-item">
-            <button
-              type="button"
-              class="nav-link py-1 px-3 text-nowrap"
-              :class="statusTab === 'all' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="setTab('all')"
-            >
-              <i class="bi bi-collection me-1"></i> Semua Transaksi
-            </button>
-          </li>
         </ul>
 
         <!-- Quick Search Tab Riwayat Persetujuan (Rata Kanan & Fleksibel Tanpa Memecah Baris Tab) -->
@@ -77,11 +67,6 @@
               <i class="bi bi-arrow-counterclockwise"></i>
             </button>
           </div>
-        </div>
-
-        <!-- Indikator Total Count untuk Tab Table Grid (pending & all) -->
-        <div v-else class="text-secondary fs-8 d-none d-md-block pe-2 text-nowrap flex-shrink-0">
-          Total: <strong class="text-body">{{ filteredOrders.length }}</strong> order
         </div>
       </div>
     </div>
@@ -691,9 +676,57 @@ const switchSourceWarehouseId = ref('');
 const switchQty = ref(0);
 const switchReason = ref('Pemenuhan kekurangan stok pusat dari kelebihan stok cabang regional.');
 
+const mapApprovalOrder = (o) => ({
+  id: o.id,
+  order_number: o.orderNumber || o.order_number,
+  status: o.status,
+  priority: o.priority || 'NORMAL',
+  is_overbudget: Boolean(o.isOverbudget),
+  projected_utilization: 0,
+  requesting_organization: {
+    id: o.requestingOrganization?.id || o.requesting_organization?.id,
+    name: o.requestingOrganization?.name || o.requesting_organization?.name || 'Cabang',
+    code: o.requestingOrganization?.code || o.requesting_organization?.code || '-'
+  },
+  requester: {
+    name: o.createdByUser?.name || o.requester?.name || 'Maker',
+    nip: o.createdByUser?.nip || o.requester?.nip || '-'
+  },
+  total_estimated_value: Number(o.totalEstimatedValue || o.total_estimated_value || 0),
+  created_at_formatted: (o.createdAt || o.created_at) ? new Date(o.createdAt || o.created_at).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-',
+  notes: o.notes || '',
+  items: (o.items || []).map((li, idx) => ({
+    id: li.id || idx + 1,
+    item: {
+      id: li.item?.id,
+      name: li.item?.name || 'Barang Logistik',
+      sku: li.item?.sku || '-',
+      uom: li.item?.uom || 'PCS'
+    },
+    qty_requested: li.qtyRequested || li.qty_requested || 0,
+    qty_allocated: li.qtyApproved || li.qty_allocated || 0,
+    qty_packed: li.qtyPacked || li.qty_packed || 0,
+    qty_shipped: li.qtyShipped || li.qty_shipped || 0,
+    qty_received: li.qtyReceived || li.qty_received || 0,
+    subtotal_ref: Number(li.subtotalRef || li.subtotal_ref || 0)
+  })),
+  switchingRecommendations: []
+});
+
 const orders = ref([]);
 const selectedOrder = ref(null);
 const loadError = ref('');
+
+const extractOrdersList = (res) => {
+  if (!res) return null;
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res.data?.data?.content)) return res.data.data.content;
+  if (Array.isArray(res.data?.content)) return res.data.content;
+  if (Array.isArray(res.data?.data)) return res.data.data;
+  if (Array.isArray(res.data)) return res.data;
+  if (Array.isArray(res.content)) return res.content;
+  return null;
+};
 
 // Lifecycle
 onMounted(async () => {
@@ -702,51 +735,17 @@ onMounted(async () => {
     const res = await api.get('/orders', {
       params: { page: 0, size: 100, sort: 'createdAt,desc' }
     });
-    const serverOrders = res.data?.content || [];
-    orders.value = serverOrders.map((o) => ({
-      id: o.id,
-      order_number: o.orderNumber,
-      status: o.status,
-      priority: o.priority || 'NORMAL',
-      is_overbudget: Boolean(o.isOverbudget),
-      projected_utilization: 0,
-      requesting_organization: {
-        id: o.requestingOrganization?.id,
-        name: o.requestingOrganization?.name || 'Cabang',
-        code: o.requestingOrganization?.code || '-'
-      },
-      requester: {
-        name: o.createdByUser?.name || 'Maker',
-        nip: o.createdByUser?.nip || '-'
-      },
-      total_estimated_value: Number(o.totalEstimatedValue || 0),
-      created_at_formatted: o.createdAt ? new Date(o.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '-',
-      notes: o.notes || '',
-      items: (o.items || []).map((li, idx) => ({
-        id: li.id || idx + 1,
-        item: {
-          id: li.item?.id,
-          name: li.item?.name || 'Barang Logistik',
-          sku: li.item?.sku || '-',
-          uom: li.item?.uom || 'PCS'
-        },
-        qty_requested: li.qtyRequested || 0,
-        qty_allocated: li.qtyApproved || 0,
-        qty_packed: li.qtyPacked || 0,
-        qty_shipped: li.qtyShipped || 0,
-        qty_received: li.qtyReceived || 0,
-        subtotal_ref: Number(li.subtotalRef || 0)
-      })),
-      switchingRecommendations: []
-    }));
-
+    const serverOrders = extractOrdersList(res);
+    if (serverOrders !== null) {
+      orders.value = serverOrders.map(mapApprovalOrder);
+    }
+  } catch (err) {
+    console.warn('Failed loading orders from server:', err);
+    orders.value = [];
+  } finally {
     if (!selectedOrder.value || !orders.value.find(o => o.id === selectedOrder.value.id)) {
       selectedOrder.value = orders.value[0] || null;
     }
-  } catch (err) {
-    orders.value = [];
-    selectedOrder.value = null;
-    loadError.value = err?.message || err?.error || 'Gagal memuat data order dari server.';
   }
 });
 

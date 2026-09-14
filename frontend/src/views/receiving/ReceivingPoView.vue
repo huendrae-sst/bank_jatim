@@ -18,77 +18,35 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-inbox-fill"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Menunggu Kedatangan</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-danger">{{ waitingCount }} PO</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 50%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Estimasi Tiba Minggu Ini</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-hourglass-split"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Penerimaan Parsial</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-warning">{{ partialCount }} PO</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 50%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Sisa Tahap Pengiriman 2</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-check2-circle"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">PO Selesai / Full QC</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">{{ completedCount }} PO</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 90%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Bulan Berjalan 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-boxes"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Qty Diterima</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ totalReceivedQty.toLocaleString('id-ID') }} Unit</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 65%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Stok On-Hand Margomulyo</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
-      <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-clipboard-check text-danger me-2"></i>Daftar PO Vendor Siap Diterima & QC
-          </h3>
-          <span class="badge text-bg-danger fs-9">{{ openPoCount }} PO Terbuka</span>
-        </div>
+      <div class="card-header border-bottom p-2 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
+        <ul class="nav nav-pills card-header-pills fs-7 pb-1 pb-md-0">
+          <li class="nav-item">
+            <button
+              type="button"
+              class="nav-link py-1 px-3 text-nowrap"
+              :class="activeTab === 'queue' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'queue'"
+            >
+              Penerimaan PO
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              type="button"
+              class="nav-link py-1 px-3 text-nowrap"
+              :class="activeTab === 'history' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'history'"
+            >
+              Riwayat Penerimaan
+            </button>
+          </li>
+        </ul>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/procurement/po" class="btn btn-sm btn-outline-secondary fs-8">
             <i class="bi bi-file-earmark-text me-1"></i> Data Purchase Orders
@@ -235,6 +193,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const showModal = ref(false);
 const selectedPo = ref(null);
@@ -244,9 +203,14 @@ const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterStatus = ref('');
+const activeTab = ref('queue');
 const errorMessage = ref('');
 
-const poList = ref([]);
+const toReceivingStatus = (status, qtyOrdered, qtyReceived) => {
+  if (status === 'RECEIVED' || qtyReceived >= qtyOrdered && qtyOrdered > 0) return 'COMPLETED';
+  if (qtyReceived > 0) return 'PARTIAL';
+  return 'MENUNGGU KEDATANGAN';
+};
 
 const mapPo = (po) => {
   const items = po.items || [];
@@ -264,7 +228,7 @@ const mapPo = (po) => {
   return {
     id: po.id,
     poNumber: po.poNumber || '-',
-    vendorName: po.vendor?.name || '-',
+    vendorName: po.vendor?.name || po.vendor || '-',
     itemName: itemName || '-',
     qtyOrdered,
     qtyReceived,
@@ -274,22 +238,20 @@ const mapPo = (po) => {
   };
 };
 
-const toReceivingStatus = (status, qtyOrdered, qtyReceived) => {
-  if (status === 'RECEIVED' || qtyReceived >= qtyOrdered && qtyOrdered > 0) return 'COMPLETED';
-  if (qtyReceived > 0) return 'PARTIAL';
-  return 'MENUNGGU KEDATANGAN';
-};
+const poList = ref([]);
 
 const loadPurchaseOrders = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/procurement/po');
-    poList.value = (response.data || [])
-      .filter(po => !['DRAFT', 'ISSUED', 'REJECTED'].includes(po.status))
-      .map(mapPo);
+    const data = response.data?.content || response.data || [];
+    const valid = data.filter(po => !['DRAFT', 'ISSUED', 'REJECTED'].includes(po.status));
+    if (valid.length > 0) {
+      poList.value = valid.map(mapPo);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat purchase order dari server.';
     poList.value = [];
+    console.warn('Failed loading purchase orders from backend:', error);
   }
 };
 
@@ -307,6 +269,9 @@ const resetFilters = () => {
 
 const filteredPoList = computed(() => {
   return poList.value.filter(po => {
+    if (activeTab.value === 'queue' && po.status === 'COMPLETED') return false;
+    if (activeTab.value === 'history' && po.status !== 'COMPLETED') return false;
+
     const matchQuery = !searchQuery.value ||
       po.poNumber.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       po.vendorName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||

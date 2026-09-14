@@ -18,64 +18,6 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-database-check"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Entri Migrasi</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ initialStockList.length }} Entri</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Gudang Margomulyo & Cabang</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-boxes"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Kuantitas Fisik</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">25,000 Unit</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 75%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Saldo Stok Tersinkron</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-cash-stack"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Valuasi Awal</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">Rp 232.50 Jt</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 85%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Nilai Buku GL Persediaan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-clock-history"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Status Ledger</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">POSTED</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Terkunci & Tidak Dapat Diubah</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
@@ -83,9 +25,8 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-table text-danger me-2"></i>Daftar Penetapan Saldo Awal Terdaftar
+            Daftar Penetapan Saldo Awal Terdaftar
           </h3>
-          <span class="badge text-bg-success fs-9">Aktif & Terposting</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <input type="file" ref="fileInputRef" accept=".xlsx,.csv" class="d-none" @change="handleFileSelected" />

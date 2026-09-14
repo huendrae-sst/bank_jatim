@@ -95,8 +95,9 @@ const formatNumber = (val) => new Intl.NumberFormat('id-ID').format(val || 0);
 const fetchCoverageData = async () => {
   isLoading.value = true;
   try {
-    const res = await api.get('/procurement/po');
-    const orders = res.data?.data || res.data || [];
+    const res = await api.get('/procurement/po').catch(() => ({ data: [] }));
+    let orders = res.data?.data || res.data || [];
+    if (!Array.isArray(orders)) orders = [];
     const rows = [];
 
     for (const po of orders) {

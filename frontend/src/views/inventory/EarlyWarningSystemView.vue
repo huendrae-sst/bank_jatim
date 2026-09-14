@@ -83,10 +83,9 @@
       <div class="col-12 col-lg-6" v-for="item in lowStockItems" :key="item.id">
         <div class="card card-outline card-danger shadow-xs h-100">
           <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
-            <h3 class="card-title fs-7 fw-bold mb-0 text-danger d-flex align-items-center gap-1">
-              <i class="bi bi-exclamation-octagon-fill"></i> Peringatan Stok Kritis
+            <h3 class="card-title fs-7 fw-bold mb-0 text-danger">
+              Peringatan Stok Kritis
             </h3>
-            <span class="badge text-bg-danger fs-9">Stok: {{ item.onHand }}</span>
           </div>
           <div class="card-body p-3 d-flex flex-column justify-content-between">
             <div>

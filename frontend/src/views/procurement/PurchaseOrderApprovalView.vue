@@ -18,64 +18,6 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-hourglass-split"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Menunggu Otorisasi</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-warning">{{ pendingPOs.length }} Draft PO</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 50%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Butuh Tanda Tangan Pemimpin</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-cash-stack"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Nilai Komitmen</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-danger">Rp 625.00 Jt</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 75%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Nilai Kontrak Pengadaan Baru</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-check2-all"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Disetujui Bulan Ini</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">15 Kontrak</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 90%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">PO Diterbitkan ke Rekanan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-building"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Vendor Terlibat</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">8 Rekanan</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 70%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Vendor Terverifikasi CSMS</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
@@ -85,9 +27,8 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-inbox text-danger me-2"></i>Antrean Purchase Order (PO) Menunggu Persetujuan
+            Antrean Purchase Order (PO) Menunggu Persetujuan
           </h3>
-          <span class="badge text-bg-warning fs-9">{{ pendingPOs.length }} Draft PO</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/procurement/orders" class="btn btn-sm btn-outline-secondary fs-8">
@@ -197,14 +138,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterVendor = ref('');
 const errorMessage = ref('');
-
-const pendingPOs = ref([]);
 
 const describeItems = (items = []) => items
   .map(line => {
@@ -218,23 +158,27 @@ const describeItems = (items = []) => items
 const mapPo = (po) => ({
   id: po.id,
   poNumber: po.poNumber || '-',
-  vendor: po.vendor?.name || '-',
+  vendor: po.vendor?.name || po.vendor || '-',
   items: describeItems(po.items),
   totalContract: Number(po.totalAmount || 0),
   paymentTerms: po.notes || 'Termin sesuai kontrak',
   status: po.status || '-'
 });
 
+const pendingPOs = ref([]);
+
 const loadPendingPOs = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/procurement/po');
-    pendingPOs.value = (response.data || [])
-      .filter(po => ['DRAFT', 'ISSUED', 'MENUNGGU OTORISASI'].includes(po.status))
-      .map(mapPo);
+    const data = response.data?.content || response.data || [];
+    const valid = data.filter(po => ['DRAFT', 'ISSUED', 'MENUNGGU OTORISASI', 'WAITING_APPROVAL'].includes(po.status));
+    if (valid.length > 0) {
+      pendingPOs.value = valid.map(mapPo);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat antrean approval PO dari server.';
     pendingPOs.value = [];
+    console.warn('Failed loading pending POs from backend:', error);
   }
 };
 

@@ -22,56 +22,6 @@
       </div>
     </div>
 
-    <!-- 2. KPI Metric Widgets (AdminLTE 4 Info-Boxes) -->
-    <div class="row g-3 mb-3">
-      <!-- Box 1: Total PR -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger"><i class="bi bi-file-earmark-text"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Total Pengajuan PR</span>
-            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ prList.length }}</span>
-            <span class="fs-9 text-secondary">Tahun Anggaran 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Box 2: Menunggu Otorisasi -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning"><i class="bi bi-hourglass-split"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Menunggu Otorisasi</span>
-            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ waitingApprovalCount }}</span>
-            <span class="fs-9 text-warning-emphasis">Memerlukan Review Pejabat</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Box 3: Approved -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-primary"><i class="bi bi-check2-circle"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Approved (Siap Pool)</span>
-            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ approvedCount }}</span>
-            <span class="fs-9 text-secondary">Siap Masuk Konsolidasi PO</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Box 4: Estimasi Belanja -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success"><i class="bi bi-cash-stack"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Total Estimasi Belanja</span>
-            <span class="info-box-number fs-4 fw-bold font-monospace text-success">Rp 171<span class="fs-7 fw-normal">jt</span></span>
-            <span class="fs-9 text-secondary">Dari Pagu Unit Kerja</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">
       {{ errorMessage }}
@@ -345,9 +295,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
+import { extractList } from '@/utils/responseParser';
 
-const searchQuery = ref('');
 const activeTab = ref('all');
+const searchQuery = ref('');
 const filterOrg = ref('ALL');
 const filterMethod = ref('ALL');
 const showCreateModal = ref(false);
@@ -361,6 +313,19 @@ const resetFilters = () => {
   filterMethod.value = 'ALL';
   currentPage.value = 1;
 };
+
+const mapPr = (pr) => ({
+  id: pr.id,
+  prNumber: pr.prNumber,
+  date: pr.createdAt ? new Date(pr.createdAt).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '-',
+  organization: pr.organization?.name || pr.organizationName || 'Kantor Pusat',
+  costCenter: pr.organization?.code || pr.costCenter || '-',
+  method: pr.procurementMethod || pr.method || 'DIRECT',
+  purpose: pr.purpose || '-',
+  estimatedCost: Number(pr.estimatedTotalCost || pr.estimatedCost || 0),
+  budgetStatus: pr.budgetStatus || 'VALIDATED',
+  status: pr.status || 'DRAFT'
+});
 
 const prList = ref([]);
 
@@ -380,30 +345,37 @@ const approvedCount = computed(() => {
   return prList.value.filter(p => p.status === 'APPROVED').length;
 });
 
+const poIssuedCount = computed(() => {
+  return prList.value.filter(p => p.status === 'PO_ISSUED').length;
+});
+
 const filteredPrList = computed(() => {
   return prList.value.filter(pr => {
-    // Tab filter
+    // Tab filtering
     if (activeTab.value === 'waiting' && !['SUBMITTED', 'WAITING_APPROVAL'].includes(pr.status)) return false;
     if (activeTab.value === 'approved' && pr.status !== 'APPROVED') return false;
+    if (activeTab.value === 'po_issued' && pr.status !== 'PO_ISSUED') return false;
 
-    // Org filter
+    // Unit Kerja Filter
     if (filterOrg.value !== 'ALL' && pr.organization !== filterOrg.value) return false;
 
-    // Method filter
+    // Method Filter
     if (filterMethod.value !== 'ALL' && pr.method !== filterMethod.value) return false;
 
-    // Search query filter
+    // Search Query
     if (searchQuery.value) {
       const q = searchQuery.value.toLowerCase();
-      const matchNum = pr.prNumber.toLowerCase().includes(q);
-      const matchOrg = pr.organization.toLowerCase().includes(q);
-      const matchPur = pr.purpose.toLowerCase().includes(q);
-      if (!matchNum && !matchOrg && !matchPur) return false;
+      const matchNum = pr.prNumber?.toLowerCase().includes(q);
+      const matchPurpose = pr.purpose?.toLowerCase().includes(q);
+      if (!matchNum && !matchPurpose) return false;
     }
 
     return true;
   });
 });
+
+const totalRows = computed(() => filteredPrList.value.length);
+const totalPages = computed(() => Math.ceil(totalRows.value / perPage.value) || 1);
 
 const paginatedPrList = computed(() => {
   const start = (currentPage.value - 1) * perPage.value;
@@ -421,17 +393,8 @@ const badgeClass = (status) => {
   }
 };
 
-const mapPr = (pr) => ({
-  id: pr.id,
-  prNumber: pr.prNumber,
-  date: pr.createdAt ? new Date(pr.createdAt).toLocaleDateString('id-ID', { dateStyle: 'medium' }) : '-',
-  organization: pr.organization?.name || '-',
-  costCenter: pr.organization?.code || '-',
-  method: pr.procurementMethod || '-',
-  purpose: pr.purpose || '-',
-  estimatedCost: Number(pr.estimatedTotalCost || 0),
-  budgetStatus: pr.budgetStatus || '-',
-  status: pr.status || '-'
+onMounted(() => {
+  loadPurchaseRequests();
 });
 
 const loadPurchaseRequests = async () => {
@@ -440,9 +403,12 @@ const loadPurchaseRequests = async () => {
     const response = await api.get('/procurement/pr', {
       params: { page: 0, size: 100, sort: 'createdAt,desc' }
     });
-    prList.value = (response.data?.content || []).map(mapPr);
+    const list = extractList(response);
+    if (list !== null) {
+      prList.value = list.map(mapPr);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat purchase request dari server.';
+    console.warn('Failed loading purchase requests from server:', error);
     prList.value = [];
   }
 };

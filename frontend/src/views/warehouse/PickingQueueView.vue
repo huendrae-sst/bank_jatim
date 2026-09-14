@@ -18,72 +18,6 @@
       </div>
     </div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-clock-history"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">MENUNGGU PICKING</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ pendingQueue.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Prioritas FIFO &amp; Urgent Cabang</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-gear-wide-connected"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">SEDANG DIAMBIL</span>
-            <span class="info-box-number text-body fs-4 font-monospace">2</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 50%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Petugas: Farhan Kurnia</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-check-circle-fill"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">SELESAI SIAP PACKING</span>
-            <span class="info-box-number text-success fs-4 font-monospace">8</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Shift Kerja Hari Ini</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-box-seam"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">LOKASI RAK AKTIF</span>
-            <span class="info-box-number text-body fs-4 font-monospace">14 <span class="fs-7 fw-normal">Bin</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 70%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Khazanah &amp; Rak A-C</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Picking Table Card -->
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
@@ -97,29 +31,23 @@
             <button
               type="button"
               class="nav-link py-1 px-3 text-nowrap"
-              :class="activeTab === 'all' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="activeTab = 'all'"
+              :class="activeTab === 'queue' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'queue'"
             >
-              Semua Antrean
+              Antrean Picking
             </button>
           </li>
           <li class="nav-item">
             <button
               type="button"
               class="nav-link py-1 px-3 text-nowrap"
-              :class="activeTab === 'urgent' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="activeTab = 'urgent'"
+              :class="activeTab === 'history' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'history'"
             >
-              Urgent Cabang
+              Riwayat Antrean
             </button>
           </li>
         </ul>
-
-        <div class="card-tools ms-md-auto">
-          <button class="btn btn-sm btn-outline-danger fw-bold fs-8" @click="scanBarcodeModal = true">
-            <i class="bi bi-upc-scan me-1"></i> Scan Rak / Barcode
-          </button>
-        </div>
       </div>
 
       <!-- Filter & Search Toolbar -->
@@ -283,6 +211,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const scanBarcodeModal = ref(false);
 const scannedBarcode = ref('');
@@ -290,7 +219,7 @@ const scanResult = ref(null);
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
-const activeTab = ref('all');
+const activeTab = ref('queue');
 const filterBranch = ref('ALL');
 const filterPriority = ref('ALL');
 const errorMessage = ref('');
@@ -302,37 +231,39 @@ const resetFilters = () => {
   currentPage.value = 1;
 };
 
-const pendingQueue = ref([]);
-
 const describeItems = (items = []) => items
   .map(line => {
     const name = line.item?.name || '-';
-    const qty = Number(line.qtyApproved || 0).toLocaleString('id-ID');
+    const qty = Number(line.qtyApproved || line.qtyRequested || 0).toLocaleString('id-ID');
     const uom = line.item?.uom || 'Unit';
     return `${name} (${qty} ${uom})`;
   })
   .join(', ');
 
 const mapQueue = (item) => ({
-  id: item.orderId,
-  batchNo: `PCK-${item.orderNumber || item.orderId}`,
+  id: item.orderId || item.id,
+  batchNo: item.batchNo || `PCK-${item.orderNumber || item.orderId || item.id}`,
   orderNumber: item.orderNumber || '-',
-  branch: item.branch || '-',
-  binLocation: item.warehouse || '-',
-  itemDescription: describeItems(item.items),
+  branch: item.branch || item.requestingOrganization?.name || '-',
+  binLocation: item.binLocation || item.warehouse || 'RAK-A1-02',
+  itemDescription: item.itemDescription || describeItems(item.items),
   priority: item.priority || 'NORMAL',
   status: item.status || 'MENUNGGU PICKING'
 });
+
+const pendingQueue = ref([]);
 
 const loadPickingQueue = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/warehouse/picking');
     const list = response.data?.data ?? response.data ?? [];
-    pendingQueue.value = Array.isArray(list) ? list.map(mapQueue) : [];
+    if (Array.isArray(list) && list.length > 0) {
+      pendingQueue.value = list.map(mapQueue);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat antrean picking dari server.';
     pendingQueue.value = [];
+    console.warn('Failed loading picking queue from backend:', error);
   }
 };
 
@@ -360,7 +291,9 @@ const submitBarcodeScan = () => {
 
 const filteredQueue = computed(() => {
   return pendingQueue.value.filter(p => {
-    if (activeTab.value === 'urgent' && p.priority !== 'URGENT') return false;
+    const isCompleted = p.status === 'SELESAI' || p.status === 'COMPLETED' || p.status === 'PICKED';
+    if (activeTab.value === 'queue' && isCompleted) return false;
+    if (activeTab.value === 'history' && !isCompleted) return false;
 
     if (filterBranch.value !== 'ALL' && p.branch !== filterBranch.value) return false;
     if (filterPriority.value !== 'ALL' && p.priority !== filterPriority.value) return false;

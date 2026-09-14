@@ -18,64 +18,6 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-hourglass-split"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Menunggu Keputusan</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-warning">{{ pendingPRs.length }} PR</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 60%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Butuh Review Pejabat Pemutus</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-cash-stack"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Nilai Diajukan</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-danger">Rp 1.29 M</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 80%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Estimasi Anggaran Capex/Opex</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-check2-all"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Disetujui Bulan Ini</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">22 PR</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 88%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Diteruskan ke Tim Konsolidasi</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-pie-chart"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Realisasi Plafon</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">64.5%</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 64.5%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Terhadap Anggaran 2026</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">
       {{ errorMessage }}
@@ -87,9 +29,8 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-inbox text-danger me-2"></i>Antrean Purchase Request (PR) Menunggu Otorisasi
+            Antrean Purchase Request (PR) Menunggu Otorisasi
           </h3>
-          <span class="badge text-bg-warning fs-9">{{ pendingPRs.length }} Menunggu Tindakan</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/procurement/requests" class="btn btn-sm btn-outline-secondary fs-8">
@@ -198,12 +139,23 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterUnit = ref('');
 const errorMessage = ref('');
+
+const mapPr = (pr) => ({
+  id: pr.id,
+  prNumber: pr.prNumber,
+  requestingUnit: pr.organization?.name || '-',
+  description: pr.purpose || '-',
+  estimatedValue: Number(pr.estimatedTotalCost || 0),
+  justification: pr.budgetStatus || '-',
+  status: pr.status || '-'
+});
 
 const pendingPRs = ref([]);
 
@@ -229,28 +181,20 @@ const paginatedPRs = computed(() => {
   return filteredPRs.value.slice(start, start + perPage.value);
 });
 
-const mapPr = (pr) => ({
-  id: pr.id,
-  prNumber: pr.prNumber,
-  requestingUnit: pr.organization?.name || '-',
-  description: pr.purpose || '-',
-  estimatedValue: Number(pr.estimatedTotalCost || 0),
-  justification: pr.budgetStatus || '-',
-  status: pr.status || '-'
-});
-
 const loadPendingPrs = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/procurement/pr', {
       params: { page: 0, size: 100, sort: 'createdAt,desc' }
     });
-    pendingPRs.value = (response.data?.content || [])
-      .filter((pr) => ['SUBMITTED', 'WAITING_APPROVAL'].includes(pr.status))
-      .map(mapPr);
+    const content = response.data?.content || response.data || [];
+    const valid = content.filter((pr) => ['SUBMITTED', 'WAITING_APPROVAL'].includes(pr.status));
+    if (valid.length > 0) {
+      pendingPRs.value = valid.map(mapPr);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat antrean approval PR.';
     pendingPRs.value = [];
+    console.warn('Failed loading pending PRs from backend:', error);
   }
 };
 

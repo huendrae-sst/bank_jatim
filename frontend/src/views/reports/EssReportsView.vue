@@ -53,13 +53,10 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
         <div>
           <h3 class="card-title fw-semibold mb-0 fs-6 text-body">
-            <i class="bi bi-table text-danger me-1"></i> Pratinjau Data Laporan: {{ currentReport.title }}
+            Pratinjau Data Laporan: {{ currentReport.title }}
           </h3>
           <span class="fs-9 text-secondary">Konsolidasi Data Seluruh Cabang Bank Jatim</span>
         </div>
-        <span class="badge text-bg-success fs-8">
-          <i class="bi bi-check2-circle me-1"></i> Terverifikasi Audit Internal
-        </span>
       </div>
 
       <!-- Table -->

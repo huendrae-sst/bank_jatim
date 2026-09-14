@@ -18,72 +18,6 @@
       </div>
     </div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-send-check"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL MANIFEST</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ shipments.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Semua Surat Jalan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-truck-flatbed"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">DALAM PERJALANAN</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ inTransitCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 65%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Menuju Kantor Cabang</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-check2-circle"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TIBA DI CABANG</span>
-            <span class="info-box-number text-success fs-4 font-monospace">{{ deliveredCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">POD Terkonfirmasi</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-box-seam"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL KOLI / PAKET</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ totalKoli }} <span class="fs-7 fw-normal">Koli</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 80%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">{{ totalWeight.toLocaleString('id-ID') }} Kg Total Muatan</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
@@ -96,20 +30,10 @@
             <button
               type="button"
               class="nav-link py-1 px-3 text-nowrap"
-              :class="activeTab === 'all' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="activeTab = 'all'"
+              :class="activeTab === 'queue' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'queue'"
             >
-              Semua
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              type="button"
-              class="nav-link py-1 px-3 text-nowrap"
-              :class="activeTab === 'transit' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="activeTab = 'transit'"
-            >
-              Dalam Perjalanan
+              Antrean Pengiriman
             </button>
           </li>
           <li class="nav-item">
@@ -119,19 +43,10 @@
               :class="activeTab === 'delivered' ? 'active bg-danger fw-bold text-white' : 'text-body'"
               @click="activeTab = 'delivered'"
             >
-              Tiba di Cabang
+              Riwayat Pengiriman (Delivered)
             </button>
           </li>
         </ul>
-
-        <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
-          <router-link to="/master/expedition-mappings" class="btn btn-sm btn-outline-secondary fs-8">
-            <i class="bi bi-map me-1"></i> Pemetaan Wilayah
-          </router-link>
-          <button class="btn btn-sm btn-danger fw-bold shadow-xs fs-8" @click="openCreateShipmentModal">
-            <i class="bi bi-plus-lg me-1"></i> Terbitkan Manifest Baru
-          </button>
-        </div>
       </div>
 
       <!-- Filter & Search Toolbar -->
@@ -355,9 +270,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const searchQuery = ref('');
-const activeTab = ref('all');
+const activeTab = ref('queue');
 const filterDestination = ref('ALL');
 const filterCourier = ref('ALL');
 const showCreateModal = ref(false);
@@ -374,6 +290,18 @@ const resetFilters = () => {
   currentPage.value = 1;
 };
 
+const mapShipment = (shipment) => ({
+  id: shipment.id,
+  manifestNumber: shipment.manifestNumber || '-',
+  trackingNumber: shipment.trackingNumber || '-',
+  destination: shipment.destinationOrganization?.name || shipment.destination || '-',
+  courier: shipment.courier?.name || shipment.courier || '-',
+  serviceType: shipment.serviceType || '-',
+  koli: Number(shipment.koliCount || shipment.koli || 0),
+  weight: Number(shipment.totalWeightKg || shipment.weight || 0),
+  status: shipment.status || '-'
+});
+
 const shipments = ref([]);
 
 const newShipment = ref({
@@ -385,26 +313,17 @@ const newShipment = ref({
   weight: 5.0
 });
 
-const mapShipment = (shipment) => ({
-  id: shipment.id,
-  manifestNumber: shipment.manifestNumber || '-',
-  trackingNumber: shipment.trackingNumber || '-',
-  destination: shipment.destinationOrganization?.name || '-',
-  courier: shipment.courier?.name || '-',
-  serviceType: shipment.serviceType || '-',
-  koli: Number(shipment.koliCount || 0),
-  weight: Number(shipment.totalWeightKg || 0),
-  status: shipment.status || '-'
-});
-
 const loadShipments = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/distribution/shipments');
-    shipments.value = (response.data || []).map(mapShipment);
+    const data = response.data?.content || response.data || [];
+    if (Array.isArray(data) && data.length > 0) {
+      shipments.value = data.map(mapShipment);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat manifest pengiriman dari server.';
     shipments.value = [];
+    console.warn('Failed loading shipments from backend:', error);
   }
 };
 
@@ -432,7 +351,7 @@ const totalWeight = computed(() => shipments.value.reduce((sum, shipment) => sum
 
 const filteredShipments = computed(() => {
   return shipments.value.filter(s => {
-    if (activeTab.value === 'transit' && s.status !== 'IN_TRANSIT') return false;
+    if (activeTab.value === 'queue' && s.status === 'DELIVERED') return false;
     if (activeTab.value === 'delivered' && s.status !== 'DELIVERED') return false;
 
     if (filterDestination.value !== 'ALL' && s.destination !== filterDestination.value) return false;

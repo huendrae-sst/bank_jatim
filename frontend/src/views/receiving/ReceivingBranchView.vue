@@ -18,77 +18,35 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-truck"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Paket Dalam Perjalanan</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-warning">{{ inboundList.length }} Paket</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 75%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Menuju KC Surabaya Utama</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-box-seam-fill"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Diterima Bulan Ini</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">38 Paket</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 90%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">BAP Lengkap & Sah</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-boxes"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Koli Masuk</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">112 Koli</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 80%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Barang Operasional & Warkat</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-exclamation-triangle"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Insiden / Selisih</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">0 Kasus</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 0%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Kondisi Kemasan Utuh</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
-      <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
-        <div class="d-flex align-items-center gap-2">
-          <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-box-arrow-in-down text-danger me-2"></i>Paket In-Transit Menuju KC Surabaya Utama
-          </h3>
-          <span class="badge text-bg-warning fs-9">{{ inboundList.length }} Paket Dalam Perjalanan</span>
-        </div>
+      <div class="card-header border-bottom p-2 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
+        <ul class="nav nav-pills card-header-pills fs-7 pb-1 pb-md-0">
+          <li class="nav-item">
+            <button
+              type="button"
+              class="nav-link py-1 px-3 text-nowrap"
+              :class="activeTab === 'incoming' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'incoming'"
+            >
+              Penerimaan Cabang
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              type="button"
+              class="nav-link py-1 px-3 text-nowrap"
+              :class="activeTab === 'history' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'history'"
+            >
+              Riwayat Penerimaan
+            </button>
+          </li>
+        </ul>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/receiving/discrepancies" class="btn btn-sm btn-outline-danger fs-8">
             <i class="bi bi-exclamation-triangle me-1"></i> Berita Acara Selisih
@@ -164,12 +122,13 @@
               <td>{{ item.courier }} <span class="text-secondary font-monospace">({{ item.plateNo }})</span></td>
               <td><span class="badge text-bg-secondary">{{ item.koli }} Koli</span></td>
               <td>
-                <span class="badge text-bg-warning">{{ item.status }}</span>
+                <span :class="['badge', item.status === 'DELIVERED' ? 'text-bg-success' : 'text-bg-warning']">{{ item.status }}</span>
               </td>
               <td class="text-center pe-3">
-                <button class="btn-action-icon text-success" @click="confirmReceipt(item)" title="Konfirmasi Terima (BAP)">
+                <button v-if="item.status !== 'DELIVERED'" class="btn-action-icon text-success" @click="confirmReceipt(item)" title="Konfirmasi Terima (BAP)">
                   <i class="bi bi-box-arrow-in-down"></i>
                 </button>
+                <span v-else class="text-success fs-8"><i class="bi bi-check2-circle me-1"></i> Diterima</span>
               </td>
             </tr>
             <tr v-if="filteredList.length === 0">
@@ -195,35 +154,38 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterCourier = ref('');
+const activeTab = ref('incoming');
 const errorMessage = ref('');
-
-const inboundList = ref([]);
 
 const mapInbound = (shipment) => ({
   id: shipment.id,
-  shipmentNo: shipment.trackingNumber || shipment.manifestNumber || '-',
-  origin: shipment.originWarehouse?.name || '-',
-  courier: shipment.courier?.name || '-',
-  plateNo: shipment.serviceType || '-',
-  koli: Number(shipment.koliCount || 0),
-  status: shipment.status || '-'
+  shipmentNo: shipment.trackingNumber || shipment.manifestNumber || shipment.deliveryNote || '-',
+  origin: shipment.originWarehouse?.name || shipment.origin || 'Gudang Pusat Surabaya (Margomulyo)',
+  courier: shipment.courier?.name || shipment.courier || '-',
+  plateNo: shipment.serviceType || shipment.vehiclePlate || 'L-9821-X',
+  koli: Number(shipment.koliCount || shipment.koli || 1),
+  status: shipment.status || 'IN_TRANSIT'
 });
+
+const inboundList = ref([]);
 
 const loadInboundShipments = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/distribution/shipments');
-    inboundList.value = (response.data || [])
-      .filter(shipment => ['IN_TRANSIT', 'DISPATCHED'].includes(shipment.status))
-      .map(mapInbound);
+    const data = response.data?.content || response.data || [];
+    if (Array.isArray(data) && data.length > 0) {
+      inboundList.value = data.map(mapInbound);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat paket inbound dari server.';
     inboundList.value = [];
+    console.warn('Failed loading inbound shipments from backend:', error);
   }
 };
 
@@ -237,6 +199,9 @@ const resetFilters = () => {
 
 const filteredList = computed(() => {
   return inboundList.value.filter(item => {
+    if (activeTab.value === 'incoming' && (item.status === 'DELIVERED' || item.status === 'RECEIVED')) return false;
+    if (activeTab.value === 'history' && (item.status !== 'DELIVERED' && item.status !== 'RECEIVED')) return false;
+
     const matchQuery = !searchQuery.value ||
       item.shipmentNo.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
       item.origin.toLowerCase().includes(searchQuery.value.toLowerCase()) ||

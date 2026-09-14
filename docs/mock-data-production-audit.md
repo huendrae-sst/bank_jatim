@@ -136,6 +136,15 @@ Tanggal audit: 2026-09-13
 - `frontend/src/views/reports/GeneralLedgerReportView.vue`
   - Data jurnal GL dibentuk dari settlement posted: `GET /finance/settlements`
 
+- `frontend/src/views/master/MenusView.vue` dan `frontend/src/views/master/RoleMenusView.vue`
+  - Daftar dan CRUD menu: endpoint `/master/menus`.
+  - Matriks akses: endpoint `/master/roles/{roleCode}/menus`.
+  - Cache `localStorage` dan fallback menu bawaan telah dihapus.
+
+- `frontend/src/views/master/RolesView.vue`
+  - Daftar role: `GET /master/roles`, bersumber dari enum `UserRole` backend.
+  - Backend belum memiliki operasi tambah/ubah/hapus role; aksi tersebut kini gagal eksplisit dan tidak mengubah state lokal.
+
 ## API-Backed Atau Sebagian API-Backed
 
 - `frontend/src/views/dashboard/OperationalDashboardView.vue` -> `GET /dashboard/metrics`
@@ -148,9 +157,9 @@ Tanggal audit: 2026-09-13
 - `frontend/src/views/procurement/PurchaseOrdersView.vue` -> `GET /procurement/po`
 - `frontend/src/views/inventory/StockBalancesView.vue` -> `GET /inventory/stock-balances`
 
-## Masih Mock/Static Dan Butuh Production Integration
+## Tanpa Seed, Namun Masih Membutuhkan Endpoint Produksi
 
-Halaman berikut masih memiliki data contoh lokal (`ref([ ... ])`, sample report data, atau state mutasi lokal). Untuk production, jangan hanya menghapus array di frontend; tiap modul perlu endpoint DTO aman, service transaction boundary, dan bila tabel belum ada perlu migration.
+Seluruh halaman berikut sudah tidak menampilkan record contoh. Koleksi dimulai kosong dan tetap kosong bila endpoint belum tersedia. Agar fungsional penuh, modul-modul ini masih memerlukan endpoint DTO aman, service transaction boundary, dan bila tabel belum ada perlu migration.
 
 ### Inventory Operations
 
@@ -188,6 +197,14 @@ Halaman berikut masih memiliki data contoh lokal (`ref([ ... ])`, sample report 
 
 - `frontend/src/views/master/AccountingView.vue`
 - `frontend/src/views/master/BudgetsEarlyWarningView.vue`
+
+## Status Kebijakan Sumber Data
+
+- Modul seed runtime `masterDataSeeds.js` dan `transactionSeeds.js` telah dihapus.
+- Seed/fallback menu, role, emboss reject, forecasting, dan chart of accounts di frontend telah dihapus.
+- Kegagalan API mengosongkan koleksi terkait; data browser lama tidak digunakan sebagai sumber pengganti.
+- Data presentasi murni seperti definisi kartu laporan, pilihan status, ikon, dan label kategori tetap berada di frontend karena bukan record bisnis.
+- Tes `frontend/test/data-source-policy.test.js` mencegah seed module dan fallback record yang sudah dikenal masuk kembali.
 
 ## Recommended Integration Order
 

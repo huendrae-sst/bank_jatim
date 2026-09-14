@@ -23,10 +23,15 @@
         let resolved = 'light';
         if (stored === 'dark' || stored === 'light') {
           resolved = stored;
-        } else if (stored === 'auto' || !stored) {
+        } else if (stored === 'auto') {
           if (globalThis.matchMedia('(prefers-color-scheme: dark)').matches) {
             resolved = 'dark';
           }
+        } else {
+          resolved = 'light';
+          try {
+            localStorage.setItem(STORAGE_KEY, 'light');
+          } catch {}
         }
         root.setAttribute('data-bs-theme', resolved);
         root.style.colorScheme = resolved;

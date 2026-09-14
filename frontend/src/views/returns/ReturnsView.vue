@@ -18,72 +18,6 @@
       </div>
     </div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-arrow-counterclockwise"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL PERMOHONAN</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ returnsList.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Tahun Anggaran 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-hourglass-split"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">MENUNGGU APPROVAL</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ waitingCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 50%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Divisi Logistik Pusat</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-truck"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">DALAM PENGIRIMAN</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ inTransitCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 30%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Menuju Gudang Pusat</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-check2-all"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">SELESAI DITERIMA</span>
-            <span class="info-box-number text-success fs-4 font-monospace">{{ completedCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Restock / Karantina</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Main Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -387,11 +321,12 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const showCreateModal = ref(false);
 const showDetailModal = ref(false);
 const selectedReturn = ref(null);
-const isLoading = ref(true);
+const isLoading = ref(false);
 
 const returnForm = reactive({
   branch: 'KC Malang',
@@ -437,6 +372,21 @@ const onReasonTypeChange = () => {
   }
 };
 
+const mapReturn = (r) => {
+  const firstItem = r.items && r.items.length > 0 ? r.items[0] : {};
+  return {
+    id: r.id,
+    retNo: r.returnNumber || r.retNo || `RET-${r.id}`,
+    branch: r.organizationName || r.branch || 'KC Malang',
+    item: firstItem.name || r.item || 'Barang Persediaan',
+    sku: firstItem.sku || r.sku || 'SKU-LOG-001',
+    qty: r.totalQty || firstItem.qtyReturned || r.qty || 0,
+    reason: r.reason || 'Retur Barang',
+    reasonType: 'DEFECT',
+    status: r.status === 'REQUESTED' ? 'MENUNGGU APPROVAL PUSAT' : (r.status === 'SHIPPED' ? 'DALAM PENGIRIMAN' : (r.status === 'RECEIVED' ? 'SELESAI DITERIMA' : (r.status || 'MENUNGGU APPROVAL PUSAT')))
+  };
+};
+
 const returnsList = ref([]);
 
 const fetchReturns = async () => {
@@ -444,22 +394,12 @@ const fetchReturns = async () => {
   try {
     const res = await api.get('/returns');
     const items = res.data?.data || res.data || [];
-    returnsList.value = items.map(r => {
-      const firstItem = r.items && r.items.length > 0 ? r.items[0] : {};
-      return {
-        id: r.id,
-        retNo: r.returnNumber,
-        branch: r.organizationName || 'Kantor Cabang',
-        item: firstItem.name || 'Barang Persediaan',
-        sku: firstItem.sku || '-',
-        qty: r.totalQty || firstItem.qtyReturned || 0,
-        reason: r.reason || 'Retur Barang',
-        reasonType: 'DEFECT',
-        status: r.status === 'REQUESTED' ? 'MENUNGGU APPROVAL PUSAT' : (r.status === 'SHIPPED' ? 'DALAM PENGIRIMAN' : (r.status === 'RECEIVED' ? 'SELESAI DITERIMA' : r.status))
-      };
-    });
+    if (Array.isArray(items) && items.length > 0) {
+      returnsList.value = items.map(mapReturn);
+    }
   } catch (err) {
-    console.error('Failed to load returns', err);
+    returnsList.value = [];
+    console.warn('Failed to load returns from backend:', err);
   } finally {
     isLoading.value = false;
   }
@@ -587,4 +527,3 @@ onMounted(() => {
   color: var(--bs-dark);
 }
 </style>
-

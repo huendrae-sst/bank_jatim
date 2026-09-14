@@ -20,64 +20,6 @@
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-hourglass-split"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Menunggu Keputusan</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-warning">{{ pendingApprovals.length }} Pengajuan</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 70%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Butuh Review Pejabat</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-check2-all"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Disetujui Bulan Ini</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">{{ approvedCount }} Transfer</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 85%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Surat Jalan Terbit</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-arrow-left-right"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Volume Unit</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ totalQty.toLocaleString('id-ID') }} Unit</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 60%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Stok Relokasi Antar-Unit</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-x-circle"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Ditolak / Dibatalkan</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ rejectedCount }} Pengajuan</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 10%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Stok Asal Tidak Mencukupi</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
@@ -85,9 +27,8 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-inbox text-danger me-2"></i>Antrean Persetujuan Switching
+            Antrean Persetujuan Switching
           </h3>
-          <span class="badge text-bg-warning fs-9">{{ pendingApprovals.length }} Menunggu Tindakan</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/inventory/switching" class="btn btn-sm btn-outline-secondary fs-8">
@@ -195,16 +136,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterBranch = ref('');
 const errorMessage = ref('');
-
-const pendingApprovals = ref([]);
-const approvedCount = ref(0);
-const rejectedCount = ref(0);
 
 const firstItem = (switching) => switching.items?.[0] || {};
 
@@ -218,20 +156,32 @@ const mapSwitching = (switching) => ({
   reason: switching.recommendationReason || '-'
 });
 
+const pendingApprovals = ref([]);
+const approvedCount = ref(0);
+const rejectedCount = ref(0);
+
 const loadApprovals = async () => {
   errorMessage.value = '';
   try {
-    const [pendingResponse, approvedResponse, rejectedResponse] = await Promise.all([
+    const [pendingResponse, approvedResponse, rejectedResponse] = await Promise.allSettled([
       api.get('/inventory/switching', { params: { status: 'PROPOSED' } }),
       api.get('/inventory/switching', { params: { status: 'APPROVED' } }),
       api.get('/inventory/switching', { params: { status: 'REJECTED' } })
     ]);
-    pendingApprovals.value = (pendingResponse.data || []).map(mapSwitching);
-    approvedCount.value = (approvedResponse.data || []).length;
-    rejectedCount.value = (rejectedResponse.data || []).length;
+    if (pendingResponse.status === 'fulfilled' && Array.isArray(pendingResponse.value.data) && pendingResponse.value.data.length > 0) {
+      pendingApprovals.value = pendingResponse.value.data.map(mapSwitching);
+    }
+    if (approvedResponse.status === 'fulfilled' && Array.isArray(approvedResponse.value.data)) {
+      approvedCount.value = approvedResponse.value.data.length;
+    }
+    if (rejectedResponse.status === 'fulfilled' && Array.isArray(rejectedResponse.value.data)) {
+      rejectedCount.value = rejectedResponse.value.data.length;
+    }
   } catch (error) {
     pendingApprovals.value = [];
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat antrean approval switching.';
+    approvedCount.value = 0;
+    rejectedCount.value = 0;
+    console.warn('Failed loading approvals from backend:', error);
   }
 };
 

@@ -18,72 +18,6 @@
       </div>
     </div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-file-earmark-ruled"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL KONTRAK PO</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ poList.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Tahun Anggaran 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-truck"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">DALAM PENGIRIMAN</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ inDeliveryCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 60%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Proses Logistik Rekanan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-check2-all"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">SELESAI DITERIMA (GRN)</span>
-            <span class="info-box-number text-success fs-4 font-monospace">{{ completedCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Stok Masuk Margomulyo</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-wallet2"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">KOMITMEN BELANJA</span>
-            <span class="info-box-number text-body fs-4 font-monospace">Rp {{ formatCompact(totalCommitment) }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 75%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Termasuk PPN 11%</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Main PO Data Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -323,6 +257,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const searchQuery = ref('');
 const activeTab = ref('all');
@@ -341,6 +276,22 @@ const resetFilters = () => {
   currentPage.value = 1;
 };
 
+const formatDate = (value) => {
+  if (!value) return '-';
+  return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
+};
+
+const mapPo = (po) => ({
+  id: po.id,
+  poNumber: po.poNumber,
+  refPr: po.notes || po.refPr || '-',
+  vendor: po.vendor?.name || po.vendor || '-',
+  warehouse: po.warehouse?.name || po.warehouse || 'Gudang Pusat Surabaya',
+  orderDate: formatDate(po.orderDate || po.createdAt),
+  totalAmount: Number(po.totalAmount || 0),
+  status: po.status
+});
+
 const poList = ref([]);
 
 onMounted(() => {
@@ -348,22 +299,16 @@ onMounted(() => {
 });
 
 const loadPurchaseOrders = async () => {
-  const response = await api.get('/procurement/po');
-  poList.value = (response.data || []).map((po) => ({
-    id: po.id,
-    poNumber: po.poNumber,
-    refPr: po.notes || '-',
-    vendor: po.vendor?.name || '-',
-    warehouse: po.warehouse?.name || '-',
-    orderDate: formatDate(po.orderDate),
-    totalAmount: Number(po.totalAmount || 0),
-    status: po.status
-  }));
-};
-
-const formatDate = (value) => {
-  if (!value) return '-';
-  return new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
+  try {
+    const response = await api.get('/procurement/po');
+    const data = response.data?.content || response.data || [];
+    if (Array.isArray(data) && data.length > 0) {
+      poList.value = data.map(mapPo);
+    }
+  } catch (error) {
+    poList.value = [];
+    console.warn('Failed loading purchase orders from backend:', error);
+  }
 };
 
 const formatCompact = (value) => {

@@ -428,6 +428,29 @@ const routes = [
         component: () => import('@/views/master/UsersView.vue')
       },
       {
+        path: 'master/roles',
+        name: 'master-roles',
+        component: () => import('@/views/master/RolesView.vue')
+      },
+      {
+        path: 'master/menus',
+        name: 'master-menus',
+        component: () => import('@/views/master/MenusView.vue')
+      },
+      {
+        path: 'menus',
+        redirect: '/master/menus'
+      },
+      {
+        path: 'master/role-menus',
+        name: 'master-role-menus',
+        component: () => import('@/views/master/RoleMenusView.vue')
+      },
+      {
+        path: 'role-menus',
+        redirect: '/master/role-menus'
+      },
+      {
         path: 'master/data',
         name: 'master-data',
         component: () => import('@/views/master/MasterDataView.vue')

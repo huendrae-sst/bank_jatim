@@ -15,61 +15,6 @@
       </div>
     </div>
 
-    <!-- 4 KPI Info Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-danger text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-folder-check fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Total Berkas Diproses</div>
-            <div class="fs-4 fw-bold font-monospace text-body">{{ embossFiles.length }} Batch</div>
-            <div class="fs-9 text-secondary">Integrasi Core Banking</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-success text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-credit-card fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Kartu Tervalidasi</div>
-            <div class="fs-4 fw-bold font-monospace text-success">{{ totalValidRecords }} <span class="fs-7 fw-normal">Kartu</span></div>
-            <div class="fs-9 text-secondary">Stok Blanko Tersedia</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-primary text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-gear-wide-connected fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Siap Generate Order</div>
-            <div class="fs-4 fw-bold font-monospace text-body">{{ readyToGenerateCount }} <span class="fs-7 fw-normal">Kartu</span></div>
-            <div class="fs-9 text-secondary">Menunggu Dispatch Cabang</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-warning text-dark d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-exclamation-triangle fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Reject Queue</div>
-            <div class="fs-4 fw-bold font-monospace text-warning-emphasis">{{ totalRejectedRecords }} <span class="fs-7 fw-normal">Kartu</span></div>
-            <div class="fs-9 text-secondary">Stok Defisit / Format Anomali</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
     <!-- Upload Dropzone Card -->
@@ -193,31 +138,35 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const searchQuery = ref('');
 const currentPage = ref(1);
 const perPage = ref(10);
 const errorMessage = ref('');
 
-const embossFiles = ref([]);
-
 const mapEmbossFile = (file) => ({
   id: file.id,
-  filename: file.filename || '-',
+  filename: file.filename || file.batchNumber || '-',
   total: Number(file.totalRecords || 0),
-  valid: Number(file.validRecords || 0),
+  valid: Number(file.validRecords || (file.completedRecords || file.totalRecords || 0)),
   rejected: Number(file.rejectedRecords || 0),
-  status: file.status || '-'
+  status: file.status || 'VALIDATED'
 });
+
+const embossFiles = ref([]);
 
 const loadEmbossFiles = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/emboss');
-    embossFiles.value = (response.data || []).map(mapEmbossFile);
+    const data = response.data?.content || response.data || [];
+    if (Array.isArray(data) && data.length > 0) {
+      embossFiles.value = data.map(mapEmbossFile);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat berkas emboss dari server.';
     embossFiles.value = [];
+    console.warn('Failed loading emboss files from backend:', error);
   }
 };
 

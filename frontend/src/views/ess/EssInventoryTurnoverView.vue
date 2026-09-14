@@ -70,12 +70,13 @@ const itoList = ref([]);
 const fetchItoData = async () => {
   isLoading.value = true;
   try {
-    const res = await api.get('/inventory/stock-balances', { params: { size: 200 } });
-    const balances = res.data?.data?.content || res.data?.content || [];
+    const res = await api.get('/inventory/stock-balances', { params: { size: 200 } }).catch(() => ({ data: {} }));
+    let balances = res.data?.data?.content || res.data?.content || [];
+    if (!Array.isArray(balances)) balances = [];
 
     const catMap = {};
     for (const sb of balances) {
-      const catName = sb.item?.category?.name || 'Lain-lain';
+      const catName = sb.item?.category?.name || sb.item?.category || 'Lain-lain';
       const qty = Number(sb.onHand || 0);
       const price = Number(sb.item?.estimatedUnitPrice || 10000);
       const val = qty * price;

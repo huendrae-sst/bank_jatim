@@ -18,64 +18,6 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-layers-half"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">SKU Terekonsiliasi</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ reconList.length }} SKU</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Multi-Bucket Sync Selesai</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-check-circle-fill"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Persentase Balance</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">100% Cocok</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Nol Selisih Ledger Fisik</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-box-seam"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Fisik Gudang</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ totalPhysical.toLocaleString('id-ID') }} Unit</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 90%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Stok On-Hand Terverifikasi</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-bookmark-check"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Reserved Order</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ totalReserved.toLocaleString('id-ID') }} Unit</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 35%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Alokasi Pesanan In-Progress</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Feedback Banner -->
     <div v-if="reconSuccessMessage" class="alert alert-success d-flex align-items-center p-3 rounded-3 shadow-xs mb-3">
@@ -89,9 +31,8 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-arrow-repeat text-danger me-2"></i>Hasil Rekonsiliasi Otomatis (Bucket Sync)
+            Hasil Rekonsiliasi Otomatis (Bucket Sync)
           </h3>
-          <span class="badge text-bg-success fs-9">100% Cocok / Reconciled</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <button class="btn btn-sm btn-danger fw-bold shadow-xs fs-8" :disabled="isProcessing" @click="runRecon">

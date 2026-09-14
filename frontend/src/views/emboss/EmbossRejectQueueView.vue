@@ -66,6 +66,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const currentPage = ref(1);
 const perPage = ref(10);
@@ -77,17 +78,21 @@ const loadRejectQueue = async () => {
   errorMessage.value = '';
   try {
     const res = await api.get('/emboss/reject-queue');
-    rejectList.value = (res.data || []).map(r => ({
-      id: r.id,
-      accountNo: r.accountNumber || '-',
-      customerName: r.customerName || '-',
-      cardType: r.cardType || 'GPN',
-      branch: r.branchCode || '-',
-      errorMessage: r.rejectionReason || 'Karakter nama melebihi batas emboss (max 26 karakter)'
-    }));
+    const data = res.data?.content || res.data || [];
+    if (Array.isArray(data)) {
+      rejectList.value = data.map(r => ({
+        id: r.id,
+        accountNo: r.accountNumber || r.accountNo || '-',
+        customerName: r.customerName || '-',
+        cardType: r.cardType || 'GPN',
+        branch: r.branchCode || r.branch || '-',
+        errorMessage: r.rejectionReason || r.errorMessage || '-'
+      }));
+    }
   } catch (err) {
-    errorMessage.value = err?.message || err?.error || 'Gagal memuat antrean reject.';
     rejectList.value = [];
+    errorMessage.value = err?.message || 'Gagal memuat antrean reject emboss dari backend.';
+    console.warn('Failed loading reject queue from backend:', err);
   }
 };
 

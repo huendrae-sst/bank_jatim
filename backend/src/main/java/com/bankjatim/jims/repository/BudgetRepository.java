@@ -16,7 +16,8 @@ public interface BudgetRepository extends JpaRepository<Budget, Long> {
 
     List<Budget> findByOrganizationIdAndFiscalYear(Long organizationId, Integer fiscalYear);
 
-    List<Budget> findByFiscalYear(Integer fiscalYear);
+    @Query("SELECT b FROM Budget b JOIN FETCH b.organization WHERE b.fiscalYear = :fiscalYear ORDER BY b.costCenterCode ASC")
+    List<Budget> findByFiscalYear(@org.springframework.data.repository.query.Param("fiscalYear") Integer fiscalYear);
 
     @Query("SELECT b FROM Budget b JOIN FETCH b.organization ORDER BY b.fiscalYear DESC, b.costCenterCode ASC")
     List<Budget> findAllWithOrganization();

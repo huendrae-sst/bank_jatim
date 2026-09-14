@@ -15,56 +15,48 @@
       </div>
     </div>
 
-    <!-- 4 Core Executive KPI Cards -->
+    <!-- 4 Core Executive KPI Cards (AdminLTE 4 Info-Boxes) -->
     <div class="row g-2 g-md-3 mb-3">
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-danger text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-database fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Valuasi Total Persediaan</div>
-            <div class="fs-4 fw-bold font-monospace text-body">Rp 1.85<span class="fs-7 fw-normal">M</span></div>
-            <div class="fs-9 text-success fw-bold"><i class="bi bi-arrow-up me-0.5"></i> +4.2% vs Bulan Lalu</div>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-danger"><i class="bi bi-database"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Valuasi Total Persediaan</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">Rp 1.85<span class="fs-7 fw-normal">M</span></span>
+            <span class="fs-9 text-success fw-bold"><i class="bi bi-arrow-up me-0.5"></i> +4.2% vs Bulan Lalu</span>
           </div>
         </div>
       </div>
 
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-success text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-wallet2 fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Sisa Pagu Anggaran</div>
-            <div class="fs-4 fw-bold font-monospace text-success">Rp 4.20<span class="fs-7 fw-normal">M</span></div>
-            <div class="fs-9 text-secondary">Terserap: 36.8% dari Rp 6.65M</div>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-success"><i class="bi bi-wallet2"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Sisa Pagu Anggaran</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-success">Rp 4.20<span class="fs-7 fw-normal">M</span></span>
+            <span class="fs-9 text-secondary">Terserap: 36.8% dari Rp 6.65M</span>
           </div>
         </div>
       </div>
 
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-primary text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-percent fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Cost Saving PR Pool</div>
-            <div class="fs-4 fw-bold font-monospace text-primary">Rp 112<span class="fs-7 fw-normal">jt</span></div>
-            <div class="fs-9 text-success fw-bold"><i class="bi bi-arrow-up me-0.5"></i> 14.8% Efisiensi Pengadaan</div>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-primary"><i class="bi bi-percent"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Cost Saving PR Pool</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-primary">Rp 112<span class="fs-7 fw-normal">jt</span></span>
+            <span class="fs-9 text-success fw-bold"><i class="bi bi-arrow-up me-0.5"></i> 14.8% Efisiensi Pengadaan</span>
           </div>
         </div>
       </div>
 
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-info text-dark d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-shield-check fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">SLA Fulfillment</div>
-            <div class="fs-4 fw-bold font-monospace text-body">98.5%</div>
-            <div class="fs-9 text-success fw-bold"><i class="bi bi-check-circle me-0.5"></i> 0% Kehabisan Stok Kritis</div>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-info"><i class="bi bi-shield-check"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">SLA Fulfillment</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">98.5%</span>
+            <span class="fs-9 text-success fw-bold"><i class="bi bi-check-circle me-0.5"></i> 0% Kehabisan Stok Kritis</span>
           </div>
         </div>
       </div>
@@ -76,9 +68,8 @@
         <div class="card card-outline card-danger shadow-xs h-100">
           <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
             <h3 class="card-title fs-6 fw-bold mb-0 text-body">
-              <i class="bi bi-bar-chart-line text-danger me-1"></i> Tren Biaya Pengadaan vs Efisiensi Biaya (Cost Saving)
+              Tren Biaya Pengadaan vs Efisiensi Biaya (Cost Saving)
             </h3>
-            <span class="badge text-bg-light border fs-9">Tahun 2026</span>
           </div>
           <div class="card-body p-3">
             <EChartsWrapper :options="costSavingChartOption" height="320px" />
@@ -90,9 +81,8 @@
         <div class="card card-outline card-danger shadow-xs h-100">
           <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
             <h3 class="card-title fs-6 fw-bold mb-0 text-body">
-              <i class="bi bi-pie-chart text-danger me-1"></i> Komposisi Saldo Persediaan
+              Komposisi Saldo Persediaan
             </h3>
-            <span class="badge text-bg-light border fs-9">Multi-Bucket</span>
           </div>
           <div class="card-body p-3">
             <EChartsWrapper :options="stockCompositionOption" height="320px" />

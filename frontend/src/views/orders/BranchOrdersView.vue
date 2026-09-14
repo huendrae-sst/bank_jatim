@@ -22,58 +22,6 @@
       </div>
     </div>
 
-    <!-- 2. KPI Metric Widgets (AdminLTE 4 Info-Boxes) -->
-    <div class="row g-3 mb-3">
-      <!-- Box 1: Total Orders -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger"><i class="bi bi-cart-check"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Total Pesanan Masuk</span>
-            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ orders.length }}</span>
-            <span class="fs-9 text-secondary">Semua Permintaan Cabang</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Box 2: Open Orders -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning"><i class="bi bi-hourglass-split"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Order Terbuka / Open</span>
-            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ openOrdersCount }}</span>
-            <span class="fs-9 text-warning-emphasis">Menunggu Approval / Alokasi</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Box 3: Riwayat Order Selesai -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info"><i class="bi bi-check2-circle"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Riwayat Order Selesai</span>
-            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ completedOrdersCount }}</span>
-            <span class="fs-9 text-secondary">Pesanan Selesai / Diterima</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Box 4: Average Order Value -->
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success"><i class="bi bi-cash-stack"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Rata-Rata Nilai Order</span>
-            <span class="info-box-number fs-4 fw-bold font-monospace text-success">
-              Rp {{ Math.round(averageOrderValue / 1000).toLocaleString('id-ID') }}<span class="fs-7 fw-normal">rb</span>
-            </span>
-            <span class="fs-9 text-secondary">Rp {{ Math.round(averageOrderValue).toLocaleString('id-ID') }} per transaksi</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- 3. Main Card Container -->
     <div class="card card-outline card-danger shadow-xs">
@@ -99,16 +47,6 @@
               @click="currentTab = 'completed'"
             >
               Riwayat Order
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              type="button"
-              class="nav-link py-1 px-3 text-nowrap"
-              :class="currentTab === 'all' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="currentTab = 'all'"
-            >
-              Semua
             </button>
           </li>
         </ul>
@@ -861,13 +799,59 @@ const sortDir = ref('desc');
 const currentPage = ref(1);
 const perPage = ref(10);
 
-// Organizations Reference
+const mapOrder = (order) => ({
+  id: order.id,
+  order_number: order.orderNumber,
+  organization_id: order.requestingOrganization?.id,
+  requesting_organization: {
+    id: order.requestingOrganization?.id,
+    name: order.requestingOrganization?.name || '-',
+    code: order.requestingOrganization?.code || '-'
+  },
+  requester: {
+    name: order.createdByUser?.name || '-',
+    nip: order.createdByUser?.nip || '-'
+  },
+  required_date: order.requiredDate,
+  priority: order.priority,
+  status: order.status,
+  total_estimated_value: Number(order.totalEstimatedValue || 0),
+  shipping_cost: 0,
+  notes: order.notes,
+  created_at: order.createdAt,
+  items: (order.items || []).map((line) => ({
+    item_id: line.item?.id,
+    qty_requested: line.qtyRequested,
+    unit_price_ref: Number(line.unitPriceRef || 0),
+    subtotal_ref: Number(line.subtotalRef || 0),
+    item: line.item ? {
+      id: line.item.id,
+      name: line.item.name,
+      sku: line.item.sku,
+      uom: line.item.uom,
+      estimated_unit_price: Number(line.item.estimatedUnitPrice || 0)
+    } : null
+  }))
+});
+
 const organizations = ref([]);
 
-// Item Catalog Reference
 const itemsCatalog = ref([]);
 
+// Orders state (initialized empty, populated from backend API or fallback on error)
 const orders = ref([]);
+const loading = ref(false);
+
+const extractOrdersList = (res) => {
+  if (!res) return null;
+  if (Array.isArray(res)) return res;
+  if (Array.isArray(res.data?.data?.content)) return res.data.data.content;
+  if (Array.isArray(res.data?.content)) return res.data.content;
+  if (Array.isArray(res.data?.data)) return res.data.data;
+  if (Array.isArray(res.data)) return res.data;
+  if (Array.isArray(res.content)) return res.content;
+  return null;
+};
 
 onMounted(() => {
   loadReferences();
@@ -875,69 +859,57 @@ onMounted(() => {
 });
 
 const loadReferences = async () => {
-  const [orgRes, itemRes] = await Promise.all([
-    api.get('/master/organizations'),
-    api.get('/master/items')
-  ]);
+  try {
+    const [orgRes, itemRes] = await Promise.allSettled([
+      api.get('/master/organizations'),
+      api.get('/master/items')
+    ]);
 
-  organizations.value = (orgRes.data || []).map((org) => ({
-    id: org.id,
-    name: org.name,
-    code: org.code
-  }));
+    if (orgRes.status === 'fulfilled' && Array.isArray(orgRes.value.data) && orgRes.value.data.length > 0) {
+      organizations.value = orgRes.value.data.map((org) => ({
+        id: org.id,
+        name: org.name,
+        code: org.code
+      }));
+    }
 
-  itemsCatalog.value = (itemRes.data || []).map((item) => ({
-    id: item.id,
-    name: item.name,
-    sku: item.sku,
-    uom: item.uom,
-    estimated_unit_price: Number(item.estimatedUnitPrice || 0)
-  }));
+    if (itemRes.status === 'fulfilled' && Array.isArray(itemRes.value.data) && itemRes.value.data.length > 0) {
+      itemsCatalog.value = itemRes.value.data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        sku: item.sku,
+        uom: item.uom,
+        estimated_unit_price: Number(item.estimatedUnitPrice || 0)
+      }));
+    }
+  } catch (err) {
+    organizations.value = [];
+    itemsCatalog.value = [];
+    console.warn('Failed loading order references from backend:', err);
+  }
 };
 
 const loadOrders = async () => {
-  const response = await api.get('/orders', {
-    params: {
-      page: 0,
-      size: 1000,
-      sort: 'createdAt,desc'
-    }
-  });
+  loading.value = true;
+  try {
+    const response = await api.get('/orders', {
+      params: {
+        page: 0,
+        size: 1000,
+        sort: 'createdAt,desc'
+      }
+    });
 
-  orders.value = (response.data?.content || []).map((order) => ({
-    id: order.id,
-    order_number: order.orderNumber,
-    organization_id: order.requestingOrganization?.id,
-    requesting_organization: {
-      id: order.requestingOrganization?.id,
-      name: order.requestingOrganization?.name || '-',
-      code: order.requestingOrganization?.code || '-'
-    },
-    requester: {
-      name: order.createdByUser?.name || '-',
-      nip: order.createdByUser?.nip || '-'
-    },
-    required_date: order.requiredDate,
-    priority: order.priority,
-    status: order.status,
-    total_estimated_value: Number(order.totalEstimatedValue || 0),
-    shipping_cost: 0,
-    notes: order.notes,
-    created_at: order.createdAt,
-    items: (order.items || []).map((line) => ({
-      item_id: line.item?.id,
-      qty_requested: line.qtyRequested,
-      unit_price_ref: Number(line.unitPriceRef || 0),
-      subtotal_ref: Number(line.subtotalRef || 0),
-      item: line.item ? {
-        id: line.item.id,
-        name: line.item.name,
-        sku: line.item.sku,
-        uom: line.item.uom,
-        estimated_unit_price: Number(line.item.estimatedUnitPrice || 0)
-      } : null
-    }))
-  }));
+    const list = extractOrdersList(response);
+    if (list !== null) {
+      orders.value = list.map(mapOrder);
+    }
+  } catch (err) {
+    console.warn('Failed loading orders from backend', err);
+    orders.value = [];
+  } finally {
+    loading.value = false;
+  }
 };
 
 // Computed Metric Counts

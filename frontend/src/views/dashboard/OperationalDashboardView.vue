@@ -6,8 +6,10 @@
         <h3 class="mb-0 text-body fw-bold">Dashboard Overview</h3>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <button class="btn btn-sm btn-outline-secondary" @click="refreshData">
-          <i class="bi bi-arrow-clockwise me-1"></i> Segarkan
+        <button class="btn btn-sm btn-outline-secondary" @click="refreshData" :disabled="loading">
+          <span v-if="loading" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+          <i v-else class="bi bi-arrow-clockwise me-1"></i>
+          Segarkan
         </button>
         <router-link to="/orders/branch" class="btn btn-sm btn-danger">
           <i class="bi bi-plus-circle me-1"></i> Order Baru
@@ -15,81 +17,75 @@
       </div>
     </div>
 
-    <!-- 4 KPI Metric Widgets (.small-box AdminLTE 4 style) -->
+    <!-- 4 KPI Metric Widgets (AdminLTE 4 Info-Boxes) -->
     <div class="row g-2 g-md-3 mb-3">
       <!-- Total Valuasi Persediaan -->
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="small-box text-bg-danger rounded-3 shadow-xs h-100 d-flex flex-column justify-content-between">
-          <div class="inner p-3">
-            <h3 class="fw-bold fs-3 mb-1">Rp {{ formatCompact(metrics.totalInventoryValuation) }}</h3>
-            <p class="mb-1 fw-semibold fs-7">Total Valuasi Persediaan</p>
-            <div class="fs-8 text-white-50 text-truncate">{{ metrics.totalItems }} SKU aktif</div>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-danger"><i class="bi bi-currency-dollar"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Total Valuasi Persediaan</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">Rp {{ formatCompact(metrics.totalInventoryValuation) }}</span>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="fs-9 text-secondary text-truncate">Bebas: Rp {{ formatCompact(metrics.availableInventoryValuation) }}</span>
+              <router-link to="/inventory/balances" class="fs-9 text-danger fw-semibold text-decoration-none text-nowrap ms-1">
+                Rincian <i class="bi bi-arrow-right"></i>
+              </router-link>
+            </div>
           </div>
-          <i class="small-box-icon bi bi-currency-dollar"></i>
-          <router-link to="/inventory/balances" class="small-box-footer link-light py-1.5 px-3 fs-8 fw-medium d-flex align-items-center justify-content-between">
-            <span>Rincian Stock Balances</span>
-            <i class="bi bi-arrow-right-circle ms-1"></i>
-          </router-link>
         </div>
       </div>
 
       <!-- Serapan Pagu Anggaran -->
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="small-box text-bg-warning rounded-3 shadow-xs h-100 d-flex flex-column justify-content-between">
-          <div class="inner p-3">
-            <h3 class="fw-bold fs-3 mb-1 text-dark">Rp {{ formatCompact(metrics.totalBudgetRemaining) }}</h3>
-            <p class="mb-1 fw-semibold fs-7 text-dark">Serapan Pagu Anggaran 2026</p>
-            <div class="fs-8 text-dark-emphasis text-truncate">Sisa pagu dari database</div>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-warning"><i class="bi bi-pie-chart-fill text-dark"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Serapan Pagu Anggaran 2026</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-warning-emphasis">{{ metrics.budgetUtilization }}%</span>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="fs-9 text-secondary text-truncate">Realisasi: Rp {{ formatCompact(metrics.totalBudgetRealized) }}</span>
+              <router-link to="/dashboard/executive" class="fs-9 text-warning-emphasis fw-semibold text-decoration-none text-nowrap ms-1">
+                Lihat Pagu <i class="bi bi-arrow-right"></i>
+              </router-link>
+            </div>
           </div>
-          <i class="small-box-icon bi bi-pie-chart-fill text-dark"></i>
-          <router-link to="/dashboard/executive" class="small-box-footer link-dark py-1.5 px-3 fs-8 fw-medium d-flex align-items-center justify-content-between">
-            <span>Lihat Pagu Cabang</span>
-            <i class="bi bi-arrow-right-circle ms-1"></i>
-          </router-link>
         </div>
       </div>
 
       <!-- Distribusi & In-Transit -->
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="small-box text-bg-info rounded-3 shadow-xs h-100 d-flex flex-column justify-content-between">
-          <div class="inner p-3">
-            <h3 class="fw-bold fs-3 mb-1 text-dark">{{ metrics.activeShipments }} Paket</h3>
-            <p class="mb-1 fw-semibold fs-7 text-dark">Distribusi & In-Transit</p>
-            <div class="fs-8 text-dark-emphasis text-truncate">Pengiriman berstatus IN_TRANSIT</div>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-info"><i class="bi bi-truck text-dark"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Distribusi & In-Transit</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ metrics.activeShipments }} Paket</span>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="fs-9 text-secondary text-truncate">{{ metrics.deliveredShipments }} Paket Sukses</span>
+              <router-link to="/distribution/shipments" class="fs-9 text-info-emphasis fw-semibold text-decoration-none text-nowrap ms-1">
+                Manifest <i class="bi bi-arrow-right"></i>
+              </router-link>
+            </div>
           </div>
-          <i class="small-box-icon bi bi-truck text-dark"></i>
-          <router-link to="/distribution/shipments" class="small-box-footer link-dark py-1.5 px-3 fs-8 fw-medium d-flex align-items-center justify-content-between">
-            <span>Monitoring Manifest</span>
-            <i class="bi bi-arrow-right-circle ms-1"></i>
-          </router-link>
         </div>
       </div>
 
       <!-- Pesanan Berjalan -->
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="small-box text-bg-success rounded-3 shadow-xs h-100 d-flex flex-column justify-content-between">
-          <div class="inner p-3">
-            <h3 class="fw-bold fs-3 mb-1">{{ metrics.pendingApprovals }} Order</h3>
-            <p class="mb-1 fw-semibold fs-7">Pesanan Berjalan</p>
-            <div class="fs-8 text-white-50 text-truncate">Menunggu approval</div>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-success"><i class="bi bi-cart-check-fill"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Pesanan Berjalan</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-success">{{ metrics.pendingApprovals }} Order</span>
+            <div class="d-flex justify-content-between align-items-center mt-1">
+              <span class="fs-9 text-secondary text-truncate">{{ metrics.pendingApprovals }} Butuh Persetujuan</span>
+              <router-link to="/orders/approvals" class="fs-9 text-success fw-semibold text-decoration-none text-nowrap ms-1">
+                Daftar <i class="bi bi-arrow-right"></i>
+              </router-link>
+            </div>
           </div>
-          <i class="small-box-icon bi bi-cart-check-fill"></i>
-          <router-link to="/orders/approvals" class="small-box-footer link-light py-1.5 px-3 fs-8 fw-medium d-flex align-items-center justify-content-between">
-            <span>Daftar Semua Pesanan</span>
-            <i class="bi bi-arrow-right-circle ms-1"></i>
-          </router-link>
         </div>
       </div>
-    </div>
-
-    <!-- EWS Early Warning Banner (Alert Style matching jatim_php) -->
-    <div v-if="loadError" class="alert alert-danger py-2 px-3 fs-8 mb-3">
-      <i class="bi bi-exclamation-octagon-fill me-1"></i> {{ loadError }}
-    </div>
-
-    <div v-if="loading" class="alert alert-secondary py-2 px-3 fs-8 mb-3">
-      <span class="spinner-border spinner-border-sm me-1"></span>
-      Memuat dashboard dari backend...
     </div>
 
     <div class="alert alert-danger d-flex align-items-center justify-content-between p-3 rounded-3 shadow-xs mb-3 flex-wrap gap-2" style="background-color: #fee2e2; border: 1px solid #fca5a5;">
@@ -99,12 +95,12 @@
         </div>
         <div>
           <h6 class="fw-bold mb-0 text-danger d-flex align-items-center gap-2">
-            Early Warning System (EWS): Terdeteksi {{ metrics.lowStockCount }} SKU perlu perhatian
-            <span class="badge text-bg-danger fs-8">{{ stockoutCount }} Kritis / Stockout</span>
-            <span class="badge text-bg-warning fs-8">{{ reorderCount }} Reorder (ROP)</span>
+            Early Warning System (EWS): Terdeteksi {{ metrics.ewsTotalAlerts || 0 }} Anomali Persediaan
+            <span class="badge text-bg-danger fs-8">{{ metrics.ewsCriticalCount || 0 }} Kritis/Stockout</span>
+            <span class="badge text-bg-warning fs-8">{{ metrics.ewsReorderCount || 0 }} Reorder (ROP)</span>
           </h6>
           <p class="fs-8 text-secondary mb-0">
-            Data berasal dari saldo stok backend dan dihitung berdasarkan batas minimum master barang.
+            Terdapat SKU dalam kondisi bahaya kehabisan stok, melebihi kapasitas (overstock), atau mengendap tanpa mutasi. Valuasi aset terdampak: <strong>Rp {{ Number(metrics.ewsAtRiskValuation || 0).toLocaleString('id-ID') }}</strong>.
           </p>
         </div>
       </div>
@@ -117,14 +113,14 @@
 
     <!-- 2x2 Analytics & Charts Grid -->
     <div class="row g-3 mb-3">
-      <!-- Chart 1: Distribusi Status Stok -->
+      <!-- Chart 1: Valuasi per Kategori Barang -->
       <div class="col-12 col-lg-6">
         <div class="card card-outline card-danger shadow-xs h-100">
           <div class="card-header border-bottom py-2 d-flex align-items-center justify-content-between">
-            <h3 class="card-title fs-6 fw-bold mb-0 text-body d-flex align-items-center gap-2">
-              <i class="bi bi-pie-chart-fill text-danger"></i> Distribusi Status Stok
+            <h3 class="card-title fs-6 fw-bold mb-0 text-body">
+              Valuasi per Kategori Barang
             </h3>
-            <span class="badge text-bg-danger fs-8">Aktif</span>
+            <span class="badge text-bg-danger-subtle text-danger border border-danger-subtle fs-8">Aktif</span>
           </div>
           <div class="card-body">
             <v-chart class="chart-container" :option="categoryChartOption" autoresize />
@@ -136,10 +132,10 @@
       <div class="col-12 col-lg-6">
         <div class="card card-outline card-warning shadow-xs h-100">
           <div class="card-header border-bottom py-2 d-flex align-items-center justify-content-between">
-            <h3 class="card-title fs-6 fw-bold mb-0 text-body d-flex align-items-center gap-2">
-              <i class="bi bi-cash-stack text-warning"></i> Serapan Pagu Anggaran per Cabang
+            <h3 class="card-title fs-6 fw-bold mb-0 text-body">
+              Serapan Pagu Anggaran per Cabang
             </h3>
-            <span class="badge text-bg-warning fs-8">TA 2026</span>
+            <span class="badge text-bg-warning-subtle text-warning-emphasis border border-warning-subtle fs-8">TA 2026</span>
           </div>
           <div class="card-body">
             <v-chart class="chart-container" :option="budgetChartOption" autoresize />
@@ -151,10 +147,10 @@
       <div class="col-12 col-lg-6">
         <div class="card card-outline card-primary shadow-xs h-100">
           <div class="card-header border-bottom py-2 d-flex align-items-center justify-content-between">
-            <h3 class="card-title fs-6 fw-bold mb-0 text-body d-flex align-items-center gap-2">
-              <i class="bi bi-graph-up-arrow text-primary"></i> Tren Arus Masuk vs Keluar Barang
+            <h3 class="card-title fs-6 fw-bold mb-0 text-body">
+              Tren Arus Masuk vs Keluar Barang
             </h3>
-            <span class="badge text-bg-primary fs-8">6 Bulan Terakhir</span>
+            <span class="badge text-bg-primary-subtle text-primary border border-primary-subtle fs-8">6 Bulan Terakhir</span>
           </div>
           <div class="card-body">
             <v-chart class="chart-container" :option="movementChartOption" autoresize />
@@ -166,10 +162,10 @@
       <div class="col-12 col-lg-6">
         <div class="card card-outline card-success shadow-xs h-100">
           <div class="card-header border-bottom py-2 d-flex align-items-center justify-content-between">
-            <h3 class="card-title fs-6 fw-bold mb-0 text-body d-flex align-items-center gap-2">
-              <i class="bi bi-trophy-fill text-success"></i> Top 5 Barang Paling Banyak Bergerak
+            <h3 class="card-title fs-6 fw-bold mb-0 text-body">
+              Top 5 Barang Paling Banyak Bergerak
             </h3>
-            <span class="badge text-bg-success fs-8">Fast-Moving</span>
+            <span class="badge text-bg-success-subtle text-success border border-success-subtle fs-8">Fast-Moving</span>
           </div>
           <div class="card-body">
             <v-chart class="chart-container" :option="fastMovingChartOption" autoresize />
@@ -267,16 +263,19 @@ use([
 
 const loading = ref(false);
 const loadError = ref('');
-const metrics = ref({
-  totalItems: 0,
-  lowStockCount: 0,
-  pendingApprovals: 0,
-  activeShipments: 0,
-  totalInventoryValuation: 0,
-  totalBudgetRemaining: 0,
-  stockStatusDistribution: {},
-  topOrderedItems: []
+
+const metrics = ref({});
+
+const mapRecentOrder = (o) => ({
+  id: o.id,
+  orderNumber: o.orderNumber || o.order_number,
+  branchName: o.requestingOrganization?.name || o.branchName || 'Kantor Cabang',
+  branchCode: o.requestingOrganization?.code || o.branchCode || 'KC-001',
+  status: o.status || 'SUBMITTED',
+  amount: Number(o.totalEstimatedValue || o.amount || 0),
+  date: (o.createdAt || o.created_at) ? new Date(o.createdAt || o.created_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'
 });
+
 const recentOrders = ref([]);
 
 onMounted(() => {
@@ -288,16 +287,38 @@ const loadDashboard = async () => {
   loadError.value = '';
   try {
     const response = await api.get('/dashboard/metrics');
-    metrics.value = {
-      ...metrics.value,
-      ...response.data,
-      totalInventoryValuation: Number(response.data?.totalInventoryValuation || 0),
-      totalBudgetRemaining: Number(response.data?.totalBudgetRemaining || 0),
-      stockStatusDistribution: response.data?.stockStatusDistribution || {},
-      topOrderedItems: response.data?.topOrderedItems || []
-    };
+    const resData = response?.data || response || {};
+    const data = resData.data || resData;
+    if (data && typeof data === 'object') {
+      if (data.totalInventoryValuation !== undefined || data.totalItems !== undefined) {
+        metrics.value = {
+          ...metrics.value,
+          ...data,
+          totalInventoryValuation: Number(data.totalInventoryValuation ?? metrics.value.totalInventoryValuation),
+          availableInventoryValuation: Number(data.availableInventoryValuation ?? metrics.value.availableInventoryValuation),
+          totalBudgetRemaining: Number(data.totalBudgetRemaining ?? metrics.value.totalBudgetRemaining),
+          totalBudgetRealized: Number(data.totalBudgetRealized ?? metrics.value.totalBudgetRealized),
+          budgetUtilization: Number(data.budgetUtilization ?? metrics.value.budgetUtilization),
+          ewsTotalAlerts: Number(data.ewsTotalAlerts ?? metrics.value.ewsTotalAlerts),
+          ewsCriticalCount: Number(data.ewsCriticalCount ?? metrics.value.ewsCriticalCount),
+          ewsReorderCount: Number(data.ewsReorderCount ?? metrics.value.ewsReorderCount),
+          ewsAtRiskValuation: Number(data.ewsAtRiskValuation ?? metrics.value.ewsAtRiskValuation),
+          categoryValuations: Array.isArray(data.categoryValuations) && data.categoryValuations.length > 0 ? data.categoryValuations : metrics.value.categoryValuations,
+          branchBudgets: Array.isArray(data.branchBudgets) && data.branchBudgets.length > 0 ? data.branchBudgets : metrics.value.branchBudgets,
+          months: Array.isArray(data.months) && data.months.length > 0 ? data.months : metrics.value.months,
+          monthlyProcurementCost: Array.isArray(data.monthlyProcurementCost) && data.monthlyProcurementCost.length > 0 ? data.monthlyProcurementCost : metrics.value.monthlyProcurementCost,
+          monthlyCostSaving: Array.isArray(data.monthlyCostSaving) && data.monthlyCostSaving.length > 0 ? data.monthlyCostSaving : metrics.value.monthlyCostSaving,
+          topOrderedItems: Array.isArray(data.topOrderedItems) && data.topOrderedItems.length > 0 ? data.topOrderedItems : metrics.value.topOrderedItems
+        };
+      }
+      if (Array.isArray(data.recentOrders) && data.recentOrders.length > 0) {
+        recentOrders.value = data.recentOrders.map(mapRecentOrder);
+      }
+    }
   } catch (err) {
-    loadError.value = err?.message || err?.error || 'Gagal memuat dashboard dari backend.';
+    metrics.value = {};
+    recentOrders.value = [];
+    console.warn('Failed loading operational dashboard from backend:', err);
   } finally {
     loading.value = false;
   }
@@ -306,13 +327,13 @@ const loadDashboard = async () => {
 const formatCompact = (value) => {
   const number = Number(value || 0);
   if (number >= 1000000000000) return `${(number / 1000000000000).toFixed(2)}T`;
-  if (number >= 1000000000) return `${(number / 1000000000).toFixed(2)}M`;
+  if (number >= 1000000000) return `${(number / 1000000000).toFixed(1)}M`;
   if (number >= 1000000) return `${(number / 1000000).toFixed(1)}jt`;
   return number.toLocaleString('id-ID');
 };
 
-const stockoutCount = computed(() => metrics.value.stockStatusDistribution?.['Kritis / Out of Stock'] || 0);
-const reorderCount = computed(() => Math.max((metrics.value.lowStockCount || 0) - stockoutCount.value, 0));
+const stockoutCount = computed(() => metrics.value.ewsCriticalCount || 0);
+const reorderCount = computed(() => metrics.value.ewsReorderCount || 0);
 
 const formatStatus = (s) => {
   const map = {
@@ -340,142 +361,227 @@ const refreshData = () => {
   loadDashboard();
 };
 
-// 1. Category Chart Option (Doughnut)
-const categoryChartOption = computed(() => ({
-  tooltip: {
-    trigger: 'item',
-    formatter: '{b}: Rp {c}M ({d}%)'
-  },
-  legend: {
-    bottom: '0%',
-    left: 'center',
-    icon: 'circle',
-    textStyle: { fontSize: 11 }
-  },
-  series: [
-    {
-      name: 'Status Stok',
-      type: 'pie',
-      radius: ['45%', '70%'],
-      avoidLabelOverlap: false,
-      itemStyle: {
-        borderRadius: 4,
-        borderColor: '#fff',
-        borderWidth: 2
+// 1. Category Chart Option (Doughnut - Valuasi per Kategori Barang)
+const categoryChartOption = computed(() => {
+  const catData = metrics.value.categoryValuations || [];
+  const total = catData.reduce((acc, c) => acc + Number(c.value || 0), 0);
+
+  return {
+    tooltip: {
+      trigger: 'item',
+      formatter: (params) => {
+        const val = Number(params.value || 0);
+        const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+        return `<b>${params.name}</b><br/>Valuasi: Rp ${val.toLocaleString('id-ID')} (${pct}%)`;
+      }
+    },
+    legend: {
+      bottom: '0%',
+      left: 'center',
+      icon: 'circle',
+      itemWidth: 8,
+      itemHeight: 8,
+      textStyle: { fontSize: 10 }
+    },
+    series: [
+      {
+        name: 'Valuasi Kategori',
+        type: 'pie',
+        radius: ['45%', '70%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 3,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        label: { show: false },
+        data: catData.map(c => ({
+          name: c.name,
+          value: c.value,
+          itemStyle: { color: c.color }
+        }))
+      }
+    ]
+  };
+});
+
+// 2. Budget Chart Option (Pagu vs Realisasi per Cabang)
+const budgetChartOption = computed(() => {
+  const budgets = metrics.value.branchBudgets || [];
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: (params) => {
+        const unit = params[0]?.name || '';
+        let tip = `<div class="fw-bold mb-1">${unit}</div>`;
+        params.forEach(p => {
+          tip += `<div><span style="color:${p.color}">●</span> ${p.seriesName}: <b>Rp ${Number(p.value).toLocaleString('id-ID')} jt</b></div>`;
+        });
+        return tip;
+      }
+    },
+    legend: {
+      bottom: '0%',
+      icon: 'circle',
+      itemWidth: 8,
+      itemHeight: 8,
+      textStyle: { fontSize: 11 }
+    },
+    grid: {
+      top: '10%',
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      data: budgets.map(b => b.name || b.branchName),
+      axisLabel: { fontSize: 9, interval: 0, fontWeight: 'bold' }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: (v) => 'Rp ' + v.toLocaleString('id-ID') + ' jt'
+      }
+    },
+    series: [
+      {
+        name: 'Pagu Alokasi',
+        type: 'bar',
+        data: budgets.map(b => Math.round(Number(b.allocated || 0) / 1000000)),
+        itemStyle: { color: '#CBD5E1', borderRadius: [4, 4, 0, 0] },
+        barMaxWidth: 16
       },
-      label: { show: false },
-      data: Object.entries(metrics.value.stockStatusDistribution || {}).map(([name, value]) => ({ name, value }))
-    }
-  ]
-}));
+      {
+        name: 'Realisasi',
+        type: 'bar',
+        data: budgets.map(b => Math.round(Number(b.realized || 0) / 1000000)),
+        itemStyle: { color: '#D9252A', borderRadius: [4, 4, 0, 0] },
+        barMaxWidth: 16
+      }
+    ]
+  };
+});
 
-// 2. Budget Chart Option
-const budgetChartOption = computed(() => ({
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: { type: 'shadow' }
-  },
-  legend: {
-    bottom: '0%',
-    icon: 'circle',
-    textStyle: { fontSize: 11 }
-  },
-  grid: {
-    top: '10%',
-    left: '3%',
-    right: '4%',
-    bottom: '15%',
-    containLabel: true
-  },
-  xAxis: {
-    type: 'category',
-    data: []
-  },
-  yAxis: {
-    type: 'value',
-    name: 'Juta Rp'
-  },
-  series: [
-    {
-      name: 'Pagu Alokasi',
-      type: 'bar',
-      data: [],
-      itemStyle: { color: '#cbd5e1', borderRadius: [4, 4, 0, 0] }
+// 3. Movement Chart Option (Inbound vs Outbound 6 Bulan Terakhir)
+const movementChartOption = computed(() => {
+  const months = metrics.value.months || [];
+  const inData = metrics.value.monthlyProcurementCost || [];
+  const outData = metrics.value.monthlyCostSaving || [];
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      formatter: (params) => {
+        let tip = `<div class="fw-bold mb-1">${params[0]?.name || ''}</div>`;
+        params.forEach(p => {
+          tip += `<div><span style="color:${p.color}">●</span> ${p.seriesName}: <b>${Number(p.value).toLocaleString('id-ID')} unit</b></div>`;
+        });
+        return tip;
+      }
     },
-    {
-      name: 'Realisasi',
-      type: 'bar',
-      data: [],
-      itemStyle: { color: '#D97706', borderRadius: [4, 4, 0, 0] }
-    }
-  ]
-}));
-
-// 3. Movement Chart Option
-const movementChartOption = computed(() => ({
-  tooltip: { trigger: 'axis' },
-  legend: {
-    bottom: '0%',
-    icon: 'circle',
-    textStyle: { fontSize: 11 }
-  },
-  grid: {
-    top: '10%',
-    left: '3%',
-    right: '4%',
-    bottom: '15%',
-    containLabel: true
-  },
-  xAxis: {
-    type: 'category',
-    boundaryGap: false,
-    data: metrics.value.months || []
-  },
-  yAxis: { type: 'value', name: 'Ribu Unit' },
-  series: [
-    {
-      name: 'Barang Masuk (PO)',
-      type: 'line',
-      smooth: true,
-      data: metrics.value.monthlyProcurementCost || [],
-      itemStyle: { color: '#0d6efd' },
-      areaStyle: { opacity: 0.1, color: '#0d6efd' }
+    legend: {
+      bottom: '0%',
+      icon: 'circle',
+      itemWidth: 8,
+      itemHeight: 8,
+      textStyle: { fontSize: 11 }
     },
-    {
-      name: 'Barang Keluar (Order)',
-      type: 'line',
-      smooth: true,
-      data: metrics.value.monthlyCostSaving || [],
-      itemStyle: { color: '#D9252A' },
-      areaStyle: { opacity: 0.1, color: '#D9252A' }
-    }
-  ]
-}));
+    grid: {
+      top: '10%',
+      left: '3%',
+      right: '4%',
+      bottom: '15%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: months,
+      axisLabel: { fontSize: 10, fontWeight: 'bold' }
+    },
+    yAxis: {
+      type: 'value',
+      axisLabel: {
+        formatter: (v) => v.toLocaleString('id-ID')
+      }
+    },
+    series: [
+      {
+        name: 'Barang Masuk (Inbound)',
+        type: 'line',
+        smooth: true,
+        data: inData,
+        symbol: 'circle',
+        symbolSize: 6,
+        itemStyle: { color: '#10B981' },
+        areaStyle: { opacity: 0.12, color: '#10B981' },
+        lineStyle: { width: 2 }
+      },
+      {
+        name: 'Barang Keluar (Outbound)',
+        type: 'line',
+        smooth: true,
+        data: outData,
+        symbol: 'circle',
+        symbolSize: 6,
+        itemStyle: { color: '#D9252A' },
+        areaStyle: { opacity: 0.12, color: '#D9252A' },
+        lineStyle: { width: 2 }
+      }
+    ]
+  };
+});
 
-// 4. Fast-Moving Items
-const fastMovingChartOption = computed(() => ({
-  tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-  grid: {
-    top: '5%',
-    left: '3%',
-    right: '5%',
-    bottom: '5%',
-    containLabel: true
-  },
-  xAxis: { type: 'value' },
-  yAxis: {
-    type: 'category',
-    data: [...(metrics.value.topOrderedItems || [])].reverse().map((item) => item.name)
-  },
-  series: [
-    {
-      name: 'Volume Terdistribusi',
-      type: 'bar',
-      data: [...(metrics.value.topOrderedItems || [])].reverse().map((item) => item.qty),
-      itemStyle: { color: '#198754', borderRadius: [0, 4, 4, 0] }
-    }
-  ]
-}));
+// 4. Fast-Moving Items (Horizontal Bar Chart)
+const fastMovingChartOption = computed(() => {
+  const items = metrics.value.topOrderedItems || [];
+  const reversed = [...items].reverse();
+
+  return {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+      formatter: (params) => {
+        const item = reversed[params[0]?.dataIndex];
+        const uom = item?.uom ? ' ' + item.uom : ' unit';
+        return `<div class="fw-bold">${item?.fullName || params[0]?.name || ''}</div><div>Jumlah Keluar: <b>${params[0]?.value}${uom}</b></div>`;
+      }
+    },
+    grid: {
+      top: '5%',
+      left: '3%',
+      right: '5%',
+      bottom: '5%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'value',
+      minInterval: 2,
+      axisLabel: { fontSize: 10 }
+    },
+    yAxis: {
+      type: 'category',
+      data: reversed.map((item) => item.name),
+      axisLabel: { fontSize: 10, fontWeight: 'bold' }
+    },
+    series: [
+      {
+        name: 'Total Kuantitas',
+        type: 'bar',
+        data: reversed.map((item) => item.qty),
+        itemStyle: {
+          color: '#0284C7',
+          borderRadius: [0, 6, 6, 0]
+        },
+        barMaxWidth: 16
+      }
+    ]
+  };
+});
 </script>
 
 <style scoped>

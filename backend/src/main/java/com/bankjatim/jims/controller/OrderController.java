@@ -46,7 +46,7 @@ public class OrderController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ORDER_REQUESTER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'REQUESTER_CABANG', 'ORDER_REQUESTER')")
     @Operation(summary = "Buat Pesanan Cabang")
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @Valid @RequestBody OrderRequest request,

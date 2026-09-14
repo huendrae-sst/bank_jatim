@@ -18,72 +18,6 @@
       </div>
     </div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-trash3"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL BERITA ACARA</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ records.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Tahun Anggaran 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-shield-check"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">MENUNGGU AUDIT SKAI</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ waitingApprovalCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 50%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Otorisasi Kepatuhan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-check-circle"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">SELESAI DIEKSEKUSI</span>
-            <span class="info-box-number text-success fs-4 font-monospace">{{ executedCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Fisik Telah Dihancurkan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-cash-stack"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">NILAI BUKU WRITE-OFF</span>
-            <span class="info-box-number text-body fs-4 font-monospace">Rp 45<span class="fs-7 fw-normal">jt</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 60%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Penghapusan Buku Besar</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Main Table Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -393,11 +327,12 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const showCreateModal = ref(false);
 const showDetailModal = ref(false);
 const selectedDestruction = ref(null);
-const isLoading = ref(true);
+const isLoading = ref(false);
 
 const destructionForm = reactive({
   location: 'Gudang Margomulyo',
@@ -427,6 +362,17 @@ const openDetailModal = (d) => {
   showDetailModal.value = true;
 };
 
+const mapDestruction = (d, idx) => ({
+  id: d.id,
+  baNo: d.baNumber || d.referenceNumber || d.baNo || `BA-MUSNAH-2026-${String(idx + 1).padStart(3, '0')}`,
+  location: d.location || d.warehouse?.name || 'Gudang Margomulyo',
+  item: d.itemName || d.item?.name || d.item || 'Barang Persediaan',
+  qty: Number(d.qty || d.qtyOut || 0),
+  method: d.method || 'Penghancuran Mesin Shredder Industri',
+  witness: d.witness || 'SKAI & Divisi Kepatuhan',
+  status: d.status || 'SELESAI / EXECUTED'
+});
+
 const records = ref([]);
 
 const fetchDestructions = async () => {
@@ -435,19 +381,13 @@ const fetchDestructions = async () => {
     const res = await api.get('/inventory/ledgers', {
       params: { transactionType: 'DESTRUCTION', size: 100 }
     });
-    const items = res.data?.data?.content || res.data?.content || [];
-    records.value = items.map((item, idx) => ({
-      id: item.id,
-      baNo: item.referenceNumber || `BA-MUSNAH-2026-${String(idx + 1).padStart(3, '0')}`,
-      location: item.warehouse?.name || 'Gudang Margomulyo',
-      item: item.item?.name || 'Barang Persediaan',
-      qty: item.qtyOut || 0,
-      method: 'Penghancuran Mesin Shredder Industri',
-      witness: 'SKAI & Divisi Kepatuhan',
-      status: 'SELESAI / EXECUTED'
-    }));
+    const items = res.data?.data?.content || res.data?.content || res.data || [];
+    if (Array.isArray(items) && items.length > 0) {
+      records.value = items.map(mapDestruction);
+    }
   } catch (err) {
-    console.error('Failed to load destructions from ledgers', err);
+    records.value = [];
+    console.warn('Failed loading destructions from backend:', err);
   } finally {
     isLoading.value = false;
   }
@@ -540,4 +480,3 @@ onMounted(() => {
   color: var(--bs-dark);
 }
 </style>
-

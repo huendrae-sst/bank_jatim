@@ -65,14 +65,18 @@ const currentPage = ref(1);
 const perPage = ref(10);
 const errorMessage = ref('');
 
-const notifs = ref([]);
-
 const iconByType = (type) => {
   switch (type) {
     case 'ACTION_REQUIRED':
+    case 'APPROVAL_REQUEST':
       return 'bi-clipboard-check-fill';
     case 'ALERT':
+    case 'LOW_STOCK_WARNING':
       return 'bi-exclamation-triangle-fill';
+    case 'SHIPMENT_DELIVERED':
+      return 'bi-truck';
+    case 'SETTLEMENT_POSTED':
+      return 'bi-cash-coin';
     default:
       return 'bi-info-circle-fill';
   }
@@ -84,9 +88,10 @@ const badgeByPriority = (priority) => {
     case 'HIGH':
       return 'bg-danger';
     case 'WARNING':
-      return 'bg-warning';
+    case 'MEDIUM':
+      return 'bg-warning text-dark';
     default:
-      return 'bg-info';
+      return 'bg-info text-dark';
   }
 };
 
@@ -105,18 +110,23 @@ const mapNotification = (notification) => ({
   icon: iconByType(notification.type),
   badgeClass: badgeByPriority(notification.priority),
   time: formatTime(notification.createdAt),
-  link: notification.link || '#',
+  link: notification.link || notification.actionUrl || '#',
   isRead: Boolean(notification.isRead)
 });
+
+const notifs = ref([]);
 
 const loadNotifications = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/notifications');
-    notifs.value = (response.data || []).map(mapNotification);
+    const items = response.data?.data || response.data || [];
+    if (Array.isArray(items) && items.length > 0) {
+      notifs.value = items.map(mapNotification);
+    }
   } catch (error) {
     notifs.value = [];
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat notifikasi.';
+    console.warn('Backend /notifications unavailable:', error);
   }
 };
 

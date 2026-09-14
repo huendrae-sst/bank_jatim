@@ -559,6 +559,24 @@
                       <span class="nav-text">Manajemen Pengguna</span>
                     </router-link>
                   </li>
+                  <li class="nav-item">
+                    <router-link to="/master/roles" class="nav-link" :class="{ active: $route.path === '/master/roles' }">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <span class="nav-text">Manajemen Peran (Role)</span>
+                    </router-link>
+                  </li>
+                  <li class="nav-item">
+                    <router-link to="/master/menus" class="nav-link" :class="{ active: $route.path === '/master/menus' }">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <span class="nav-text">Manajemen Menu</span>
+                    </router-link>
+                  </li>
+                  <li class="nav-item">
+                    <router-link to="/master/role-menus" class="nav-link" :class="{ active: $route.path === '/master/role-menus' }">
+                      <i class="nav-icon bi bi-circle"></i>
+                      <span class="nav-text">Mapping Role & Menu</span>
+                    </router-link>
+                  </li>
                 </ul>
               </li>
 

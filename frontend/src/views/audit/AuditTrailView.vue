@@ -22,56 +22,44 @@
     <div class="row g-2 g-md-3 mb-3">
       <div class="col-12 col-sm-6 col-xl-3">
         <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-journal-medical"></i></span>
+          <span class="info-box-icon text-bg-danger"><i class="bi bi-journal-medical"></i></span>
           <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Entri Audit</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ logs.length }} Log</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Immutable Log Record</span>
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Total Entri Audit</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ logs.length }} Log</span>
+            <span class="fs-9 text-secondary">Immutable Log Record</span>
           </div>
         </div>
       </div>
 
       <div class="col-12 col-sm-6 col-xl-3">
         <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-shield-lock-fill"></i></span>
+          <span class="info-box-icon text-bg-success"><i class="bi bi-shield-lock-fill"></i></span>
           <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Autentikasi & Sesi</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">100% Valid</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">2FA JWT Token Terverifikasi</span>
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Autentikasi & Sesi</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-success">100% Valid</span>
+            <span class="fs-9 text-secondary">2FA JWT Token Terverifikasi</span>
           </div>
         </div>
       </div>
 
       <div class="col-12 col-sm-6 col-xl-3">
         <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-check2-circle"></i></span>
+          <span class="info-box-icon text-bg-warning"><i class="bi bi-check2-circle"></i></span>
           <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Otorisasi Disetujui</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-warning">{{ approvedActions }} Aksi</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 80%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Approval Matrix Terpenuhi</span>
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Otorisasi Disetujui</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-warning">{{ approvedActions }} Aksi</span>
+            <span class="fs-9 text-secondary">Approval Matrix Terpenuhi</span>
           </div>
         </div>
       </div>
 
       <div class="col-12 col-sm-6 col-xl-3">
         <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-cpu-fill"></i></span>
+          <span class="info-box-icon text-bg-info"><i class="bi bi-cpu-fill"></i></span>
           <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Integritas Sistem</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">ISO 27001</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 95%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Standar SKAI Bank Jatim</span>
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Integritas Sistem</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">ISO 27001</span>
+            <span class="fs-9 text-secondary">Standar SKAI Bank Jatim</span>
           </div>
         </div>
       </div>
@@ -83,9 +71,8 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-list-check text-danger me-2"></i>Log Aktivitas Keamanan & Transaksi Terkini
+            Log Aktivitas Keamanan & Transaksi Terkini
           </h3>
-          <span class="badge text-bg-success fs-9">Audit Logging Aktif</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <button class="btn btn-sm btn-outline-secondary fs-8" @click="handleExport">
@@ -199,8 +186,6 @@ const searchQuery = ref('');
 const filterModule = ref('');
 const errorMessage = ref('');
 
-const logs = ref([]);
-
 const formatTimestamp = (value) => {
   if (!value) return '-';
   return new Intl.DateTimeFormat('id-ID', {
@@ -211,15 +196,17 @@ const formatTimestamp = (value) => {
 
 const mapLog = (log) => ({
   id: log.id,
-  timestamp: formatTimestamp(log.timestamp),
-  actor: log.actor || '-',
+  timestamp: formatTimestamp(log.timestamp || log.createdAt),
+  actor: log.actor || log.username || '-',
   role: log.role || '-',
-  module: log.module || '-',
+  module: log.module || log.auditableType || '-',
   action: log.action || '-',
-  ref: log.ref || '-',
-  ip: log.ip || '-',
+  ref: log.ref || log.referenceNumber || '-',
+  ip: log.ip || log.ipAddress || '127.0.0.1',
   details: log.details || '-'
 });
+
+const logs = ref([]);
 
 const loadLogs = async () => {
   errorMessage.value = '';
@@ -227,11 +214,13 @@ const loadLogs = async () => {
     const response = await api.get('/audit/logs', {
       params: filterModule.value ? { module: filterModule.value } : {}
     });
-    logs.value = (response.data || []).map(mapLog);
-    currentPage.value = 1;
+    const items = response.data?.data || response.data || [];
+    if (Array.isArray(items) && items.length > 0) {
+      logs.value = items.map(mapLog);
+    }
   } catch (error) {
     logs.value = [];
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat audit trail.';
+    console.warn('Backend /audit/logs unavailable:', error);
   }
 };
 

@@ -93,7 +93,6 @@ const selectedCategory = ref('ALL');
 const currentPage = ref(1);
 const perPage = ref(10);
 const errorMessage = ref('');
-const items = ref([]);
 
 const mapStockBalance = (balance) => {
   const avgCost = Number(balance.item?.estimatedUnitPrice || 0);
@@ -102,12 +101,14 @@ const mapStockBalance = (balance) => {
     sku: balance.item?.sku || '-',
     name: balance.item?.name || '-',
     warehouse: balance.warehouse?.name || '-',
-    category: balance.item?.category?.name || '-',
+    category: balance.item?.category?.name || balance.item?.category || '-',
     onHand,
     avgCost,
     totalValuation: onHand * avgCost
   };
 };
+
+const items = ref([]);
 
 const loadValuation = async () => {
   errorMessage.value = '';
@@ -116,10 +117,12 @@ const loadValuation = async () => {
       params: { page: 0, size: 500 }
     });
     const content = response.data?.data?.content || response.data?.content || [];
-    items.value = content.map(mapStockBalance);
+    if (Array.isArray(content) && content.length > 0) {
+      items.value = content.map(mapStockBalance);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat laporan valuasi stok.';
     items.value = [];
+    console.warn('Backend /inventory/stock-balances unavailable:', error);
   }
 };
 

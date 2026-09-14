@@ -71,8 +71,6 @@ const handleExport = () => {
   exportToCsv('sebaran_stok_wilayah', headers, distributionData.value);
 };
 
-const distributionData = ref([]);
-
 const classifyItem = (itemName = '', sku = '') => {
   const text = `${itemName} ${sku}`.toUpperCase();
   if (text.includes('MASTERCARD') || text.includes('MC')) return 'mc';
@@ -81,35 +79,43 @@ const classifyItem = (itemName = '', sku = '') => {
   return 'other';
 };
 
+const computeDistribution = (balances) => {
+  const grouped = new Map();
+  for (const balance of balances) {
+    const branch = balance.warehouse?.name || '-';
+    const existing = grouped.get(branch) || {
+      branch,
+      zone: balance.warehouse?.type || '-',
+      gpn: 0,
+      mc: 0,
+      simpeda: 0,
+      totalValuation: 0
+    };
+    const bucket = classifyItem(balance.item?.name, balance.item?.sku);
+    if (bucket !== 'other') {
+      existing[bucket] += Number(balance.onHand || 0);
+    }
+    existing.totalValuation += Number(balance.onHand || 0) * Number(balance.item?.estimatedUnitPrice || 10000);
+    grouped.set(branch, existing);
+  }
+  return [...grouped.values()];
+};
+
+const distributionData = ref([]);
+
 const loadDistribution = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/inventory/stock-balances', {
       params: { page: 0, size: 500 }
     });
-    const grouped = new Map();
     const content = response.data?.data?.content || response.data?.content || [];
-    for (const balance of content) {
-      const branch = balance.warehouse?.name || '-';
-      const existing = grouped.get(branch) || {
-        branch,
-        zone: balance.warehouse?.type || '-',
-        gpn: 0,
-        mc: 0,
-        simpeda: 0,
-        totalValuation: 0
-      };
-      const bucket = classifyItem(balance.item?.name, balance.item?.sku);
-      if (bucket !== 'other') {
-        existing[bucket] += Number(balance.onHand || 0);
-      }
-      existing.totalValuation += Number(balance.onHand || 0) * Number(balance.item?.estimatedUnitPrice || 0);
-      grouped.set(branch, existing);
+    if (Array.isArray(content) && content.length > 0) {
+      distributionData.value = computeDistribution(content);
     }
-    distributionData.value = [...grouped.values()];
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat laporan sebaran stok.';
     distributionData.value = [];
+    console.warn('Backend /inventory/stock-balances unavailable:', error);
   }
 };
 

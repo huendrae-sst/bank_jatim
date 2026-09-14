@@ -42,61 +42,6 @@
       </div>
     </div>
 
-    <!-- 4 Metric Cards -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-success text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-stack fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Saldo Akhir On-Hand</div>
-            <div class="fs-4 fw-bold font-monospace text-success">{{ endingBalance.toLocaleString('id-ID') }} <span class="fs-7 fw-normal">{{ selectedItemUom }}</span></div>
-            <div class="fs-9 text-secondary">Harga: Rp {{ selectedItemPrice.toLocaleString('id-ID') }} / {{ selectedItemUom }}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-primary text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-arrow-down-left-circle fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Total Masuk (Inbound)</div>
-            <div class="fs-4 fw-bold font-monospace text-body">+{{ totalQtyIn.toLocaleString('id-ID') }} <span class="fs-7 fw-normal">{{ selectedItemUom }}</span></div>
-            <div class="fs-9 text-secondary">PO Vendor & Saldo Awal</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-danger text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-arrow-up-right-circle fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Total Keluar (Outbound)</div>
-            <div class="fs-4 fw-bold font-monospace text-danger">-{{ totalQtyOut.toLocaleString('id-ID') }} <span class="fs-7 fw-normal">{{ selectedItemUom }}</span></div>
-            <div class="fs-9 text-secondary">Distribusi Cabang</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-info text-dark d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-wallet2 fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Total Valuasi Fisik</div>
-            <div class="fs-4 fw-bold font-monospace text-body">Rp {{ (totalValuation / 1000000).toFixed(1) }}<span class="fs-7 fw-normal">jt</span></div>
-            <div class="fs-9 text-secondary">Rp {{ totalValuation.toLocaleString('id-ID') }} (Ledger)</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
     <!-- Immutable Mutation Records Table Card -->

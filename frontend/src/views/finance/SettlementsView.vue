@@ -18,64 +18,6 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-cash-coin"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Settlement</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ settlements.length }} Berkas</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Bulan Berjalan 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-check-all"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Diposting ke GL</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">{{ postedCount }} Berkas</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 50%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Jurnal Akuntansi Sah & Balance</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-clock-history"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Draft Menunggu Posting</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-warning">{{ draftCount }} Berkas</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 50%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Otorisasi Finance Officer</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-wallet2"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Beban Cabang</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">Rp 61.02 Jt</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 75%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Beban Pengadaan Terdistribusi</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
@@ -297,6 +239,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const searchQuery = ref('');
 const activeTab = ref('all');
@@ -304,6 +247,18 @@ const selectedJournal = ref(null);
 const currentPage = ref(1);
 const perPage = ref(10);
 const errorMessage = ref('');
+
+const mapSettlement = (settlement) => ({
+  id: settlement.id,
+  number: settlement.settlementNumber || settlement.number,
+  debitOrg: settlement.debitOrganization?.name || settlement.debitOrg || '-',
+  debitCostCenter: settlement.debitCostCenter || '-',
+  creditOrg: settlement.creditOrganization?.name || settlement.creditOrg || '-',
+  itemAmount: Number(settlement.itemAmount || 0),
+  shippingAmount: Number(settlement.shippingAmount || 0),
+  totalAmount: Number(settlement.totalAmount || 0),
+  status: settlement.status || '-'
+});
 
 const settlements = ref([]);
 
@@ -335,26 +290,17 @@ const paginatedSettlements = computed(() => {
   return filteredSettlements.value.slice(start, start + perPage.value);
 });
 
-const mapSettlement = (settlement) => ({
-  id: settlement.id,
-  number: settlement.settlementNumber,
-  debitOrg: settlement.debitOrganization?.name || '-',
-  debitCostCenter: settlement.debitCostCenter || '-',
-  creditOrg: settlement.creditOrganization?.name || '-',
-  itemAmount: Number(settlement.itemAmount || 0),
-  shippingAmount: Number(settlement.shippingAmount || 0),
-  totalAmount: Number(settlement.totalAmount || 0),
-  status: settlement.status || '-'
-});
-
 const loadSettlements = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/finance/settlements');
-    settlements.value = (response.data || []).map(mapSettlement);
+    const data = response.data?.content || response.data || [];
+    if (Array.isArray(data) && data.length > 0) {
+      settlements.value = data.map(mapSettlement);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat settlement dari server.';
     settlements.value = [];
+    console.warn('Failed loading settlements from backend:', error);
   }
 };
 

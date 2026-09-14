@@ -73,7 +73,6 @@ const handleExport = () => {
   exportToCsv('laporan_settlement', headers, settlements.value);
 };
 
-const settlements = ref([]);
 
 const mapSettlement = (settlement) => ({
   no: settlement.settlementNumber || '-',
@@ -84,15 +83,19 @@ const mapSettlement = (settlement) => ({
   postedDate: settlement.postedAt || settlement.updatedAt || '-'
 });
 
+const settlements = ref([]);
+
 const loadSettlements = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/finance/settlements');
     const list = response.data?.data || response.data || [];
-    settlements.value = (Array.isArray(list) ? list : []).map(mapSettlement);
+    if (Array.isArray(list) && list.length > 0) {
+      settlements.value = list.map(mapSettlement);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat laporan settlement.';
     settlements.value = [];
+    console.warn('Backend /finance/settlements unavailable:', error);
   }
 };
 

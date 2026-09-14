@@ -132,8 +132,9 @@ const paginatedSavingsList = computed(() => {
 const fetchSwitchingData = async () => {
   isLoading.value = true;
   try {
-    const res = await api.get('/inventory/switching');
-    const items = res.data?.data || res.data || [];
+    const res = await api.get('/inventory/switching').catch(() => ({ data: [] }));
+    let items = res.data?.data || res.data || [];
+    if (!Array.isArray(items)) items = [];
     const list = [];
 
     for (const sw of items) {

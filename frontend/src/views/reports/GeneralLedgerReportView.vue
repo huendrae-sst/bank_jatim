@@ -75,8 +75,6 @@ const handleExport = () => {
   exportToCsv('jurnal_buku_besar', headers, journals.value);
 };
 
-const journals = ref([]);
-
 const mapSettlementToJournalRows = (settlement) => {
   const amount = Number(settlement.totalAmount || 0);
   const journalNo = settlement.settlementNumber || `SET-${settlement.id}`;
@@ -106,17 +104,20 @@ const mapSettlementToJournalRows = (settlement) => {
   ];
 };
 
+const journals = ref([]);
+
 const loadJournals = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/finance/settlements');
     const list = response.data?.data || response.data || [];
-    journals.value = (Array.isArray(list) ? list : [])
-      .filter(settlement => settlement.status === 'POSTED')
-      .flatMap(mapSettlementToJournalRows);
+    const postedList = (Array.isArray(list) ? list : []).filter(s => s.status === 'POSTED');
+    if (postedList.length > 0) {
+      journals.value = postedList.flatMap(mapSettlementToJournalRows);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat jurnal GL dari settlement.';
     journals.value = [];
+    console.warn('Backend /finance/settlements unavailable:', error);
   }
 };
 

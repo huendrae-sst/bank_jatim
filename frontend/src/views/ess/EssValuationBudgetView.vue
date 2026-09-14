@@ -11,31 +11,46 @@
       </div>
     </div>
 
-    <!-- 4 KPI Box Widgets -->
-    <!-- 4 KPI Box Widgets -->
+    <!-- 4 KPI Info-Boxes -->
     <div class="row g-2 g-md-3 mb-3">
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="small-box text-bg-danger rounded-3 p-3">
-          <h3 class="fw-bold fs-3 mb-1">{{ formatRupiahShort(totalValuation) }}</h3>
-          <p class="mb-0 fw-semibold fs-7">Total Nilai Buku Persediaan</p>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-danger"><i class="bi bi-box-seam"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Total Nilai Buku Persediaan</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ formatRupiahShort(totalValuation) }}</span>
+            <span class="fs-9 text-secondary">Valuasi Stok On-Hand</span>
+          </div>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="small-box text-bg-warning rounded-3 p-3 text-dark">
-          <h3 class="fw-bold fs-3 mb-1">{{ formatRupiahShort(totalBudgetPagu) }}</h3>
-          <p class="mb-0 fw-semibold fs-7">Pagu Anggaran Disetujui</p>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-warning"><i class="bi bi-wallet2 text-dark"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Pagu Anggaran Disetujui</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-warning-emphasis">{{ formatRupiahShort(totalBudgetPagu) }}</span>
+            <span class="fs-9 text-secondary">Alokasi Plafon Belanja</span>
+          </div>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="small-box text-bg-success rounded-3 p-3">
-          <h3 class="fw-bold fs-3 mb-1">{{ absorptionRate }}%</h3>
-          <p class="mb-0 fw-semibold fs-7">Rasio Serapan Berjalan</p>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-success"><i class="bi bi-pie-chart-fill"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Rasio Serapan Berjalan</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-success">{{ absorptionRate }}%</span>
+            <span class="fs-9 text-secondary">Realisasi & Komitmen Belanja</span>
+          </div>
         </div>
       </div>
       <div class="col-12 col-sm-6 col-xl-3">
-        <div class="small-box text-bg-info rounded-3 p-3 text-dark">
-          <h3 class="fw-bold fs-3 mb-1">{{ formatRupiahShort(totalBudgetRemaining) }}</h3>
-          <p class="mb-0 fw-semibold fs-7">Sisa Alokasi Anggaran</p>
+        <div class="info-box shadow-xs mb-0 h-100 bg-body">
+          <span class="info-box-icon text-bg-info"><i class="bi bi-cash-coin text-dark"></i></span>
+          <div class="info-box-content">
+            <span class="info-box-text fs-8 text-secondary fw-bold text-uppercase">Sisa Alokasi Anggaran</span>
+            <span class="info-box-number fs-4 fw-bold font-monospace text-body-emphasis">{{ formatRupiahShort(totalBudgetRemaining) }}</span>
+            <span class="fs-9 text-secondary">Sisa Pagu Belanja Tersedia</span>
+          </div>
         </div>
       </div>
     </div>
@@ -125,26 +140,30 @@ const fetchData = async () => {
     const metrics = metricsRes.data?.data || metricsRes.data || {};
     totalValuation.value = Number(metrics.totalInventoryValuation || 0);
 
-    const budgets = budgetsRes.data?.data || budgetsRes.data || [];
+    let budgets = budgetsRes.data?.data || budgetsRes.data || [];
+    if (!Array.isArray(budgets)) budgets = [];
+
     let paguSum = 0;
     let spentSum = 0;
     for (const b of budgets) {
-      paguSum += Number(b.allocatedAmount || 0);
-      spentSum += Number(b.realizedAmount || 0) + Number(b.committedAmount || 0);
+      paguSum += Number(b.allocatedAmount || b.allocated || 0);
+      spentSum += Number(b.realizedAmount || b.realized || 0) + Number(b.committedAmount || b.committed || 0);
     }
     totalBudgetPagu.value = paguSum;
     totalBudgetSpent.value = spentSum;
     totalBudgetRemaining.value = Math.max(0, paguSum - spentSum);
 
     // Group stock balances by category
-    const balances = balancesRes.data?.data?.content || balancesRes.data?.content || [];
+    let balances = balancesRes.data?.data?.content || balancesRes.data?.content || [];
+    if (!Array.isArray(balances)) balances = [];
+
     const catMap = {};
     let grandValuation = 0;
 
     for (const sb of balances) {
-      const catName = sb.item?.category?.name || 'Lain-lain';
+      const catName = sb.item?.category?.name || sb.item?.category || 'Lain-lain';
       const qty = Number(sb.onHand || 0);
-      const price = Number(sb.item?.estimatedUnitPrice || 0);
+      const price = Number(sb.item?.estimatedUnitPrice || 10000);
       const val = qty * price;
 
       if (!catMap[catName]) {

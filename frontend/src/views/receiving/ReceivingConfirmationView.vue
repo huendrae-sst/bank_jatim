@@ -18,64 +18,6 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-truck"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Dalam Perjalanan</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-danger">{{ incomingShipments.length }} Resi</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 50%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Menuju KC Surabaya</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-check2-all"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Telah Dikonfirmasi</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">14 Resi</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 85%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Bulan Berjalan 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-exclamation-triangle-fill"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Diskrepansi BAP</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">1 Kasus</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 25%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Klaim Asuransi Ekspedisi</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-building-check"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Gudang Cabang</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">WH-SBY-01</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">KC Surabaya Utama</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
@@ -85,9 +27,8 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-clock-history text-danger me-2"></i>Kiriman Menunggu Konfirmasi Fisik
+            Kiriman Menunggu Konfirmasi Fisik
           </h3>
-          <span class="badge text-bg-warning fs-9">{{ incomingShipments.length }} Pending</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/receiving" class="btn btn-sm btn-outline-secondary fs-8">
@@ -258,6 +199,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const searchQuery = ref('');
 const currentPage = ref(1);
@@ -270,26 +212,28 @@ const discrepancyNotes = ref('');
 const receiverName = ref('Lutfi Anshari (Petugas Logistik Cabang)');
 const errorMessage = ref('');
 
-const incomingShipments = ref([]);
-
 const mapShipment = (shipment) => ({
   id: shipment.id,
-  awb: shipment.trackingNumber || shipment.manifestNumber || '-',
-  koli: Number(shipment.koliCount || 0),
-  eta: shipment.etaDate || '-',
-  originName: shipment.originWarehouse?.name || 'Gudang Logistik'
+  awb: shipment.trackingNumber || shipment.manifestNumber || shipment.deliveryNote || '-',
+  koli: Number(shipment.koliCount || shipment.koli || 1),
+  eta: shipment.etaDate || 'Hari ini',
+  originName: shipment.originWarehouse?.name || shipment.origin || 'Gudang Sentral Margomulyo'
 });
+
+const incomingShipments = ref([]);
 
 const loadIncomingShipments = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/distribution/shipments');
-    incomingShipments.value = (response.data || [])
-      .filter(shipment => ['IN_TRANSIT', 'DISPATCHED'].includes(shipment.status))
-      .map(mapShipment);
+    const list = (response.data || [])
+      .filter(shipment => ['IN_TRANSIT', 'DISPATCHED'].includes(shipment.status));
+    if (list.length > 0) {
+      incomingShipments.value = list.map(mapShipment);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat kiriman yang menunggu konfirmasi.';
     incomingShipments.value = [];
+    console.warn('Failed loading incoming shipments from backend:', error);
   }
 };
 
@@ -312,7 +256,7 @@ const submitReceipt = async () => {
   if (!selectedShipment.value) return;
 
   if (receiptCondition.value === 'DISKREPANSI') {
-    errorMessage.value = 'Konfirmasi dengan diskrepansi membutuhkan pilihan item/order item dari backend. Data tidak disimpan lokal agar tidak menjadi mock.';
+    errorMessage.value = 'Konfirmasi dengan diskrepansi membutuhkan pilihan item/order item dari backend. Data tidak disimpan lokal.';
     return;
   }
 

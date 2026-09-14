@@ -73,37 +73,27 @@ const fetchProjections = async () => {
       api.get('/master/budgets').catch(() => ({ data: [] }))
     ]);
 
-    const categories = catRes.data?.data || catRes.data || [];
-    const budgets = budgetRes.data?.data || budgetRes.data || [];
+    let categories = catRes.data?.data || catRes.data || [];
+    if (!Array.isArray(categories)) categories = [];
+    let budgets = budgetRes.data?.data || budgetRes.data || [];
+    if (!Array.isArray(budgets)) budgets = [];
 
     let totalRealized = 0;
     for (const b of budgets) {
-      totalRealized += Number(b.realizedAmount || 0) + Number(b.committedAmount || 0);
+      totalRealized += Number(b.realizedAmount || b.realized || 0) + Number(b.committedAmount || b.committed || 0);
     }
-    if (totalRealized === 0) totalRealized = 2500000000; // sensible baseline if fresh seed
-
     const catCount = Math.max(categories.length, 1);
     const avgPerCat = Math.round(totalRealized / catCount);
 
-    const growthDrivers = [
-      { growth: 15.0, drivers: 'Target penambahan nasabah baru & perluasan kartu chip' },
-      { growth: 10.0, drivers: 'Pembaruan berkala warkat & buku tabungan security' },
-      { growth: 8.0, drivers: 'Kebutuhan perlengkapan operasional & formulir perbankan' },
-      { growth: 5.0, drivers: 'Penggantian reguler perlengkapan kantor & teller' },
-      { growth: 0.0, drivers: 'Stabil dengan adopsi transaksi digital' }
-    ];
-
     const list = categories.map((c, idx) => {
-      const gd = growthDrivers[idx % growthDrivers.length];
       const actual = Math.round(avgPerCat * (1 + (idx % 3) * 0.25));
-      const projected = Math.round(actual * (1 + gd.growth / 100));
 
       return {
         category: c.name,
         actual2026: actual,
-        growth: gd.growth,
-        projected2027: projected,
-        drivers: gd.drivers
+        growth: 0,
+        projected2027: actual,
+        drivers: '-'
       };
     });
 

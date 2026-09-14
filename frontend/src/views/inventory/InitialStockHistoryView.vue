@@ -19,64 +19,6 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-journal-text"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Mutasi Masuk</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ historyData.length }} Transaksi</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Posting Tahun Buku 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-box-seam-fill"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Unit Masuk</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">27,000 Unit</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 85%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Kartu, Warkat, dan Ribbon</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-cash-coin"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Nilai Valuasi</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">Rp 584.00 Jt</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 75%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Debet Akun Persediaan</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-shield-check"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Status Integrasi GL</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">TERPOSTING</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Buku Besar Akuntansi Balance</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
@@ -84,9 +26,8 @@
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-journal-check text-danger me-2"></i>Log Jurnal Transaksi Saldo Awal
+            Log Jurnal Transaksi Saldo Awal
           </h3>
-          <span class="badge text-bg-secondary fs-9">{{ selectedWarehouseLabel }}</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/inventory/initial-stock" class="btn btn-sm btn-danger fw-bold shadow-xs fs-8">

@@ -5,7 +5,7 @@
       <div class="container-fluid p-0">
         <div class="row align-items-center">
           <div class="col-sm-6">
-            <h3 class="mb-0 text-body fw-bold">Manajemen Pengguna & Persona</h3>
+            <h3 class="mb-0 text-body fw-bold">Manajemen Pengguna</h3>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-end mb-0 fs-8">
@@ -18,80 +18,23 @@
       </div>
     </div>
 
-    <!-- 2. AdminLTE 4 Info-Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs"><i class="bi bi-people-fill"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Total Pengguna</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ userList.length }} User</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Akun Terdaftar di JIMS</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs"><i class="bi bi-shield-check"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Akun Aktif</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-success">{{ userList.filter(u => u.status === 'AKTIF').length }} User</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Hak Akses Terverifikasi</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs"><i class="bi bi-person-badge"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Pejabat Pemutus</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-warning">{{ userList.filter(u => u.role.includes('APPROVER') || u.role.includes('ADMIN')).length }} Pejabat</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-warning" style="width: 60%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Approval Matrix Aktif</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info shadow-xs"><i class="bi bi-person-workspace"></i></span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary fw-bold text-uppercase fs-9">Petugas Operasional</span>
-            <span class="info-box-number font-monospace fs-4 my-1 text-body">{{ userList.filter(u => u.role.includes('OFFICER') || u.role.includes('REQUESTER')).length }} Staf</span>
-            <div class="progress" style="height: 4px;">
-              <div class="progress-bar bg-info" style="width: 75%"></div>
-            </div>
-            <span class="progress-description text-secondary fs-9 mt-1">Gudang & Pemohon Cabang</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-            <i class="bi bi-person-lines-fill text-danger me-2"></i>Daftar Akun Pengguna Terdaftar
+            Daftar Akun Pengguna Terdaftar
           </h3>
-          <span class="badge text-bg-danger fs-9">{{ userList.length }} Pengguna</span>
           <span v-if="loading" class="badge text-bg-light border text-secondary fs-9">
             <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
             Memuat
           </span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
+          <router-link to="/master/roles" class="btn btn-sm btn-outline-secondary fs-8">
+            <i class="bi bi-shield-lock me-1"></i> Kelola Peran
+          </router-link>
           <button class="btn btn-sm btn-danger fw-bold shadow-xs fs-8" @click="openCreateModal">
             <i class="bi bi-person-plus me-1"></i> Tambah Pengguna
           </button>
@@ -106,7 +49,9 @@
               <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-person-badge"></i></span>
               <select v-model="filterRole" class="form-select form-select-sm border-start-0 fs-8">
                 <option value="">Semua Peran (Role)</option>
-                <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+                <option v-for="r in roleList" :key="r.code" :value="r.code">
+                  {{ r.code }} - {{ r.name }}
+                </option>
               </select>
             </div>
           </div>
@@ -255,9 +200,11 @@
                   </select>
                 </div>
                 <div class="col-12 col-md-6">
-                  <label class="form-label fw-bold mb-1">Peran Fungsional (Role)</label>
-                  <select v-model="userForm.role" class="form-select form-select-sm">
-                    <option v-for="role in roles" :key="role" :value="role">{{ role }}</option>
+                  <label class="form-label fw-bold mb-1">Peran Fungsional (Role) <span class="text-danger">*</span></label>
+                  <select v-model="userForm.role" class="form-select form-select-sm" required>
+                    <option v-for="r in roleList" :key="r.code" :value="r.code">
+                      {{ r.code }} - {{ r.name }}
+                    </option>
                   </select>
                 </div>
                 <div class="col-12 col-md-6">
@@ -288,7 +235,11 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
+import { useRoleStore } from '@/stores/role';
 import api from '@/api/client';
+
+
+const roleStore = useRoleStore();
 
 const showModal = ref(false);
 const isEditMode = ref(false);
@@ -305,26 +256,9 @@ const formError = ref('');
 const userList = ref([]);
 const organizationOptions = ref([]);
 const warehouseOptions = ref([]);
-const roles = [
-  'SUPER_ADMIN',
-  'USER_ADMIN',
-  'MASTER_MAKER',
-  'MASTER_APPROVER',
-  'BUDGET_OFFICER',
-  'PROCUREMENT_OFFICER',
-  'PROCUREMENT_APPROVER',
-  'INVENTORY_OFFICER',
-  'WAREHOUSE_OFFICER',
-  'REQUESTER_CABANG',
-  'ORDER_APPROVER',
-  'SWITCHING_APPROVER',
-  'DISTRIBUTION_OFFICER',
-  'RECEIVING_OFFICER',
-  'FINANCE_OFFICER',
-  'FINANCE_APPROVER',
-  'AUDITOR',
-  'MANAGEMENT'
-];
+
+const roleList = computed(() => roleStore.roles);
+const roles = computed(() => roleStore.roleCodes);
 
 const userForm = reactive({
   name: '',
@@ -358,25 +292,30 @@ const mapUser = (user) => ({
 });
 
 const loadReferenceData = async () => {
-  const [orgResponse, warehouseResponse] = await Promise.all([
-    api.get('/master/organizations'),
-    api.get('/master/warehouses')
-  ]);
-  organizationOptions.value = orgResponse.data || [];
-  warehouseOptions.value = warehouseResponse.data || [];
+  try {
+    const [orgResponse, warehouseResponse] = await Promise.all([
+      api.get('/master/organizations'),
+      api.get('/master/warehouses')
+    ]);
+    const rawOrgs = Array.isArray(orgResponse?.data) ? orgResponse.data : (Array.isArray(orgResponse) ? orgResponse : null);
+    organizationOptions.value = rawOrgs || [];
+    const rawWh = Array.isArray(warehouseResponse?.data) ? warehouseResponse.data : (Array.isArray(warehouseResponse) ? warehouseResponse : null);
+    warehouseOptions.value = rawWh || [];
+  } catch (err) {
+    console.warn('Failed loading organization reference for users:', err);
+    organizationOptions.value = [];
+    warehouseOptions.value = [];
+  }
 };
 
 const loadUsers = async () => {
-  loading.value = true;
-  errorMessage.value = '';
   try {
     const response = await api.get('/master/users');
-    userList.value = (response.data || []).map(mapUser);
-  } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat data pengguna dari server.';
+    const rawUsers = Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : null);
+    userList.value = rawUsers ? rawUsers.map(mapUser) : [];
+  } catch (err) {
+    console.warn('Backend /master/users unavailable:', err);
     userList.value = [];
-  } finally {
-    loading.value = false;
   }
 };
 
@@ -384,9 +323,9 @@ const loadPageData = async () => {
   loading.value = true;
   errorMessage.value = '';
   try {
-    await Promise.all([loadReferenceData(), loadUsers()]);
+    await Promise.allSettled([loadReferenceData(), loadUsers(), roleStore.fetchRoles()]);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat data pengguna dari server.';
+    console.warn('One or more user page requests failed:', error);
   } finally {
     loading.value = false;
   }
@@ -412,6 +351,9 @@ const paginatedUserList = computed(() => {
 const openCreateModal = () => {
   isEditMode.value = false;
   editingUsername.value = null;
+  const initialRole = roles.value.includes('REQUESTER_CABANG')
+    ? 'REQUESTER_CABANG'
+    : (roles.value[0] || 'REQUESTER_CABANG');
   Object.assign(userForm, {
     name: '',
     username: '',
@@ -419,7 +361,7 @@ const openCreateModal = () => {
     password: '',
     organizationId: null,
     warehouseId: null,
-    role: 'REQUESTER_CABANG',
+    role: initialRole,
     status: 'AKTIF'
   });
   formError.value = '';

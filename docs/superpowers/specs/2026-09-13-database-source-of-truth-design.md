@@ -14,7 +14,7 @@ This change covers:
 - All Vue pages that call an existing backend endpoint and also initialize from, or fall back to, `masterDataSeeds.js`, `transactionSeeds.js`, or inline sample arrays.
 - Shared response parsing and regression checks needed to keep API-backed pages database-driven.
 
-Pages for modules without a persistent backend endpoint remain outside the data-integration portion of this change. Their sample data may remain temporarily, but it must not be presented as database data and must be recorded in the production audit.
+Pages for modules without a persistent backend endpoint remain outside the data-integration portion of this change. Their business collections remain empty until an endpoint exists; they must not present local sample records as database data.
 
 ## Source-of-Truth Rules
 
@@ -54,7 +54,7 @@ The audit will classify every routed view into one of three categories:
 
 - **API-backed:** Existing endpoint is available; all runtime seed fallback is removed.
 - **Partially API-backed:** Database-backed sections follow source-of-truth rules, while unsupported actions are disabled with an explicit message.
-- **No persistent endpoint:** Existing static/sample behavior is documented as non-production and is not described as database-backed.
+- **No persistent endpoint:** Business collections remain empty and the missing backend capability is documented.
 
 The classification will be recorded in `docs/mock-data-production-audit.md` with endpoint coverage and remaining backend gaps.
 

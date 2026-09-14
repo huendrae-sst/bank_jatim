@@ -15,61 +15,9 @@
         <router-link to="/master/budgets" class="btn btn-sm btn-danger fw-bold shadow-xs">
           <i class="bi bi-wallet2 me-1"></i> Pagu Anggaran
         </router-link>
-      </div>
-    </div>
-
-    <!-- 4 KPI Info Boxes -->
-    <div class="row g-2 g-md-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-danger text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-box-seam fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Katalog SKU</div>
-            <div class="fs-4 fw-bold font-monospace text-body">{{ items.length }} SKU</div>
-            <div class="fs-9 text-secondary">Warkat & Logistik</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-primary text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-buildings fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Jaringan Unit Kerja</div>
-            <div class="fs-4 fw-bold font-monospace text-body">{{ orgs.length }} Lokasi</div>
-            <div class="fs-9 text-secondary">KP, KC, KCP & Gudang</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-success text-white d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-cash-stack fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Pagu Anggaran</div>
-            <div class="fs-4 fw-bold font-monospace text-success">Rp {{ formatCompact(totalBudgetAllocated) }}</div>
-            <div class="fs-9 text-secondary">Tahun Anggaran 2026</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="card p-3 shadow-xs h-100 d-flex flex-row align-items-center gap-3">
-          <div class="rounded-3 p-3 bg-info text-dark d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-            <i class="bi bi-truck fs-4"></i>
-          </div>
-          <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Vendor & Ekspedisi</div>
-            <div class="fs-4 fw-bold font-monospace text-body">{{ partnerCount }} Rekanan</div>
-            <div class="fs-9 text-secondary">Penyedia Terakreditasi</div>
-          </div>
-        </div>
+        <router-link to="/master/menus" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-menu-button-wide me-1"></i> Manajemen Menu
+        </router-link>
       </div>
     </div>
 
@@ -287,7 +235,7 @@ const loadMasterData = async () => {
   loading.value = true;
   loadError.value = '';
   try {
-    const [itemsRes, orgsRes, budgetsRes, vendorsRes, couriersRes] = await Promise.all([
+    const results = await Promise.allSettled([
       api.get('/master/items'),
       api.get('/master/organizations'),
       api.get('/master/budgets'),
@@ -295,41 +243,66 @@ const loadMasterData = async () => {
       api.get('/master/couriers')
     ]);
 
-    items.value = (itemsRes.data || []).map((item) => ({
-      id: item.id,
-      sku: item.sku,
-      barcode: item.barcode,
-      name: item.name,
-      category: item.category?.name || '-',
-      uom: item.uom,
-      min: Number(item.minStock || 0),
-      safety: Number(item.safetyStock || 0),
-      price: Number(item.estimatedUnitPrice || 0)
-    }));
+    const [itemsRes, orgsRes, budgetsRes, vendorsRes, couriersRes] = results;
+    const getList = (res) => {
+      if (res.status !== 'fulfilled' || !res.value) return null;
+      if (Array.isArray(res.value.data)) return res.value.data;
+      if (Array.isArray(res.value)) return res.value;
+      return null;
+    };
 
-    orgs.value = (orgsRes.data || []).map((org) => ({
-      id: org.id,
-      code: org.code,
-      name: org.name,
-      type: org.type,
-      city: org.city || '-',
-      costCenter: org.costCenterCode || '-'
-    }));
+    const rawItems = getList(itemsRes);
+    if (rawItems) {
+      items.value = rawItems.map((item) => ({
+        id: item.id,
+        sku: item.sku,
+        barcode: item.barcode,
+        name: item.name,
+        category: item.category?.name || (typeof item.category === 'string' ? item.category : '-'),
+        uom: item.uom,
+        min: Number(item.minStock || item.min || 0),
+        safety: Number(item.safetyStock || item.safety || 0),
+        price: Number(item.estimatedUnitPrice || item.price || 0)
+      }));
+    }
 
-    budgets.value = (budgetsRes.data || []).map((budget) => ({
-      id: budget.id,
-      org: budget.organization?.name || '-',
-      costCenter: budget.costCenterCode,
-      fiscalYear: budget.fiscalYear,
-      allocated: Number(budget.allocatedAmount || 0),
-      committed: Number(budget.committedAmount || 0),
-      realized: Number(budget.realizedAmount || 0)
-    }));
+    const rawOrgs = getList(orgsRes);
+    if (rawOrgs) {
+      orgs.value = rawOrgs.map((org) => ({
+        id: org.id,
+        code: org.code,
+        name: org.name,
+        type: org.type,
+        city: org.city || '-',
+        costCenter: org.costCenterCode || org.costCenter || '-'
+      }));
+    }
 
-    vendors.value = vendorsRes.data || [];
-    couriers.value = couriersRes.data || [];
+    const rawBudgets = getList(budgetsRes);
+    if (rawBudgets) {
+      budgets.value = rawBudgets.map((budget) => ({
+        id: budget.id,
+        org: budget.organization?.name || budget.org || '-',
+        costCenter: budget.costCenterCode || budget.costCenter,
+        fiscalYear: budget.fiscalYear,
+        allocated: Number(budget.allocatedAmount || budget.allocated || 0),
+        committed: Number(budget.committedAmount || budget.committed || 0),
+        realized: Number(budget.realizedAmount || budget.realized || 0)
+      }));
+    }
+
+    const rawVendors = getList(vendorsRes);
+    vendors.value = rawVendors || [];
+
+    const rawCouriers = getList(couriersRes);
+    couriers.value = rawCouriers || [];
   } catch (err) {
-    loadError.value = err?.message || err?.error || 'Gagal memuat master data dari backend.';
+    console.warn('Backend API request failed:', err);
+    items.value = [];
+    orgs.value = [];
+    budgets.value = [];
+    vendors.value = [];
+    couriers.value = [];
   } finally {
     loading.value = false;
   }

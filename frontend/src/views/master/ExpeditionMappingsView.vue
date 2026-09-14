@@ -122,6 +122,16 @@ const currentPage = ref(1);
 const perPage = ref(10);
 const errorMessage = ref('');
 
+const mapMapping = (mapping) => ({
+  id: mapping.id,
+  destinationOrganizationId: mapping.destinationOrganization?.id || '',
+  courierId: mapping.courier?.id || '',
+  branch: mapping.destinationOrganization?.name || mapping.branch || '-',
+  primaryCourier: mapping.courier?.name || mapping.primaryCourier || '-',
+  serviceType: mapping.serviceType || 'REGULER',
+  sla: Number(mapping.estimatedLeadDays || mapping.sla || 1)
+});
+
 const mappings = ref([]);
 const organizations = ref([]);
 const couriers = ref([]);
@@ -133,37 +143,44 @@ const mappingForm = reactive({
   sla: 1
 });
 
-const mapMapping = (mapping) => ({
-  id: mapping.id,
-  destinationOrganizationId: mapping.destinationOrganization?.id || '',
-  courierId: mapping.courier?.id || '',
-  branch: mapping.destinationOrganization?.name || '-',
-  primaryCourier: mapping.courier?.name || '-',
-  serviceType: mapping.serviceType || 'REGULER',
-  sla: Number(mapping.estimatedLeadDays || 0)
-});
-
 const loadOptions = async () => {
-  const [organizationResponse, courierResponse] = await Promise.all([
-    api.get('/master/organizations'),
-    api.get('/master/couriers')
-  ]);
-  organizations.value = organizationResponse.data || [];
-  couriers.value = courierResponse.data || [];
+  try {
+    const [organizationResponse, courierResponse] = await Promise.allSettled([
+      api.get('/master/organizations'),
+      api.get('/master/couriers')
+    ]);
+    if (organizationResponse.status === 'fulfilled') {
+      const orgData = organizationResponse.value?.data?.data || organizationResponse.value?.data || [];
+      organizations.value = Array.isArray(orgData) ? orgData : [];
+    }
+    if (courierResponse.status === 'fulfilled') {
+      const crData = courierResponse.value?.data?.data || courierResponse.value?.data || [];
+      couriers.value = Array.isArray(crData) ? crData : [];
+    }
+  } catch (err) {
+    console.warn('Failed to load options from backend:', err);
+    organizations.value = [];
+    couriers.value = [];
+  }
 };
 
 const loadMappings = async () => {
-  const response = await api.get('/master/expedition-mappings');
-  mappings.value = (response.data || []).map(mapMapping);
+  try {
+    const response = await api.get('/master/expedition-mappings');
+    const items = response.data?.data || response.data || [];
+    mappings.value = Array.isArray(items) ? items.map(mapMapping) : [];
+  } catch (err) {
+    console.warn('Backend /master/expedition-mappings unavailable:', err);
+    mappings.value = [];
+  }
 };
 
 const loadPage = async () => {
   errorMessage.value = '';
   try {
-    await Promise.all([loadOptions(), loadMappings()]);
+    await Promise.allSettled([loadOptions(), loadMappings()]);
   } catch (error) {
-    mappings.value = [];
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat pemetaan ekspedisi.';
+    console.warn('One or more expedition mapping requests failed:', error);
   }
 };
 

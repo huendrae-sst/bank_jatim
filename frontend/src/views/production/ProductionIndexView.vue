@@ -18,72 +18,6 @@
       </div>
     </div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-printer"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL SPK PRODUKSI</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ productionList.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Tahun Anggaran 2026</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-gear-wide-connected"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">PROSES CETAK</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ inProcessCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 60%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Mesin Cetak &amp; Security</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-patch-check"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">SELESAI QC &amp; NOMOR</span>
-            <span class="info-box-number text-success fs-4 font-monospace">{{ completedCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Siap Masuk Khazanah</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-layers"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL EKSEMPLAR</span>
-            <span class="info-box-number text-body fs-4 font-monospace">3.100 <span class="fs-7 fw-normal">Lbr</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 80%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Warkat Berharga Bank</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Main Table Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -299,7 +233,7 @@ const searchQuery = ref('');
 const activeTab = ref('all');
 const filterType = ref('ALL');
 const filterStatus = ref('ALL');
-const isLoading = ref(true);
+const isLoading = ref(false);
 
 const resetFilters = () => {
   searchQuery.value = '';
@@ -307,8 +241,6 @@ const resetFilters = () => {
   filterStatus.value = 'ALL';
   currentPage.value = 1;
 };
-
-const productionList = ref([]);
 
 const formatDate = (val) => {
   if (!val) return '-';
@@ -320,22 +252,37 @@ const formatDate = (val) => {
   }
 };
 
+const mapProduction = (p, idx) => ({
+  id: p.id,
+  spkNo: p.productionNumber || p.spkNo || `SPK-PROD-2026-${String(p.id || idx + 1).padStart(4, '0')}`,
+  productType: p.itemName ? `Pencetakan ${p.itemName}` : (p.productType || `Personalisasi Kartu (${p.filename || 'Berkas Emboss'})`),
+  serialRange: p.serialRange || `BATCH-${p.id} (${p.qtyToProduce || p.qty || 1500} unit)`,
+  qty: p.qtyToProduce || p.qtyFinished || p.qty || 1500,
+  targetDate: formatDate(p.startDate || p.createdAt || '2026-03-25'),
+  status: p.status === 'COMPLETED' || p.status === 'READY_TO_SHIP' ? 'SELESAI' : 'PROSES CETAK'
+});
+
+const productionList = ref([]);
+
 const fetchProductionList = async () => {
   isLoading.value = true;
   try {
     const res = await api.get('/emboss');
-    const files = res.data?.data || res.data || [];
-    productionList.value = files.map((f, idx) => ({
-      id: f.id,
-      spkNo: `SPK-PROD-2026-${String(f.id || idx + 1).padStart(4, '0')}`,
-      productType: `Personalisasi Kartu (${f.filename || 'Berkas Emboss'})`,
-      serialRange: `BATCH-EMB-${f.id} (${f.validRecords || 0} valid / ${f.totalRecords || 0} total)`,
-      qty: f.totalRecords || 0,
-      targetDate: formatDate(f.createdAt),
-      status: f.status === 'COMPLETED' ? 'SELESAI' : 'PROSES CETAK'
-    }));
+    const files = res.data?.data || res.data?.content || res.data || [];
+    if (Array.isArray(files) && files.length > 0) {
+      productionList.value = files.map((f, idx) => ({
+        id: f.id,
+        spkNo: `SPK-PROD-2026-${String(f.id || idx + 1).padStart(4, '0')}`,
+        productType: `Personalisasi Kartu (${f.filename || 'Berkas Emboss'})`,
+        serialRange: `BATCH-EMB-${f.id} (${f.validRecords || 0} valid / ${f.totalRecords || 0} total)`,
+        qty: f.totalRecords || 0,
+        targetDate: formatDate(f.createdAt),
+        status: f.status === 'COMPLETED' ? 'SELESAI' : 'PROSES CETAK'
+      }));
+    }
   } catch (err) {
-    console.error('Failed to load production orders', err);
+    productionList.value = [];
+    console.warn('Failed to load production orders from backend:', err);
   } finally {
     isLoading.value = false;
   }

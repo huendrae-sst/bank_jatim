@@ -81,11 +81,9 @@
       <div class="col-12 col-lg-6">
         <div class="card card-outline card-warning shadow-xs h-100">
           <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
-            <h3 class="card-title fs-6 fw-bold mb-0 text-body d-flex align-items-center gap-2">
-              <i class="bi bi-hand-index-thumb text-warning"></i>
-              <span>Antrean Picking (Ambil Barang di Rak)</span>
+            <h3 class="card-title fs-6 fw-bold mb-0 text-body">
+              Antrean Picking (Ambil Barang di Rak)
             </h3>
-            <span class="badge text-bg-warning fs-9">{{ pickingQueue.length }} Order Menunggu</span>
           </div>
           <div class="card-body p-3 space-y-3">
             <div
@@ -128,11 +126,9 @@
       <div class="col-12 col-lg-6">
         <div class="card card-outline card-success shadow-xs h-100">
           <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
-            <h3 class="card-title fs-6 fw-bold mb-0 text-body d-flex align-items-center gap-2">
-              <i class="bi bi-box-seam text-success"></i>
-              <span>Antrean Packing (Pengemasan Koli)</span>
+            <h3 class="card-title fs-6 fw-bold mb-0 text-body">
+              Antrean Packing (Pengemasan Koli)
             </h3>
-            <span class="badge text-bg-success fs-9">{{ packingQueue.length }} Siap Koli</span>
           </div>
           <div class="card-body p-3 space-y-3">
             <div
@@ -201,8 +197,6 @@
 import { ref, onMounted } from 'vue';
 import api from '@/api/client';
 
-const pickingQueue = ref([]);
-const packingQueue = ref([]);
 const errorMessage = ref('');
 
 const describeItems = (items = []) => items
@@ -215,29 +209,40 @@ const describeItems = (items = []) => items
   .join(', ');
 
 const mapQueue = (order) => ({
-  id: order.orderId,
+  id: order.orderId || order.id,
   orderNumber: order.orderNumber || '-',
-  branch: order.branch || '-',
-  itemsSummary: describeItems(order.items),
-  koli: 1,
-  weight: 2.5
+  branch: order.branch || order.destination || order.requestingOrganization?.name || '-',
+  itemsSummary: typeof order.items === 'string' ? order.items : (order.itemDescription || describeItems(order.items || [])),
+  koli: order.koli || 1,
+  weight: order.weight ? Number(order.weight) : 2.5
 });
+
+const pickingQueue = ref([]);
+const packingQueue = ref([]);
 
 const loadQueues = async () => {
   errorMessage.value = '';
   try {
-    const [pickingResponse, packingResponse] = await Promise.all([
+    const [pickingResponse, packingResponse] = await Promise.allSettled([
       api.get('/warehouse/picking'),
       api.get('/warehouse/packing')
     ]);
-    const pickingList = pickingResponse.data?.data ?? pickingResponse.data ?? [];
-    const packingList = packingResponse.data?.data ?? packingResponse.data ?? [];
-    pickingQueue.value = Array.isArray(pickingList) ? pickingList.map(mapQueue) : [];
-    packingQueue.value = Array.isArray(packingList) ? packingList.map(mapQueue) : [];
+    if (pickingResponse.status === 'fulfilled') {
+      const pickingList = pickingResponse.value.data?.data ?? pickingResponse.value.data ?? [];
+      if (Array.isArray(pickingList) && pickingList.length > 0) {
+        pickingQueue.value = pickingList.map(mapQueue);
+      }
+    }
+    if (packingResponse.status === 'fulfilled') {
+      const packingList = packingResponse.value.data?.data ?? packingResponse.value.data ?? [];
+      if (Array.isArray(packingList) && packingList.length > 0) {
+        packingQueue.value = packingList.map(mapQueue);
+      }
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat antrean picking/packing dari server.';
     pickingQueue.value = [];
     packingQueue.value = [];
+    console.warn('Failed loading queues from backend:', error);
   }
 };
 

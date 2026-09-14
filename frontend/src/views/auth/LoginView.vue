@@ -122,8 +122,8 @@ const showForgotMsg = ref(false);
 const currentTheme = ref('light');
 
 onMounted(() => {
-  const storedTheme = localStorage.getItem('lte-theme') || 'light';
-  currentTheme.value = storedTheme;
+  const resolved = document.documentElement.getAttribute('data-bs-theme') || localStorage.getItem('lte-theme') || 'light';
+  currentTheme.value = resolved;
 });
 
 const handleLogin = async () => {

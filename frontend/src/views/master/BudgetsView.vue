@@ -161,6 +161,23 @@ const selectedBudget = ref(null);
 const currentPage = ref(1);
 const perPage = ref(10);
 
+const mapDefaultBudget = (b) => {
+  const allocated = Number(b.allocated || 0);
+  const committed = Number(b.committed || 0);
+  const realized = Number(b.realized || 0);
+  const remaining = allocated - committed - realized;
+  return {
+    id: b.id,
+    branchName: b.org || '-',
+    coa: b.costCenter || '5.2.01 (Beban Warkat & Cetakan)',
+    allocated,
+    committed,
+    realized,
+    remaining,
+    absorptionRate: allocated === 0 ? 0 : (realized / allocated) * 100
+  };
+};
+
 const budgetList = ref([]);
 
 onMounted(() => {
@@ -168,23 +185,31 @@ onMounted(() => {
 });
 
 const loadBudgets = async () => {
-  const response = await api.get('/master/budgets');
-  budgetList.value = (response.data || []).map((budget) => {
-    const allocated = Number(budget.allocatedAmount || 0);
-    const committed = Number(budget.committedAmount || 0);
-    const realized = Number(budget.realizedAmount || 0);
-    const remaining = allocated - committed - realized;
-    return {
-      id: budget.id,
-      branchName: budget.organization?.name || '-',
-      coa: budget.costCenterCode,
-      allocated,
-      committed,
-      realized,
-      remaining,
-      absorptionRate: allocated === 0 ? 0 : (realized / allocated) * 100
-    };
-  });
+  try {
+    const response = await api.get('/master/budgets');
+    const items = response.data?.data || response.data || [];
+    if (Array.isArray(items)) {
+      budgetList.value = items.map((budget) => {
+        const allocated = Number(budget.allocatedAmount || budget.allocated || 0);
+        const committed = Number(budget.committedAmount || budget.committed || 0);
+        const realized = Number(budget.realizedAmount || budget.realized || 0);
+        const remaining = allocated - committed - realized;
+        return {
+          id: budget.id,
+          branchName: budget.organization?.name || budget.org || '-',
+          coa: budget.costCenterCode || budget.costCenter || '-',
+          allocated,
+          committed,
+          realized,
+          remaining,
+          absorptionRate: allocated === 0 ? 0 : (realized / allocated) * 100
+        };
+      });
+    }
+  } catch (err) {
+    console.warn('Backend /master/budgets unavailable:', err);
+    budgetList.value = [];
+  }
 };
 
 const budgetForm = reactive({

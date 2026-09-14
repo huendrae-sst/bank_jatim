@@ -45,72 +45,6 @@
 
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-primary shadow-xs">
-            <i class="bi bi-layers-half"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">POOL ITEM TERSEDIA</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ poolItems.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-primary" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Tervalidasi &amp; Siap Digabung</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-check-all"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">ITEM TERPILIH</span>
-            <span class="info-box-number text-danger fs-4 font-monospace">{{ selectedItems.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 65%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Akan Masuk Kontrak PO</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-piggy-bank"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">ESTIMASI COST SAVING</span>
-            <span class="info-box-number text-success fs-4 font-monospace">Rp 18.5<span class="fs-7 fw-normal">jt</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Diskon Volume Multi-Cabang</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-wallet2"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL SUBPOKOK</span>
-            <span class="info-box-number text-body fs-4 font-monospace">Rp {{ (selectedSubtotal / 1000000).toFixed(1) }}<span class="fs-7 fw-normal">jt</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 80%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Item Terpilih (Sebelum PPN)</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Pool Items Table Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -288,6 +222,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const selectedItems = ref([]);
 const selectAll = ref(false);
@@ -298,10 +233,30 @@ const searchQuery = ref('');
 const filterVendor = ref('ALL');
 const filterBranch = ref('ALL');
 const errorMessage = ref('');
-const selectedVendorId = ref(null);
-const selectedWarehouseId = ref(null);
 const vendorOptions = ref([]);
 const warehouseOptions = ref([]);
+const selectedVendorId = ref(null);
+const selectedWarehouseId = ref(null);
+
+const selectedVendorName = computed(() => {
+  return vendorOptions.value.find(vendor => vendor.id === selectedVendorId.value)?.name || '-';
+});
+
+const mapPoolItems = (purchaseRequests = []) => purchaseRequests.flatMap(pr =>
+  (pr.items || [])
+    .map(line => ({
+      id: line.id,
+      prNumber: pr.prNumber || '-',
+      branch: pr.organization?.name || '-',
+      itemName: line.item?.name || '-',
+      qty: Number(line.qtyRequested || line.qtyApproved || 0),
+      uom: line.item?.uom || 'Unit',
+      unitPrice: Number(line.unitPriceRef || line.estimatedUnitPrice || 0),
+      vendor: selectedVendorName.value
+    }))
+);
+
+const poolItems = ref([]);
 
 const resetFilters = () => {
   searchQuery.value = '';
@@ -310,37 +265,24 @@ const resetFilters = () => {
   currentPage.value = 1;
 };
 
-const poolItems = ref([]);
-
-const mapPoolItems = (purchaseRequests = []) => purchaseRequests.flatMap(pr =>
-  (pr.items || [])
-    .filter(line => Number(line.qtyApproved || 0) > Number(line.qtyOrdered || 0))
-    .map(line => ({
-      id: line.id,
-      prNumber: pr.prNumber || '-',
-      branch: pr.organization?.name || '-',
-      itemName: line.item?.name || '-',
-      qty: Number(line.qtyApproved || 0) - Number(line.qtyOrdered || 0),
-      uom: line.item?.uom || 'Unit',
-      unitPrice: Number(line.estimatedUnitPrice || 0),
-      vendor: selectedVendorName.value
-    }))
-);
-
 const loadOptions = async () => {
-  const [vendorResponse, warehouseResponse] = await Promise.all([
-    api.get('/master/vendors'),
-    api.get('/master/warehouses')
-  ]);
-  vendorOptions.value = vendorResponse.data || [];
-  warehouseOptions.value = warehouseResponse.data || [];
-  selectedVendorId.value = vendorOptions.value[0]?.id || null;
-  selectedWarehouseId.value = warehouseOptions.value[0]?.id || null;
+  try {
+    const [vendorResponse, warehouseResponse] = await Promise.allSettled([
+      api.get('/master/vendors'),
+      api.get('/master/warehouses')
+    ]);
+    if (vendorResponse.status === 'fulfilled' && Array.isArray(vendorResponse.value.data) && vendorResponse.value.data.length > 0) {
+      vendorOptions.value = vendorResponse.value.data;
+      selectedVendorId.value = vendorOptions.value[0]?.id || null;
+    }
+    if (warehouseResponse.status === 'fulfilled' && Array.isArray(warehouseResponse.value.data) && warehouseResponse.value.data.length > 0) {
+      warehouseOptions.value = warehouseResponse.value.data;
+      selectedWarehouseId.value = warehouseOptions.value[0]?.id || null;
+    }
+  } catch (error) {
+    console.warn('Using default options', error);
+  }
 };
-
-const selectedVendorName = computed(() => {
-  return vendorOptions.value.find(vendor => vendor.id === selectedVendorId.value)?.name || '-';
-});
 
 const branchOptions = computed(() => [...new Set(poolItems.value.map(item => item.branch).filter(Boolean))]);
 
@@ -348,11 +290,12 @@ const loadPool = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/procurement/consolidation');
-    poolItems.value = mapPoolItems(response.data || []);
+    const data = response.data || [];
+    poolItems.value = Array.isArray(data) ? mapPoolItems(data) : [];
     selectedItems.value = [];
     selectAll.value = false;
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat pool PR approved dari server.';
+    console.warn('Failed loading pool from server:', error);
     poolItems.value = [];
   }
 };

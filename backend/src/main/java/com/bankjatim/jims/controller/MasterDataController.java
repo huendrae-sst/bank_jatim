@@ -4,10 +4,14 @@ import com.bankjatim.jims.common.ApiResponse;
 import com.bankjatim.jims.domain.*;
 import com.bankjatim.jims.dto.ExpeditionMappingRequest;
 import com.bankjatim.jims.dto.ExpeditionMappingResponse;
+import com.bankjatim.jims.dto.MenuRequest;
+import com.bankjatim.jims.dto.MenuResponse;
 import com.bankjatim.jims.dto.UserRequest;
 import com.bankjatim.jims.dto.UserResponse;
 import com.bankjatim.jims.repository.*;
+import com.bankjatim.jims.security.UserRole;
 import com.bankjatim.jims.service.ExpeditionMappingService;
+import com.bankjatim.jims.service.MenuService;
 import com.bankjatim.jims.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -34,6 +39,7 @@ public class MasterDataController {
     private final CourierRepository courierRepository;
     private final UserService userService;
     private final ExpeditionMappingService expeditionMappingService;
+    private final MenuService menuService;
 
     @GetMapping("/items")
     @Operation(summary = "Daftar Master Barang")
@@ -57,6 +63,14 @@ public class MasterDataController {
     @Operation(summary = "Daftar Pengguna JIMS")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getUsers() {
         return ResponseEntity.ok(ApiResponse.ok(userService.getUsers()));
+    }
+
+    @GetMapping("/roles")
+    @Operation(summary = "Daftar Peran Pengguna yang Didukung Backend")
+    public ResponseEntity<ApiResponse<List<String>>> getRoles() {
+        return ResponseEntity.ok(ApiResponse.ok(
+                Arrays.stream(UserRole.values()).map(Enum::name).toList()
+        ));
     }
 
     @PostMapping("/users")
@@ -131,5 +145,61 @@ public class MasterDataController {
     public ResponseEntity<ApiResponse<Void>> deleteExpeditionMapping(@PathVariable Long id) {
         expeditionMappingService.deleteMapping(id);
         return ResponseEntity.ok(ApiResponse.ok("Pemetaan ekspedisi berhasil dihapus", null));
+    }
+
+    @GetMapping("/menus")
+    @Operation(summary = "Daftar Menu Sistem & Navigasi RBAC")
+    public ResponseEntity<ApiResponse<List<MenuResponse>>> getMenus() {
+        return ResponseEntity.ok(ApiResponse.ok(menuService.getAllMenus()));
+    }
+
+    @PostMapping("/menus")
+    @Operation(summary = "Tambah Menu Sistem Baru")
+    public ResponseEntity<ApiResponse<MenuResponse>> createMenu(@Valid @RequestBody MenuRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Menu berhasil dibuat", menuService.createMenu(request)));
+    }
+
+    @PutMapping("/menus/{id}")
+    @Operation(summary = "Ubah Konfigurasi Menu Sistem")
+    public ResponseEntity<ApiResponse<MenuResponse>> updateMenu(
+            @PathVariable String id, @Valid @RequestBody MenuRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Menu berhasil diperbarui", menuService.updateMenu(id, request)));
+    }
+
+    @DeleteMapping("/menus/{id}")
+    @Operation(summary = "Hapus Menu Sistem")
+    public ResponseEntity<ApiResponse<Void>> deleteMenu(@PathVariable String id) {
+        menuService.deleteMenu(id);
+        return ResponseEntity.ok(ApiResponse.ok("Menu berhasil dihapus", null));
+    }
+
+    @PatchMapping("/menus/{id}/status")
+    @Operation(summary = "Ubah Status Aktif/Nonaktif Menu")
+    public ResponseEntity<ApiResponse<String>> toggleMenuStatus(@PathVariable String id) {
+        String status = menuService.toggleStatus(id);
+        return ResponseEntity.ok(ApiResponse.ok("Status menu berhasil diubah", status));
+    }
+
+    @PutMapping("/menus/{id}/roles")
+    @Operation(summary = "Ubah Matriks Hak Akses Peran untuk Menu")
+    public ResponseEntity<ApiResponse<List<String>>> updateMenuRoles(
+            @PathVariable String id, @RequestBody List<String> roles) {
+        return ResponseEntity.ok(ApiResponse.ok("Hak akses menu berhasil diperbarui", menuService.updateRoles(id, roles)));
+    }
+
+    @GetMapping("/roles/{roleCode}/menus")
+    @Operation(summary = "Daftar Kode Menu yang Dapat Diakses oleh Suatu Peran (Role)")
+    public ResponseEntity<ApiResponse<List<String>>> getRoleMenus(@PathVariable String roleCode) {
+        return ResponseEntity.ok(ApiResponse.ok(menuService.getMenuCodesForRole(roleCode)));
+    }
+
+    @PutMapping("/roles/{roleCode}/menus")
+    @Operation(summary = "Perbarui Pemetaan Menu untuk Suatu Peran (Role)")
+    public ResponseEntity<ApiResponse<List<String>>> updateRoleMenus(
+            @PathVariable String roleCode, @RequestBody List<String> menuCodes) {
+        return ResponseEntity.ok(ApiResponse.ok(
+                "Hak akses menu untuk peran " + roleCode + " berhasil disimpan",
+                menuService.updateRoleMenus(roleCode, menuCodes)));
     }
 }

@@ -74,11 +74,7 @@ const forecastPeriod = ref('3');
 const currentPage = ref(1);
 const perPage = ref(10);
 
-const forecastList = ref([
-  { sku: 'SKU-RIBBON-PB', name: 'Ribbon Passbook Olivetti PR2', currentStock: 140, monthlyBurn: 90, monthsLeft: 1.5, recommendation: 'Segera Terbitkan PR (Kritis)' },
-  { sku: 'SKU-TB-SIMPEDA', name: 'Buku Tabungan SIMPEDA', currentStock: 8500, monthlyBurn: 2200, monthsLeft: 3.8, recommendation: 'Stok Terkendali' },
-  { sku: 'SKU-BLANK-GPN', name: 'Blanko Kartu ATM GPN Chip', currentStock: 14200, monthlyBurn: 3500, monthsLeft: 4.0, recommendation: 'Stok Terkendali' }
-]);
+const forecastList = ref([]);
 
 const paginatedForecastList = computed(() => {
   const start = (currentPage.value - 1) * perPage.value;

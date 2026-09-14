@@ -77,8 +77,10 @@ const fetchRiskData = async () => {
       api.get('/master/expedition-mappings').catch(() => ({ data: [] }))
     ]);
 
-    const orgs = orgsRes.data?.data || orgsRes.data || [];
-    const mappings = mapsRes.data?.data || mapsRes.data || [];
+    let orgs = orgsRes.data?.data || orgsRes.data || [];
+    if (!Array.isArray(orgs)) orgs = [];
+    let mappings = mapsRes.data?.data || mapsRes.data || [];
+    if (!Array.isArray(mappings)) mappings = [];
 
     const mapByOrg = {};
     for (const m of mappings) {

@@ -36,8 +36,10 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public Page<OrderResponse> getOrders(Long organizationId, Pageable pageable) {
-        return orderRepository.findAllWithDetails(organizationId, pageable)
-                .map(OrderResponse::from);
+        Page<Order> orders = (organizationId != null)
+                ? orderRepository.findAllWithDetails(organizationId, pageable)
+                : orderRepository.findAllWithDetails(pageable);
+        return orders.map(OrderResponse::from);
     }
 
     @Transactional(readOnly = true)

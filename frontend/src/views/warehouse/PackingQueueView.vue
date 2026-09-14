@@ -29,72 +29,6 @@
       </router-link>
     </div>
 
-    <!-- 4 AdminLTE 4 Metric Info-Boxes -->
-    <div class="row g-3 mb-3">
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-danger shadow-xs">
-            <i class="bi bi-box2"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">ANTREAN PACKING</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ packingQueue.length }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-danger" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Lolos QC Picking</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-warning shadow-xs">
-            <i class="bi bi-shield-lock"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">PROSES SEAL</span>
-            <span class="info-box-number text-body fs-4 font-monospace">{{ inSealCount }}</span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-warning" style="width: 50%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Penimbangan &amp; Segel</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-success shadow-xs">
-            <i class="bi bi-boxes"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL KOLI TERKEMAS</span>
-            <span class="info-box-number text-success fs-4 font-monospace">3 <span class="fs-7 fw-normal">Koli</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Siap Kirim Hari Ini</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 col-sm-6 col-xl-3">
-        <div class="info-box shadow-xs mb-0 h-100 bg-body">
-          <span class="info-box-icon text-bg-info text-white shadow-xs">
-            <i class="bi bi-speedometer2"></i>
-          </span>
-          <div class="info-box-content">
-            <span class="info-box-text text-secondary">TOTAL BERAT PAKET</span>
-            <span class="info-box-number text-body fs-4 font-monospace">20.7 <span class="fs-7 fw-normal">Kg</span></span>
-            <div class="progress" style="height: 2px;">
-              <div class="progress-bar bg-info" style="width: 65%"></div>
-            </div>
-            <span class="progress-description fs-9 text-secondary">Muatan Logistik Cabang</span>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Packing Table Card -->
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
@@ -108,39 +42,23 @@
             <button
               type="button"
               class="nav-link py-1 px-3 text-nowrap"
-              :class="activeTab === 'all' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="activeTab = 'all'"
+              :class="activeTab === 'queue' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'queue'"
             >
-              Semua Antrean
+              Antrean Packing
             </button>
           </li>
           <li class="nav-item">
             <button
               type="button"
               class="nav-link py-1 px-3 text-nowrap"
-              :class="activeTab === 'packing' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="activeTab = 'packing'"
+              :class="activeTab === 'history' ? 'active bg-danger fw-bold text-white' : 'text-body'"
+              @click="activeTab = 'history'"
             >
-              Siap Packing
-            </button>
-          </li>
-          <li class="nav-item">
-            <button
-              type="button"
-              class="nav-link py-1 px-3 text-nowrap"
-              :class="activeTab === 'seal' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-              @click="activeTab = 'seal'"
-            >
-              Proses Seal
+              Riwayat Antrean
             </button>
           </li>
         </ul>
-
-        <div class="card-tools ms-md-auto">
-          <router-link to="/distribution/shipments" class="btn btn-sm btn-outline-danger fw-bold fs-8 shadow-xs">
-            <i class="bi bi-truck me-1"></i> Ke Pengiriman &amp; Manifest
-          </router-link>
-        </div>
       </div>
 
       <!-- Filter & Search Toolbar -->
@@ -251,11 +169,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
-const activeTab = ref('all');
+const activeTab = ref('queue');
 const filterDestination = ref('ALL');
 const filterStatus = ref('ALL');
 const errorMessage = ref('');
@@ -267,8 +186,6 @@ const resetFilters = () => {
   currentPage.value = 1;
 };
 
-const packingQueue = ref([]);
-
 const describeItems = (items = []) => items
   .map(line => {
     const name = line.item?.name || '-';
@@ -279,25 +196,29 @@ const describeItems = (items = []) => items
   .join(', ');
 
 const mapQueue = (item) => ({
-  id: item.orderId,
-  packNo: `PCK-KOLI-${item.orderNumber || item.orderId}`,
+  id: item.orderId || item.id,
+  packNo: item.packNo || `PCK-KOLI-${item.orderNumber || item.orderId || item.id}`,
   orderNumber: item.orderNumber || '-',
-  destination: item.branch || '-',
-  items: describeItems(item.items),
-  weight: '1.00',
-  koli: 1,
-  status: item.status === 'PICKING' ? 'SIAP PACKING' : item.status || 'SIAP PACKING'
+  destination: item.destination || item.branch || '-',
+  items: typeof item.items === 'string' ? item.items : describeItems(item.items || []),
+  weight: item.weight || '1.50',
+  koli: item.koli || 1,
+  status: item.status === 'PICKING' ? 'SIAP PACKING' : (item.status || 'SIAP PACKING')
 });
+
+const packingQueue = ref([]);
 
 const loadPackingQueue = async () => {
   errorMessage.value = '';
   try {
     const response = await api.get('/warehouse/packing');
     const list = response.data?.data ?? response.data ?? [];
-    packingQueue.value = Array.isArray(list) ? list.map(mapQueue) : [];
+    if (Array.isArray(list) && list.length > 0) {
+      packingQueue.value = list.map(mapQueue);
+    }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat antrean packing dari server.';
     packingQueue.value = [];
+    console.warn('Failed loading packing queue from backend:', error);
   }
 };
 
@@ -313,8 +234,9 @@ const destinationOptions = computed(() => [...new Set(packingQueue.value.map(ite
 
 const filteredQueue = computed(() => {
   return packingQueue.value.filter(p => {
-    if (activeTab.value === 'packing' && p.status !== 'SIAP PACKING') return false;
-    if (activeTab.value === 'seal' && p.status !== 'PROSES SEAL') return false;
+    const isCompleted = p.status === 'SELESAI' || p.status === 'COMPLETED' || p.status === 'PACKED' || p.status === 'READY_TO_SHIP';
+    if (activeTab.value === 'queue' && isCompleted) return false;
+    if (activeTab.value === 'history' && !isCompleted) return false;
 
     if (filterDestination.value !== 'ALL' && !p.destination.includes(filterDestination.value)) return false;
     if (filterStatus.value !== 'ALL' && p.status !== filterStatus.value) return false;
