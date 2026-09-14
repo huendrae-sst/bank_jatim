@@ -9,8 +9,9 @@ import com.bankjatim.jims.domain.StockBalance;
 import com.bankjatim.jims.domain.Warehouse;
 import com.bankjatim.jims.dto.StockBalanceResponse;
 import com.bankjatim.jims.service.InventoryService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -25,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class InventoryControllerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+    private final ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
 
     @Test
     void stockBalancesResponseDoesNotExposeWarehouseOrganizationAssociation() throws Exception {

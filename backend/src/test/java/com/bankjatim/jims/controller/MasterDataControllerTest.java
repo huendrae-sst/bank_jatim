@@ -23,8 +23,9 @@ import com.bankjatim.jims.service.ExpeditionMappingService;
 import com.bankjatim.jims.service.MenuService;
 import com.bankjatim.jims.service.RoleMenuService;
 import com.bankjatim.jims.service.UserService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MasterDataControllerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+    private final ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
 
     @Test
     void usersEndpointReturnsDatabaseUsersWithoutPassword() throws Exception {

@@ -9,8 +9,9 @@ import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.dto.EmbossFileResponse;
 import com.bankjatim.jims.dto.EmbossRecordResponse;
 import com.bankjatim.jims.service.EmbossService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
@@ -20,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EmbossControllerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+    private final ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
 
     @Test
     void embossDetailAndRecordsReturnSafeDtos() throws Exception {

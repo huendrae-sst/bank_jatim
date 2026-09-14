@@ -10,8 +10,9 @@ import com.bankjatim.jims.dto.NotificationResponse;
 import com.bankjatim.jims.security.UserPrincipal;
 import com.bankjatim.jims.service.AuditLogService;
 import com.bankjatim.jims.service.NotificationService;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AuditNotificationControllerTest {
 
-    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
+    private final ObjectMapper objectMapper = JsonMapper.builder().findAndAddModules().build();
 
     @Test
     void auditTrailReturnsDtoWithoutUserAssociationProxy() throws Exception {

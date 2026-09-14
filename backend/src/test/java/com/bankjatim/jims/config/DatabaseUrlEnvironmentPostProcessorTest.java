@@ -2,22 +2,31 @@ package com.bankjatim.jims.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
-import org.springframework.core.io.support.PropertiesLoaderUtils;
+import org.springframework.boot.WebApplicationType;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.env.MockEnvironment;
 
-import java.io.IOException;
-import java.util.Properties;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DatabaseUrlEnvironmentPostProcessorTest {
 
     @Test
-    void registersProcessorUsingBoot4EnvironmentPostProcessorKey() throws IOException {
-        Properties factories = PropertiesLoaderUtils.loadAllProperties("META-INF/spring.factories");
+    void discoversProcessorDuringSpringApplicationStartup() {
+        SpringApplication application = new SpringApplication(EmptyConfiguration.class);
+        application.setWebApplicationType(WebApplicationType.NONE);
+        application.setDefaultProperties(Map.of(
+                "spring.main.banner-mode", "off",
+                "DATABASE_URL", "postgresql://admin:aninza@192.168.18.67:5432/bank_jatim"));
 
-        assertThat(factories.getProperty("org.springframework.boot.EnvironmentPostProcessor"))
-                .contains(DatabaseUrlEnvironmentPostProcessor.class.getName());
+        try (ConfigurableApplicationContext context = application.run()) {
+            assertThat(context.getEnvironment().getProperty("spring.datasource.url"))
+                    .isEqualTo("jdbc:postgresql://192.168.18.67:5432/bank_jatim");
+            assertThat(context.getEnvironment().getProperty("spring.datasource.username")).isEqualTo("admin");
+            assertThat(context.getEnvironment().getProperty("spring.datasource.password")).isEqualTo("aninza");
+        }
     }
 
     @Test
@@ -73,5 +82,9 @@ class DatabaseUrlEnvironmentPostProcessorTest {
         assertThat(environment.getProperty("spring.datasource.url")).isNull();
         assertThat(environment.getProperty("spring.datasource.username")).isNull();
         assertThat(environment.getProperty("spring.datasource.password")).isNull();
+    }
+
+    @Configuration(proxyBeanMethods = false)
+    static class EmptyConfiguration {
     }
 }
