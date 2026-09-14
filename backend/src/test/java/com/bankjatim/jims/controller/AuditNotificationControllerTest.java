@@ -3,11 +3,11 @@ package com.bankjatim.jims.controller;
 import com.bankjatim.jims.common.ApiResponse;
 import com.bankjatim.jims.domain.AuditLog;
 import com.bankjatim.jims.domain.Notification;
+import com.bankjatim.jims.domain.Role;
 import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.dto.AuditLogResponse;
 import com.bankjatim.jims.dto.NotificationResponse;
 import com.bankjatim.jims.security.UserPrincipal;
-import com.bankjatim.jims.security.UserRole;
 import com.bankjatim.jims.service.AuditLogService;
 import com.bankjatim.jims.service.NotificationService;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -52,7 +52,7 @@ class AuditNotificationControllerTest {
                 "ayu@example.test",
                 "199001",
                 "secret",
-                UserRole.USER_ADMIN,
+                "USER_ADMIN",
                 1L,
                 null,
                 null,
@@ -77,7 +77,7 @@ class AuditNotificationControllerTest {
                 .email("ayu@example.test")
                 .password("secret")
                 .nip("199001")
-                .role(UserRole.USER_ADMIN)
+                .role(Role.builder().code("USER_ADMIN").name("User Admin").systemRole(true).build())
                 .build();
         user.setId(7L);
 

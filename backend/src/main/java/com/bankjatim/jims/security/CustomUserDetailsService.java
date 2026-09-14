@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getEmail(),
                 user.getNip(),
                 user.getPassword(),
-                user.getRole(),
+                user.getRole().getCode(),
                 user.getOrganization() != null ? user.getOrganization().getId() : null,
                 user.getWarehouse() != null ? user.getWarehouse().getId() : null,
                 user.getApprovalLimit(),

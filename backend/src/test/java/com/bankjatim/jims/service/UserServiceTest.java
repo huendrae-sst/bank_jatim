@@ -1,14 +1,15 @@
 package com.bankjatim.jims.service;
 
 import com.bankjatim.jims.domain.Organization;
+import com.bankjatim.jims.domain.Role;
 import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.domain.Warehouse;
 import com.bankjatim.jims.dto.UserRequest;
 import com.bankjatim.jims.dto.UserResponse;
 import com.bankjatim.jims.repository.OrganizationRepository;
+import com.bankjatim.jims.repository.RoleRepository;
 import com.bankjatim.jims.repository.UserRepository;
 import com.bankjatim.jims.repository.WarehouseRepository;
-import com.bankjatim.jims.security.UserRole;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -29,6 +30,7 @@ class UserServiceTest {
                 userRepository(state),
                 organizationRepository(state.organization),
                 warehouseRepository(state.warehouse),
+                roleRepository(),
                 passwordEncoder()
         );
 
@@ -50,6 +52,7 @@ class UserServiceTest {
                 userRepository(state),
                 organizationRepository(state.organization),
                 warehouseRepository(state.warehouse),
+                roleRepository(),
                 passwordEncoder()
         );
         UserRequest request = createRequest();
@@ -72,6 +75,7 @@ class UserServiceTest {
                 userRepository(state),
                 organizationRepository(state.organization),
                 warehouseRepository(state.warehouse),
+                roleRepository(),
                 passwordEncoder()
         );
 
@@ -86,7 +90,7 @@ class UserServiceTest {
         request.setEmail("operator@bankjatim.co.id");
         request.setNip("199001012020122001");
         request.setPassword("secret123");
-        request.setRole(UserRole.USER_ADMIN);
+        request.setRole("USER_ADMIN");
         request.setOrganizationId(1L);
         request.setWarehouseId(2L);
         request.setApprovalLimit(BigDecimal.valueOf(1_000_000));
@@ -102,7 +106,7 @@ class UserServiceTest {
                 .email("operator@bankjatim.co.id")
                 .nip("199001012020122001")
                 .password("existing-hash")
-                .role(UserRole.USER_ADMIN)
+                .role(role())
                 .build();
         user.setId(10L);
         return user;
@@ -180,6 +184,25 @@ class UserServiceTest {
                 return encodedPassword.equals(encode(rawPassword));
             }
         };
+    }
+
+    private static RoleRepository roleRepository() {
+        Role role = role();
+        return (RoleRepository) Proxy.newProxyInstance(
+                RoleRepository.class.getClassLoader(),
+                new Class<?>[]{RoleRepository.class},
+                (proxy, method, args) -> switch (method.getName()) {
+                    case "findByCodeIgnoreCase" -> Optional.of(role);
+                    case "toString" -> "RoleRepositoryStub";
+                    default -> throw new UnsupportedOperationException(method.getName());
+                }
+        );
+    }
+
+    private static Role role() {
+        Role role = Role.builder().code("USER_ADMIN").name("User Admin").systemRole(true).build();
+        role.setId(3L);
+        return role;
     }
 
     private static class RepositoryState {

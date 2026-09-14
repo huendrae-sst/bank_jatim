@@ -23,7 +23,7 @@ public class UserPrincipal implements UserDetails {
     private final String nip;
     @JsonIgnore
     private final String password;
-    private final UserRole role;
+    private final String role;
     private final Long organizationId;
     private final Long warehouseId;
     private final BigDecimal approvalLimit;
@@ -31,9 +31,9 @@ public class UserPrincipal implements UserDetails {
     private final Collection<? extends GrantedAuthority> authorities;
 
     public static UserPrincipal create(Long id, String name, String email, String nip, String password,
-                                       UserRole role, Long organizationId, Long warehouseId,
+                                       String role, Long organizationId, Long warehouseId,
                                        BigDecimal approvalLimit, boolean active) {
-        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.name());
+        GrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
         return UserPrincipal.builder()
                 .id(id)
                 .name(name)

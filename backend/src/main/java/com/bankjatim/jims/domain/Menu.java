@@ -4,10 +4,6 @@ import com.bankjatim.jims.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Entity
 @Table(name = "menus")
 @Getter
@@ -47,25 +43,4 @@ public class Menu extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "roles", columnDefinition = "TEXT", nullable = false)
-    @Builder.Default
-    private String roles = "SUPER_ADMIN";
-
-    public List<String> getRoleList() {
-        if (roles == null || roles.isBlank()) {
-            return List.of();
-        }
-        return Arrays.stream(roles.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    public void setRoleList(List<String> list) {
-        if (list == null || list.isEmpty()) {
-            this.roles = "SUPER_ADMIN";
-        } else {
-            this.roles = String.join(",", list);
-        }
-    }
 }

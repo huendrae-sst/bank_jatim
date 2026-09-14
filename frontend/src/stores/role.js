@@ -1,28 +1,17 @@
 import { defineStore } from 'pinia';
 import api from '@/api/client';
+import { createRoleApi } from '@/services/roleApi';
 import { extractList } from '@/utils/responseParser';
+import { normalizeRole } from '@/utils/roleMapper';
 
-const normalizeRole = (item, index) => {
-  if (typeof item === 'string') {
-    return {
-      id: item,
-      code: item,
-      name: item.replace(/_/g, ' '),
-      category: 'Sistem',
-      description: '',
-      status: 'AKTIF'
-    };
-  }
-  return { id: item.id ?? item.code ?? String(index + 1), ...item };
-};
+const roleApi = createRoleApi(api);
 
 export const useRoleStore = defineStore('role', {
   state: () => ({ roles: [], loading: false, error: null }),
 
   getters: {
     roleCodes: (state) => state.roles.map((role) => role.code),
-    activeRoles: (state) => state.roles.filter((role) => role.status === 'AKTIF'),
-    categories: (state) => [...new Set(state.roles.map((role) => role.category).filter(Boolean))],
+    activeRoles: (state) => state.roles,
     getRoleByCode: (state) => (code) => state.roles.find((role) => role.code === code)
   },
 
@@ -31,10 +20,10 @@ export const useRoleStore = defineStore('role', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await api.get('/master/roles');
+        const response = await roleApi.list();
         const roles = extractList(response);
         if (!roles) throw new Error('Format respons role dari backend tidak valid.');
-        this.roles = roles.map(normalizeRole);
+        this.roles = roles.map((role) => normalizeRole(role));
         return this.roles;
       } catch (error) {
         this.roles = [];
@@ -45,16 +34,26 @@ export const useRoleStore = defineStore('role', {
       }
     },
 
-    async addRole() {
-      throw new Error('Backend belum menyediakan endpoint untuk menambah role.');
+    async addRole(roleData) {
+      await roleApi.create({
+        code: roleData.code,
+        name: roleData.name,
+        description: roleData.description || null
+      });
+      return this.fetchRoles();
     },
 
-    async updateRole() {
-      throw new Error('Backend belum menyediakan endpoint untuk mengubah role.');
+    async updateRole(code, roleData) {
+      await roleApi.update(code, {
+        name: roleData.name,
+        description: roleData.description || null
+      });
+      return this.fetchRoles();
     },
 
-    async deleteRole() {
-      throw new Error('Backend belum menyediakan endpoint untuk menghapus role.');
+    async deleteRole(code) {
+      await roleApi.remove(code);
+      return this.fetchRoles();
     }
   }
 });

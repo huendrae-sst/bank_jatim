@@ -3,7 +3,6 @@ package com.bankjatim.jims.dto;
 import com.bankjatim.jims.domain.Organization;
 import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.domain.Warehouse;
-import com.bankjatim.jims.security.UserRole;
 
 import java.math.BigDecimal;
 
@@ -12,7 +11,7 @@ public record UserResponse(
         String name,
         String email,
         String nip,
-        UserRole role,
+        String role,
         BigDecimal approvalLimit,
         String phone,
         Boolean isActive,
@@ -25,7 +24,7 @@ public record UserResponse(
                 user.getName(),
                 user.getEmail(),
                 user.getNip(),
-                user.getRole(),
+                user.getRole().getCode(),
                 user.getApprovalLimit(),
                 user.getPhone(),
                 user.getIsActive(),

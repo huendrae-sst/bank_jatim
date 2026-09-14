@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import api from '@/api/client';
+import { createRoleMenuApi } from '@/services/roleMenuApi';
 import { extractList } from '@/utils/responseParser';
 
 export const MODULE_CATEGORIES = [
@@ -18,9 +19,16 @@ export const MODULE_CATEGORIES = [
 ];
 
 const responseData = (response) => response?.data?.data ?? response?.data ?? null;
+const roleMenuApi = createRoleMenuApi(api);
 
 export const useMenuStore = defineStore('menu', {
-  state: () => ({ menus: [], loading: false, error: null }),
+  state: () => ({
+    menus: [],
+    roleMenuMappings: [],
+    loading: false,
+    assignmentLoading: false,
+    error: null
+  }),
 
   getters: {
     totalMenus: (state) => state.menus.length,
@@ -129,16 +137,43 @@ export const useMenuStore = defineStore('menu', {
     },
 
     async updateRoleMenus(roleCode, selectedMenuCodes) {
-      const response = await api.put(`/master/roles/${encodeURIComponent(roleCode)}/menus`, selectedMenuCodes);
-      const assignedCodes = responseData(response) || [];
-      const assigned = new Set(assignedCodes);
-      this.menus.forEach((menu) => {
-        const roles = new Set(Array.isArray(menu.roles) ? menu.roles : []);
-        if (roleCode === 'SUPER_ADMIN' || assigned.has(menu.code)) roles.add(roleCode);
-        else roles.delete(roleCode);
-        menu.roles = [...roles];
-      });
-      return assignedCodes;
+      this.assignmentLoading = true;
+      try {
+        await roleMenuApi.replaceForRole(roleCode, selectedMenuCodes);
+        const assignedCodes = await this.fetchRoleMenus(roleCode);
+        await this.fetchRoleMenuMappings();
+        return assignedCodes;
+      } finally {
+        this.assignmentLoading = false;
+      }
+    },
+
+    async fetchRoleMenus(roleCode) {
+      const response = await roleMenuApi.getForRole(roleCode);
+      const menuCodes = extractList(response);
+      if (!menuCodes) throw new Error('Format respons menu role dari backend tidak valid.');
+      return menuCodes;
+    },
+
+    async fetchRoleMenuMappings() {
+      try {
+        const response = await roleMenuApi.listAll();
+        const mappings = extractList(response);
+        if (!mappings) throw new Error('Format respons mapping role-menu dari backend tidak valid.');
+        this.roleMenuMappings = mappings;
+        const rolesByMenu = new Map();
+        mappings.forEach(({ roleCode, menuCode }) => {
+          if (!rolesByMenu.has(menuCode)) rolesByMenu.set(menuCode, []);
+          rolesByMenu.get(menuCode).push(roleCode);
+        });
+        this.menus.forEach((menu) => {
+          menu.roles = rolesByMenu.get(menu.code) || [];
+        });
+        return this.roleMenuMappings;
+      } catch (error) {
+        this.roleMenuMappings = [];
+        throw error;
+      }
     }
   }
 });

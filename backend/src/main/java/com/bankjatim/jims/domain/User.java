@@ -1,7 +1,6 @@
 package com.bankjatim.jims.domain;
 
 import com.bankjatim.jims.common.BaseEntity;
-import com.bankjatim.jims.security.UserRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -38,9 +37,9 @@ public class User extends BaseEntity {
     @JsonIgnore
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 50)
-    private UserRole role;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "role", referencedColumnName = "code", nullable = false)
+    private Role role;
 
     @Column(name = "approval_limit", precision = 15, scale = 2, nullable = false)
     @Builder.Default

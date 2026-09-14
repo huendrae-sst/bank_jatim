@@ -8,12 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,11 +18,15 @@ import java.util.stream.Collectors;
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final RoleMenuService roleMenuService;
 
     @Transactional(readOnly = true)
     public List<MenuResponse> getAllMenus() {
-        return menuRepository.findAllByOrderBySortOrderAsc().stream()
-                .map(this::toResponse)
+        List<Menu> menus = menuRepository.findAllByOrderBySortOrderAsc();
+        Map<Long, List<String>> roleCodes = roleMenuService.getRoleCodesByMenuIds(
+                menus.stream().map(Menu::getId).toList());
+        return menus.stream()
+                .map(menu -> toResponse(menu, roleCodes.getOrDefault(menu.getId(), List.of())))
                 .collect(Collectors.toList());
     }
 
@@ -61,12 +62,9 @@ public class MenuService {
                 .description(request.getDescription())
                 .build();
 
-        menu.setRoleList(request.getRoles() != null && !request.getRoles().isEmpty()
-                ? request.getRoles()
-                : List.of("SUPER_ADMIN"));
-
         Menu saved = menuRepository.save(menu);
-        return toResponse(saved);
+        List<String> roles = roleMenuService.replaceMenuRoles(saved, request.getRoles());
+        return toResponse(saved, roles);
     }
 
     @Transactional
@@ -81,15 +79,17 @@ public class MenuService {
         if (request.getOrder() != null) menu.setSortOrder(request.getOrder());
         if (request.getStatus() != null) menu.setStatus(request.getStatus());
         if (request.getDescription() != null) menu.setDescription(request.getDescription());
-        if (request.getRoles() != null) menu.setRoleList(request.getRoles());
-
         Menu updated = menuRepository.save(menu);
-        return toResponse(updated);
+        List<String> roles = request.getRoles() == null
+                ? roleMenuService.getRoleCodesByMenuIds(List.of(updated.getId())).getOrDefault(updated.getId(), List.of())
+                : roleMenuService.replaceMenuRoles(updated, request.getRoles());
+        return toResponse(updated, roles);
     }
 
     @Transactional
     public void deleteMenu(String idOrCode) {
         Menu menu = findByIdOrCode(idOrCode);
+        roleMenuService.deleteMenuAssignments(menu.getId());
         menuRepository.delete(menu);
     }
 
@@ -105,71 +105,20 @@ public class MenuService {
     @Transactional
     public List<String> updateRoles(String idOrCode, List<String> roles) {
         Menu menu = findByIdOrCode(idOrCode);
-        menu.setRoleList(roles);
-        menuRepository.save(menu);
-        return menu.getRoleList();
+        return roleMenuService.replaceMenuRoles(menu, roles);
     }
 
     @Transactional(readOnly = true)
     public List<String> getMenuCodesForRole(String roleCode) {
-        if (roleCode == null || roleCode.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-        String cleanRole = roleCode.trim().toUpperCase();
-        return menuRepository.findAll().stream()
-                .filter(m -> "SUPER_ADMIN".equals(cleanRole) || m.getRoleList().contains(cleanRole))
-                .map(Menu::getCode)
-                .collect(Collectors.toList());
+        return roleMenuService.getMenuCodesForRole(roleCode);
     }
 
     @Transactional
     public List<String> updateRoleMenus(String roleCode, List<String> selectedMenuCodes) {
-        if (roleCode == null || roleCode.trim().isEmpty()) {
-            throw new IllegalArgumentException("Role code cannot be empty");
-        }
-        String cleanRole = roleCode.trim().toUpperCase();
-
-        // Ensure SUPER_ADMIN cannot lose access
-        if ("SUPER_ADMIN".equals(cleanRole)) {
-            List<Menu> all = menuRepository.findAll();
-            for (Menu menu : all) {
-                List<String> roles = new ArrayList<>(menu.getRoleList());
-                if (!roles.contains("SUPER_ADMIN")) {
-                    roles.add("SUPER_ADMIN");
-                    menu.setRoleList(roles);
-                    menuRepository.save(menu);
-                }
-            }
-            return all.stream().map(Menu::getCode).collect(Collectors.toList());
-        }
-
-        Set<String> selectedSet = selectedMenuCodes != null ? new HashSet<>(selectedMenuCodes) : Collections.emptySet();
-        List<Menu> allMenus = menuRepository.findAll();
-        List<String> resultAssignedCodes = new ArrayList<>();
-
-        for (Menu menu : allMenus) {
-            List<String> currentRoles = new ArrayList<>(menu.getRoleList());
-            boolean hasRole = currentRoles.contains(cleanRole);
-            boolean shouldHaveRole = selectedSet.contains(menu.getCode());
-
-            if (shouldHaveRole && !hasRole) {
-                currentRoles.add(cleanRole);
-                menu.setRoleList(currentRoles);
-                menuRepository.save(menu);
-            } else if (!shouldHaveRole && hasRole) {
-                currentRoles.remove(cleanRole);
-                menu.setRoleList(currentRoles);
-                menuRepository.save(menu);
-            }
-
-            if (shouldHaveRole) {
-                resultAssignedCodes.add(menu.getCode());
-            }
-        }
-        return resultAssignedCodes;
+        return roleMenuService.replaceRoleMenus(roleCode, selectedMenuCodes);
     }
 
-    private MenuResponse toResponse(Menu menu) {
+    private MenuResponse toResponse(Menu menu, List<String> roles) {
         return MenuResponse.builder()
                 .id(String.valueOf(menu.getId()))
                 .code(menu.getCode())
@@ -181,7 +130,7 @@ public class MenuService {
                 .order(menu.getSortOrder())
                 .status(menu.getStatus())
                 .description(menu.getDescription())
-                .roles(menu.getRoleList())
+                .roles(roles)
                 .build();
     }
 }

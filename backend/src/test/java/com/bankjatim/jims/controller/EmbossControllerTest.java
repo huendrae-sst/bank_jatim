@@ -4,10 +4,10 @@ import com.bankjatim.jims.common.ApiResponse;
 import com.bankjatim.jims.domain.EmbossFile;
 import com.bankjatim.jims.domain.EmbossRecord;
 import com.bankjatim.jims.domain.Item;
+import com.bankjatim.jims.domain.Role;
 import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.dto.EmbossFileResponse;
 import com.bankjatim.jims.dto.EmbossRecordResponse;
-import com.bankjatim.jims.security.UserRole;
 import com.bankjatim.jims.service.EmbossService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -46,7 +46,7 @@ class EmbossControllerTest {
                 .name("Uploader")
                 .email("uploader@example.test")
                 .password("secret")
-                .role(UserRole.INVENTORY_OFFICER)
+                .role(Role.builder().code("INVENTORY_OFFICER").name("Inventory Officer").systemRole(true).build())
                 .build();
         user.setId(7L);
 

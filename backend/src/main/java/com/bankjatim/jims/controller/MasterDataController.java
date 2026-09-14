@@ -9,7 +9,6 @@ import com.bankjatim.jims.dto.MenuResponse;
 import com.bankjatim.jims.dto.UserRequest;
 import com.bankjatim.jims.dto.UserResponse;
 import com.bankjatim.jims.repository.*;
-import com.bankjatim.jims.security.UserRole;
 import com.bankjatim.jims.service.ExpeditionMappingService;
 import com.bankjatim.jims.service.MenuService;
 import com.bankjatim.jims.service.UserService;
@@ -21,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -63,14 +61,6 @@ public class MasterDataController {
     @Operation(summary = "Daftar Pengguna JIMS")
     public ResponseEntity<ApiResponse<List<UserResponse>>> getUsers() {
         return ResponseEntity.ok(ApiResponse.ok(userService.getUsers()));
-    }
-
-    @GetMapping("/roles")
-    @Operation(summary = "Daftar Peran Pengguna yang Didukung Backend")
-    public ResponseEntity<ApiResponse<List<String>>> getRoles() {
-        return ResponseEntity.ok(ApiResponse.ok(
-                Arrays.stream(UserRole.values()).map(Enum::name).toList()
-        ));
     }
 
     @PostMapping("/users")
@@ -188,18 +178,4 @@ public class MasterDataController {
         return ResponseEntity.ok(ApiResponse.ok("Hak akses menu berhasil diperbarui", menuService.updateRoles(id, roles)));
     }
 
-    @GetMapping("/roles/{roleCode}/menus")
-    @Operation(summary = "Daftar Kode Menu yang Dapat Diakses oleh Suatu Peran (Role)")
-    public ResponseEntity<ApiResponse<List<String>>> getRoleMenus(@PathVariable String roleCode) {
-        return ResponseEntity.ok(ApiResponse.ok(menuService.getMenuCodesForRole(roleCode)));
-    }
-
-    @PutMapping("/roles/{roleCode}/menus")
-    @Operation(summary = "Perbarui Pemetaan Menu untuk Suatu Peran (Role)")
-    public ResponseEntity<ApiResponse<List<String>>> updateRoleMenus(
-            @PathVariable String roleCode, @RequestBody List<String> menuCodes) {
-        return ResponseEntity.ok(ApiResponse.ok(
-                "Hak akses menu untuk peran " + roleCode + " berhasil disimpan",
-                menuService.updateRoleMenus(roleCode, menuCodes)));
-    }
 }

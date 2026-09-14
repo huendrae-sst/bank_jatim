@@ -3,13 +3,13 @@ package com.bankjatim.jims.controller;
 import com.bankjatim.jims.common.ApiResponse;
 import com.bankjatim.jims.domain.Item;
 import com.bankjatim.jims.domain.Organization;
+import com.bankjatim.jims.domain.Role;
 import com.bankjatim.jims.domain.SwitchingStock;
 import com.bankjatim.jims.domain.SwitchingStockItem;
 import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.domain.Warehouse;
 import com.bankjatim.jims.dto.SwitchingStockResponse;
 import com.bankjatim.jims.security.UserPrincipal;
-import com.bankjatim.jims.security.UserRole;
 import com.bankjatim.jims.service.SwitchingStockService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,7 +49,7 @@ class SwitchingStockControllerTest {
                 "approver@example.test",
                 "199002",
                 "secret",
-                UserRole.SWITCHING_APPROVER,
+                "SWITCHING_APPROVER",
                 1L,
                 null,
                 null,
@@ -76,7 +76,7 @@ class SwitchingStockControllerTest {
                 .name("Ayu Lestari")
                 .email("ayu@example.test")
                 .password("secret")
-                .role(UserRole.INVENTORY_OFFICER)
+                .role(Role.builder().code("INVENTORY_OFFICER").name("Inventory Officer").systemRole(true).build())
                 .build();
         user.setId(5L);
 

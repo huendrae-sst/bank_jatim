@@ -16,5 +16,7 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     boolean existsByCode(String code);
 
+    List<Menu> findAllByCodeIn(List<String> codes);
+
     void deleteByCode(String code);
 }

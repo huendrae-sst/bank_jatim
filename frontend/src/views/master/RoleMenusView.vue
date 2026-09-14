@@ -62,17 +62,9 @@
                 </button>
               </div>
 
-              <!-- Category Filter Dropdown (Rata Kanan) -->
-              <div class="flex-shrink-0" style="width: 140px;">
-                <select v-model="roleCategoryFilter" class="form-select form-select-sm fs-9 text-truncate px-2">
-                  <option value="">Semua Kategori</option>
-                  <option v-for="cat in roleCategories" :key="cat" :value="cat">{{ cat }}</option>
-                </select>
-              </div>
-
               <!-- Reset Button (Shown if filter active) -->
               <button
-                v-if="roleCategoryFilter || roleSearch"
+                v-if="roleSearch"
                 type="button"
                 class="btn btn-sm btn-outline-danger fs-9 px-1.5 py-1 flex-shrink-0"
                 @click="resetRoleFilters"
@@ -184,7 +176,7 @@
               <button
                 type="button"
                 class="btn btn-sm btn-danger fw-bold shadow-xs fs-8 d-flex align-items-center position-relative"
-                :disabled="!isDirty || isSuperAdminActive"
+                :disabled="!isDirty || isSuperAdminActive || menuStore.assignmentLoading"
                 @click="saveRolePermissions"
               >
                 <i class="bi bi-check2-circle me-1.5"></i>
@@ -377,7 +369,7 @@
               <button
                 type="button"
                 class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs"
-                :disabled="!isDirty || isSuperAdminActive"
+                :disabled="!isDirty || isSuperAdminActive || menuStore.assignmentLoading"
                 @click="saveRolePermissions"
               >
                 <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
@@ -419,7 +411,6 @@ const showAlert = (msg, type = 'success') => {
 
 // Left Column: Role Search & Filtering
 const roleSearch = ref('');
-const roleCategoryFilter = ref('');
 const activeRoleCode = ref('REQUESTER_CABANG');
 
 // Right Column: Menu Tree Search & State
@@ -435,7 +426,8 @@ onMounted(async () => {
   try {
     await Promise.all([
       menuStore.fetchMenus(),
-      roleStore.fetchRoles()
+      roleStore.fetchRoles(),
+      menuStore.fetchRoleMenuMappings()
     ]);
   } catch (error) {
     showAlert(error?.message || 'Gagal memuat role dan menu dari backend.', 'error');
@@ -445,7 +437,7 @@ onMounted(async () => {
   // Set default active role
   if (roleStore.roles.length > 0) {
     const defaultRole = roleStore.roles.find((r) => r.code === 'REQUESTER_CABANG') || roleStore.roles[0];
-    selectRole(defaultRole.code);
+    await selectRole(defaultRole.code);
   }
 
   // Expand all tree modules initially
@@ -453,11 +445,6 @@ onMounted(async () => {
 });
 
 const roleList = computed(() => roleStore.roles);
-
-// Role Categories
-const roleCategories = computed(() => {
-  return [...new Set(roleList.value.map((r) => r.category).filter(Boolean))];
-});
 
 // Filtered Roles
 const filteredRoles = computed(() => {
@@ -468,16 +455,12 @@ const filteredRoles = computed(() => {
       const matchName = r.name.toLowerCase().includes(q);
       if (!matchCode && !matchName) return false;
     }
-    if (roleCategoryFilter.value && r.category !== roleCategoryFilter.value) {
-      return false;
-    }
     return true;
   });
 });
 
 const resetRoleFilters = () => {
   roleSearch.value = '';
-  roleCategoryFilter.value = '';
 };
 
 // Active Role Object
@@ -508,11 +491,11 @@ const isDirty = computed(() => {
 // Count of menus assigned to any role
 const getRoleMenuCount = (code) => {
   if (code === 'SUPER_ADMIN') return menuStore.totalMenus;
-  return menuStore.menus.filter((m) => Array.isArray(m.roles) && m.roles.includes(code)).length;
+  return menuStore.roleMenuMappings.filter((mapping) => mapping.roleCode === code).length;
 };
 
 // Select a Role
-const selectRole = (roleCode) => {
+const selectRole = async (roleCode) => {
   if (isDirty.value) {
     if (!confirm('Ada perubahan yang belum disimpan untuk peran sebelumnya. Tetap berpindah peran?')) {
       return;
@@ -520,21 +503,15 @@ const selectRole = (roleCode) => {
   }
 
   activeRoleCode.value = roleCode;
-
-  // Load current allowed menus for this role from menuStore
-  const codes = new Set();
-  if (roleCode === 'SUPER_ADMIN') {
-    menuStore.menus.forEach((m) => codes.add(m.code));
-  } else {
-    menuStore.menus.forEach((m) => {
-      if (Array.isArray(m.roles) && m.roles.includes(roleCode)) {
-        codes.add(m.code);
-      }
-    });
+  selectedMenuCodes.value = new Set();
+  initialSelectedMenuCodes.value = new Set();
+  try {
+    const menuCodes = await menuStore.fetchRoleMenus(roleCode);
+    selectedMenuCodes.value = new Set(menuCodes);
+    initialSelectedMenuCodes.value = new Set(menuCodes);
+  } catch (error) {
+    showAlert(error?.message || 'Gagal memuat mapping menu role.', 'error');
   }
-
-  selectedMenuCodes.value = new Set(codes);
-  initialSelectedMenuCodes.value = new Set(codes);
 };
 
 // Reset to initial selection
@@ -547,11 +524,15 @@ const resetToInitialSelection = () => {
 const saveRolePermissions = async () => {
   if (!activeRoleCode.value || isSuperAdminActive.value) return;
 
-  const codesArray = Array.from(selectedMenuCodes.value);
-  await menuStore.updateRoleMenus(activeRoleCode.value, codesArray);
-  initialSelectedMenuCodes.value = new Set(selectedMenuCodes.value);
-
-  showAlert(`Hak akses menu untuk peran "${activeRole.value?.name || activeRoleCode.value}" berhasil disimpan!`);
+  try {
+    const codesArray = Array.from(selectedMenuCodes.value);
+    const persistedCodes = await menuStore.updateRoleMenus(activeRoleCode.value, codesArray);
+    selectedMenuCodes.value = new Set(persistedCodes);
+    initialSelectedMenuCodes.value = new Set(persistedCodes);
+    showAlert(`Hak akses menu untuk peran "${activeRole.value?.name || activeRoleCode.value}" berhasil disimpan!`);
+  } catch (error) {
+    showAlert(error?.message || 'Gagal menyimpan mapping menu role.', 'error');
+  }
 };
 
 // Tree Modules computed with search

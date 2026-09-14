@@ -50,16 +50,7 @@
       <!-- 5. Filter Toolbar -->
       <div class="card-body p-3 bg-body-tertiary border-bottom">
         <div class="row g-2 align-items-center">
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="input-group input-group-sm">
-              <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-layers"></i></span>
-              <select v-model="filterCategory" class="form-select form-select-sm border-start-0 fs-8">
-                <option value="">Semua Kategori</option>
-                <option v-for="cat in categoryList" :key="cat" :value="cat">{{ cat }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="col-auto" v-if="searchQuery || filterCategory">
+          <div class="col-auto" v-if="searchQuery">
             <button
               type="button"
               @click="resetFilters"
@@ -100,10 +91,9 @@
             <tr>
               <th class="ps-3 py-2 text-uppercase fs-9">Kode Peran (System Key)</th>
               <th class="py-2 text-uppercase fs-9">Nama Peran Fungsional</th>
-              <th class="py-2 text-uppercase fs-9">Kategori / Lingkup</th>
+              <th class="py-2 text-uppercase fs-9">Jenis</th>
               <th class="py-2 text-uppercase fs-9">Deskripsi Tugas & Wewenang</th>
               <th class="text-center py-2 text-uppercase fs-9">Pengguna Terkait</th>
-              <th class="py-2 text-uppercase fs-9">Status</th>
               <th class="text-center pe-3 py-2 text-uppercase fs-9">Aksi</th>
             </tr>
           </thead>
@@ -119,7 +109,9 @@
                 </div>
               </td>
               <td class="py-2">
-                <span class="badge text-bg-light border text-secondary">{{ r.category || 'Umum' }}</span>
+                <span class="badge" :class="r.systemRole ? 'text-bg-secondary' : 'text-bg-info'">
+                  {{ r.systemRole ? 'Sistem' : 'Kustom' }}
+                </span>
               </td>
               <td class="py-2 text-secondary fs-9" style="max-width: 320px;">
                 {{ r.description || '-' }}
@@ -129,24 +121,24 @@
                   {{ getUserCount(r.code) }} User
                 </span>
               </td>
-              <td class="py-2">
-                <span class="badge" :class="r.status === 'AKTIF' ? 'text-bg-success' : 'text-bg-secondary'">
-                  {{ r.status || 'AKTIF' }}
-                </span>
-              </td>
               <td class="text-center pe-3 py-2">
                 <div class="d-inline-flex gap-1">
                   <button class="btn-action-icon text-secondary" @click="openEditModal(r)" title="Edit Peran">
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button class="btn-action-icon text-danger" @click="deleteRoleItem(r)" title="Hapus Peran">
+                  <button
+                    class="btn-action-icon text-danger"
+                    :disabled="r.systemRole"
+                    @click="deleteRoleItem(r)"
+                    :title="r.systemRole ? 'Role sistem tidak dapat dihapus' : 'Hapus Peran'"
+                  >
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
               </td>
             </tr>
             <tr v-if="filteredRoleList.length === 0">
-              <td colspan="7" class="text-center py-4 text-secondary">
+              <td colspan="6" class="text-center py-4 text-secondary">
                 <i class="bi bi-inbox fs-3 d-block mb-1"></i>
                 Tidak ada peran fungsional yang sesuai dengan filter pencarian.
               </td>
@@ -200,27 +192,6 @@
                     required
                   />
                 </div>
-                <div class="col-12 col-md-6">
-                  <label class="form-label fw-bold mb-1">Kategori / Lingkup Modul <span class="text-danger">*</span></label>
-                  <select v-model="roleForm.category" class="form-select form-select-sm" required>
-                    <option value="IT & Sistem">IT & Sistem</option>
-                    <option value="Master Data">Master Data</option>
-                    <option value="Pengadaan">Pengadaan</option>
-                    <option value="Gudang & Logistik">Gudang & Logistik</option>
-                    <option value="Cabang & Pemohon">Cabang & Pemohon</option>
-                    <option value="Keuangan">Keuangan</option>
-                    <option value="Pengawasan">Pengawasan</option>
-                    <option value="Manajemen">Manajemen</option>
-                    <option value="Lainnya">Lainnya</option>
-                  </select>
-                </div>
-                <div class="col-12 col-md-6">
-                  <label class="form-label fw-bold mb-1">Status Peran</label>
-                  <select v-model="roleForm.status" class="form-select form-select-sm">
-                    <option value="AKTIF">AKTIF</option>
-                    <option value="NONAKTIF">NONAKTIF</option>
-                  </select>
-                </div>
                 <div class="col-12">
                   <label class="form-label fw-bold mb-1">Deskripsi Tugas & Hak Akses</label>
                   <textarea
@@ -258,11 +229,10 @@ const roleStore = useRoleStore();
 
 const showModal = ref(false);
 const isEditMode = ref(false);
-const editingRoleId = ref(null);
+const editingRoleCode = ref(null);
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
-const filterCategory = ref('');
 const loading = ref(false);
 const saving = ref(false);
 const errorMessage = ref('');
@@ -273,30 +243,10 @@ const usersList = ref([]);
 const roleForm = reactive({
   code: '',
   name: '',
-  category: 'Gudang & Logistik',
-  description: '',
-  status: 'AKTIF'
+  description: ''
 });
 
 const roleList = computed(() => roleStore.roles);
-const categoryList = computed(() => roleStore.categories);
-
-const approverRolesCount = computed(() => {
-  return roleList.value.filter(
-    (r) => r.code.includes('APPROVER') || r.category === 'Pengawasan'
-  ).length;
-});
-
-const operationalRolesCount = computed(() => {
-  return roleList.value.filter(
-    (r) => r.code.includes('OFFICER') || r.code.includes('REQUESTER')
-  ).length;
-});
-
-const activeRolesCount = computed(() => {
-  return roleList.value.filter((r) => r.status === 'AKTIF').length;
-});
-
 const getUserCount = (roleCode) => {
   if (!usersList.value.length) return 0;
   return usersList.value.filter((u) => u.role === roleCode).length;
@@ -304,7 +254,6 @@ const getUserCount = (roleCode) => {
 
 const resetFilters = () => {
   searchQuery.value = '';
-  filterCategory.value = '';
   currentPage.value = 1;
 };
 
@@ -337,8 +286,7 @@ const filteredRoleList = computed(() => {
       r.code.toLowerCase().includes(q) ||
       r.name.toLowerCase().includes(q) ||
       (r.description && r.description.toLowerCase().includes(q));
-    const matchCategory = !filterCategory.value || r.category === filterCategory.value;
-    return matchQuery && matchCategory;
+    return matchQuery;
   });
 });
 
@@ -349,13 +297,11 @@ const paginatedRoleList = computed(() => {
 
 const openCreateModal = () => {
   isEditMode.value = false;
-  editingRoleId.value = null;
+  editingRoleCode.value = null;
   Object.assign(roleForm, {
     code: '',
     name: '',
-    category: 'Gudang & Logistik',
-    description: '',
-    status: 'AKTIF'
+    description: ''
   });
   formError.value = '';
   showModal.value = true;
@@ -363,13 +309,11 @@ const openCreateModal = () => {
 
 const openEditModal = (r) => {
   isEditMode.value = true;
-  editingRoleId.value = r.id;
+  editingRoleCode.value = r.code;
   Object.assign(roleForm, {
     code: r.code,
     name: r.name,
-    category: r.category || 'Gudang & Logistik',
-    description: r.description || '',
-    status: r.status || 'AKTIF'
+    description: r.description || ''
   });
   formError.value = '';
   showModal.value = true;
@@ -380,7 +324,7 @@ const saveRole = async () => {
   formError.value = '';
   try {
     if (isEditMode.value) {
-      await roleStore.updateRole(editingRoleId.value, roleForm);
+      await roleStore.updateRole(editingRoleCode.value, roleForm);
     } else {
       await roleStore.addRole(roleForm);
     }
@@ -393,6 +337,7 @@ const saveRole = async () => {
 };
 
 const deleteRoleItem = async (r) => {
+  if (r.systemRole) return;
   const userCount = getUserCount(r.code);
   if (userCount > 0) {
     alert(
@@ -403,7 +348,7 @@ const deleteRoleItem = async (r) => {
 
   if (confirm(`Yakin ingin menghapus peran "${r.name}" (${r.code})?`)) {
     try {
-      await roleStore.deleteRole(r.id);
+      await roleStore.deleteRole(r.code);
     } catch (err) {
       errorMessage.value = err?.message || 'Gagal menghapus peran.';
     }

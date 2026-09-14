@@ -40,7 +40,7 @@ public class NotificationService {
 
     private List<Notification> notificationsFor(UserPrincipal principal) {
         List<Notification> userNotifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(principal.getId());
-        List<Notification> roleNotifications = notificationRepository.findByTargetRoleOrderByCreatedAtDesc(principal.getRole().name());
+        List<Notification> roleNotifications = notificationRepository.findByTargetRoleOrderByCreatedAtDesc(principal.getRole());
 
         return Stream.concat(userNotifications.stream(), roleNotifications.stream())
                 .collect(Collectors.toMap(Notification::getId, notification -> notification, (left, right) -> left))

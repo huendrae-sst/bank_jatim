@@ -5,6 +5,7 @@ import com.bankjatim.jims.domain.Courier;
 import com.bankjatim.jims.domain.ExpeditionMapping;
 import com.bankjatim.jims.domain.Menu;
 import com.bankjatim.jims.domain.Organization;
+import com.bankjatim.jims.domain.Role;
 import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.dto.ExpeditionMappingResponse;
 import com.bankjatim.jims.dto.MenuResponse;
@@ -18,9 +19,9 @@ import com.bankjatim.jims.repository.OrganizationRepository;
 import com.bankjatim.jims.repository.UserRepository;
 import com.bankjatim.jims.repository.VendorRepository;
 import com.bankjatim.jims.repository.WarehouseRepository;
-import com.bankjatim.jims.security.UserRole;
 import com.bankjatim.jims.service.ExpeditionMappingService;
 import com.bankjatim.jims.service.MenuService;
+import com.bankjatim.jims.service.RoleMenuService;
 import com.bankjatim.jims.service.UserService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,19 +38,6 @@ class MasterDataControllerTest {
     private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Test
-    void rolesEndpointReturnsBackendRoleDefinitions() {
-        MasterDataController controller = new MasterDataController(
-                null, null, null, null, null, null, null, null, null, null
-        );
-
-        ResponseEntity<ApiResponse<List<String>>> response = controller.getRoles();
-
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getData())
-                .containsExactlyElementsOf(java.util.Arrays.stream(UserRole.values()).map(Enum::name).toList());
-    }
-
-    @Test
     void usersEndpointReturnsDatabaseUsersWithoutPassword() throws Exception {
         UserRepository userRepository = stubUserRepository(user());
         MasterDataController controller = new MasterDataController(
@@ -60,7 +48,7 @@ class MasterDataControllerTest {
                 null,
                 null,
                 null,
-                new UserService(userRepository, null, null, null),
+                new UserService(userRepository, null, null, null, null),
                 null,
                 null
         );
@@ -120,7 +108,7 @@ class MasterDataControllerTest {
                 null,
                 null,
                 null,
-                new MenuService(menuRepository)
+                new MenuService(menuRepository, new StubRoleMenuService())
         );
 
         ResponseEntity<ApiResponse<List<MenuResponse>>> response = controller.getMenus();
@@ -136,32 +124,6 @@ class MasterDataControllerTest {
         assertThat(firstMenu.path("roles").get(1).asText()).isEqualTo("USER_ADMIN");
     }
 
-    @Test
-    void testGetRoleMenusAndUpdateRoleMenus() {
-        Menu menu = menu();
-        MenuRepository menuRepository = stubMenuRepository(menu);
-        MasterDataController controller = new MasterDataController(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                new MenuService(menuRepository)
-        );
-
-        ResponseEntity<ApiResponse<List<String>>> getRes = controller.getRoleMenus("USER_ADMIN");
-        assertThat(getRes.getBody()).isNotNull();
-        assertThat(getRes.getBody().getData()).contains("MST_MENUS");
-
-        ResponseEntity<ApiResponse<List<String>>> updateRes = controller.updateRoleMenus("REQUESTER_CABANG", List.of("MST_MENUS"));
-        assertThat(updateRes.getBody()).isNotNull();
-        assertThat(updateRes.getBody().getData()).contains("MST_MENUS");
-    }
-
     private static Menu menu() {
         Menu menu = Menu.builder()
                 .code("MST_MENUS")
@@ -172,7 +134,6 @@ class MasterDataControllerTest {
                 .sortOrder(78)
                 .status("AKTIF")
                 .description("Pengaturan menu navigasi dan hak akses peran")
-                .roles("SUPER_ADMIN,USER_ADMIN")
                 .build();
         menu.setId(100L);
         return menu;
@@ -211,7 +172,7 @@ class MasterDataControllerTest {
                 .email("ayu.lestari@bankjatim.co.id")
                 .nip("199001012020122001")
                 .password("secret")
-                .role(UserRole.USER_ADMIN)
+                .role(Role.builder().code("USER_ADMIN").name("User Admin").systemRole(true).build())
                 .build();
         user.setId(10L);
         return user;
@@ -267,6 +228,17 @@ class MasterDataControllerTest {
         @Override
         public List<ExpeditionMappingResponse> getMappings() {
             return List.of(ExpeditionMappingResponse.from(mapping));
+        }
+    }
+
+    private static class StubRoleMenuService extends RoleMenuService {
+        StubRoleMenuService() {
+            super(null, null, null);
+        }
+
+        @Override
+        public java.util.Map<Long, List<String>> getRoleCodesByMenuIds(java.util.Collection<Long> menuIds) {
+            return java.util.Map.of(100L, List.of("SUPER_ADMIN", "USER_ADMIN"));
         }
     }
 }

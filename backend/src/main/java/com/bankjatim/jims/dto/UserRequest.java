@@ -1,6 +1,5 @@
 package com.bankjatim.jims.dto;
 
-import com.bankjatim.jims.security.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,7 +24,7 @@ public class UserRequest {
     private String password;
 
     @NotNull(message = "Role tidak boleh kosong")
-    private UserRole role;
+    private String role;
 
     private Long organizationId;
     private Long warehouseId;

@@ -41,7 +41,7 @@ public class AuthService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .nip(user.getNip())
-                .role(user.getRole())
+                .role(user.getRole().getCode())
                 .organizationId(user.getOrganization() != null ? user.getOrganization().getId() : null)
                 .organizationName(user.getOrganization() != null ? user.getOrganization().getName() : null)
                 .organizationCode(user.getOrganization() != null ? user.getOrganization().getCode() : null)

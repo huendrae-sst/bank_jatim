@@ -8,6 +8,7 @@ import com.bankjatim.jims.domain.Warehouse;
 import com.bankjatim.jims.dto.UserRequest;
 import com.bankjatim.jims.dto.UserResponse;
 import com.bankjatim.jims.repository.OrganizationRepository;
+import com.bankjatim.jims.repository.RoleRepository;
 import com.bankjatim.jims.repository.UserRepository;
 import com.bankjatim.jims.repository.WarehouseRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final OrganizationRepository organizationRepository;
     private final WarehouseRepository warehouseRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
@@ -51,7 +53,7 @@ public class UserService {
                 .email(request.getEmail())
                 .nip(blankToNull(request.getNip()))
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(resolveRole(request.getRole()))
                 .organization(resolveOrganization(request.getOrganizationId()))
                 .warehouse(resolveWarehouse(request.getWarehouseId()))
                 .approvalLimit(defaultMoney(request.getApprovalLimit()))
@@ -84,7 +86,7 @@ public class UserService {
         user.setName(request.getName());
         user.setEmail(request.getEmail());
         user.setNip(blankToNull(request.getNip()));
-        user.setRole(request.getRole());
+        user.setRole(resolveRole(request.getRole()));
         user.setOrganization(resolveOrganization(request.getOrganizationId()));
         user.setWarehouse(resolveWarehouse(request.getWarehouseId()));
         user.setApprovalLimit(defaultMoney(request.getApprovalLimit()));
@@ -119,6 +121,12 @@ public class UserService {
         }
         return warehouseRepository.findById(warehouseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Gudang tidak ditemukan: " + warehouseId));
+    }
+
+    private com.bankjatim.jims.domain.Role resolveRole(String roleCode) {
+        String code = RoleService.normalizeCode(roleCode);
+        return roleRepository.findByCodeIgnoreCase(code)
+                .orElseThrow(() -> new ResourceNotFoundException("Role tidak ditemukan: " + code));
     }
 
     private static BigDecimal defaultMoney(BigDecimal value) {
