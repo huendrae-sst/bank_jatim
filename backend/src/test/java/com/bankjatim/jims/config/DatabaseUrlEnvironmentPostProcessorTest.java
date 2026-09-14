@@ -2,11 +2,23 @@ package com.bankjatim.jims.config;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.SpringApplication;
+import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.mock.env.MockEnvironment;
+
+import java.io.IOException;
+import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class DatabaseUrlEnvironmentPostProcessorTest {
+
+    @Test
+    void registersProcessorUsingBoot4EnvironmentPostProcessorKey() throws IOException {
+        Properties factories = PropertiesLoaderUtils.loadAllProperties("META-INF/spring.factories");
+
+        assertThat(factories.getProperty("org.springframework.boot.EnvironmentPostProcessor"))
+                .contains(DatabaseUrlEnvironmentPostProcessor.class.getName());
+    }
 
     @Test
     void mapsDatabaseUrlToSpringDatasourceProperties() {
