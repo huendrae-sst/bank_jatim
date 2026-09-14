@@ -1,0 +1,86 @@
+{
+  "generated_at": "2026-09-14T03:50:10.623912+00:00",
+  "nodes": {
+    "backend_src_main_java_com_bankjatim_jims_config_redisconfig": {
+      "code_fingerprint": "4e7a15b11efdf1b8ffc313ddbc20239ead55ef1c9a6769f5cb34e553b3b2c035",
+      "label": "RedisConfig.java",
+      "last": "2026-09-14T03:21:34.681972+00:00",
+      "provenance": [
+        {
+          "date": "2026-09-14T03:21:34.681972+00:00",
+          "outcome": "useful",
+          "q": "tech stack?"
+        }
+      ],
+      "score": 0.999541232,
+      "source_file": "backend/src/main/java/com/bankjatim/jims/config/RedisConfig.java",
+      "status": "tentative",
+      "uses": 1
+    },
+    "backend_src_main_java_com_bankjatim_jims_security_jwtauthenticationfilter_jwtauthenticationfilter": {
+      "code_fingerprint": "bebb390efbf3c2ab1e7215a6756dffc323397899d1d93fa2d176510891b6e626",
+      "label": "JwtAuthenticationFilter",
+      "last": "2026-09-14T03:21:34.681972+00:00",
+      "provenance": [
+        {
+          "date": "2026-09-14T03:21:34.681972+00:00",
+          "outcome": "useful",
+          "q": "tech stack?"
+        }
+      ],
+      "score": 0.999541232,
+      "source_file": "backend/src/main/java/com/bankjatim/jims/security/JwtAuthenticationFilter.java",
+      "status": "tentative",
+      "uses": 1
+    },
+    "backend_src_main_java_com_bankjatim_jims_service_miniostorageservice_miniostorageservice": {
+      "code_fingerprint": "7e20df65663f4e686e6dda99f15ebee1d89d141e3d89a7f96a4dc6687a7bbb39",
+      "label": "MinioStorageService",
+      "last": "2026-09-14T03:21:34.681972+00:00",
+      "provenance": [
+        {
+          "date": "2026-09-14T03:21:34.681972+00:00",
+          "outcome": "useful",
+          "q": "tech stack?"
+        }
+      ],
+      "score": 0.999541232,
+      "source_file": "backend/src/main/java/com/bankjatim/jims/service/MinioStorageService.java",
+      "status": "tentative",
+      "uses": 1
+    },
+    "frontend_package_dependencies": {
+      "code_fingerprint": "b261e232f58c01b36ed962343c1721a8f29c671adadd7c1e48e3e82f270ffcfa",
+      "label": "dependencies",
+      "last": "2026-09-14T03:21:34.681972+00:00",
+      "provenance": [
+        {
+          "date": "2026-09-14T03:21:34.681972+00:00",
+          "outcome": "useful",
+          "q": "tech stack?"
+        }
+      ],
+      "score": 0.999541232,
+      "source_file": "frontend/package.json",
+      "status": "tentative",
+      "uses": 1
+    },
+    "springapplication": {
+      "code_fingerprint": "",
+      "label": "SpringApplication",
+      "last": "2026-09-14T03:21:34.681972+00:00",
+      "provenance": [
+        {
+          "date": "2026-09-14T03:21:34.681972+00:00",
+          "outcome": "useful",
+          "q": "tech stack?"
+        }
+      ],
+      "score": 0.999541232,
+      "source_file": "",
+      "status": "tentative",
+      "uses": 1
+    }
+  },
+  "version": 1
+}
