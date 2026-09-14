@@ -79,6 +79,8 @@ export JAVA_HOME="/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home
 export PATH="$JAVA_HOME/bin:$PATH"
 mvn spring-boot:run
 ```
+Saat dijalankan dari direktori `backend`, Spring Boot otomatis memuat `backend/.env`. Environment variable dari sistem, container, atau platform deployment tetap dapat digunakan sebagai override.
+
 - API Base URL: `http://localhost:8080/api`
 - **Swagger UI Interactive Documentation**: `http://localhost:8080/api/swagger-ui.html`
 - **OpenAPI 3.0 JSON Spec**: `http://localhost:8080/api/v3/api-docs`
