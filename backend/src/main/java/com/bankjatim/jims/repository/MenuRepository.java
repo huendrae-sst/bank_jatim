@@ -12,6 +12,8 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
     List<Menu> findAllByOrderBySortOrderAsc();
 
+    List<Menu> findAllByStatusIgnoreCaseOrderBySortOrderAsc(String status);
+
     Optional<Menu> findByCode(String code);
 
     boolean existsByCode(String code);
