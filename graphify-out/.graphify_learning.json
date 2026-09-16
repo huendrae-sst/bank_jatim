@@ -1,85 +1,161 @@
 {
-  "generated_at": "2026-09-14T03:50:10.623912+00:00",
+  "generated_at": "2026-09-16T02:22:22.387455+00:00",
   "nodes": {
     "backend_src_main_java_com_bankjatim_jims_config_redisconfig": {
-      "code_fingerprint": "4e7a15b11efdf1b8ffc313ddbc20239ead55ef1c9a6769f5cb34e553b3b2c035",
+      "code_fingerprint": "6cd4b0d38b7e512db8b92c9f4fc038b1f086a8d16a9b18bc4af2e52422eff96e",
       "label": "RedisConfig.java",
-      "last": "2026-09-14T03:21:34.681972+00:00",
+      "last": "2026-09-15T02:29:07.054969+00:00",
       "provenance": [
+        {
+          "date": "2026-09-15T02:29:07.054969+00:00",
+          "outcome": "useful",
+          "q": "tanpa docker?"
+        },
+        {
+          "date": "2026-09-15T02:26:33.355537+00:00",
+          "outcome": "useful",
+          "q": "pertama kali clone apa saja yang perlu di install kalau belum punya installer apa supaya running kecuali db karena pake remote"
+        },
+        {
+          "date": "2026-09-14T03:51:13.961916+00:00",
+          "outcome": "useful",
+          "q": "dinaikkan stack nya menjadi Backend: Java 21 Spring Boot 4.1.1 bagaimana?"
+        },
         {
           "date": "2026-09-14T03:21:34.681972+00:00",
           "outcome": "useful",
           "q": "tech stack?"
         }
       ],
-      "score": 0.999541232,
+      "score": 3.866444301,
       "source_file": "backend/src/main/java/com/bankjatim/jims/config/RedisConfig.java",
+      "status": "preferred",
+      "uses": 4
+    },
+    "backend_src_main_java_com_bankjatim_jims_config_securityconfig": {
+      "code_fingerprint": "7727b91f0878bfc6e81109d33a46d41580f17dc28f711f2d1d4f0b5b5185690a",
+      "label": "SecurityConfig.java",
+      "last": "2026-09-14T03:51:13.961916+00:00",
+      "provenance": [
+        {
+          "date": "2026-09-14T03:51:13.961916+00:00",
+          "outcome": "useful",
+          "q": "dinaikkan stack nya menjadi Backend: Java 21 Spring Boot 4.1.1 bagaimana?"
+        }
+      ],
+      "score": 0.956203948,
+      "source_file": "backend/src/main/java/com/bankjatim/jims/config/SecurityConfig.java",
       "status": "tentative",
       "uses": 1
     },
     "backend_src_main_java_com_bankjatim_jims_security_jwtauthenticationfilter_jwtauthenticationfilter": {
       "code_fingerprint": "bebb390efbf3c2ab1e7215a6756dffc323397899d1d93fa2d176510891b6e626",
       "label": "JwtAuthenticationFilter",
-      "last": "2026-09-14T03:21:34.681972+00:00",
+      "last": "2026-09-14T03:51:13.961916+00:00",
       "provenance": [
+        {
+          "date": "2026-09-14T03:51:13.961916+00:00",
+          "outcome": "useful",
+          "q": "dinaikkan stack nya menjadi Backend: Java 21 Spring Boot 4.1.1 bagaimana?"
+        },
         {
           "date": "2026-09-14T03:21:34.681972+00:00",
           "outcome": "useful",
           "q": "tech stack?"
         }
       ],
-      "score": 0.999541232,
+      "score": 1.911953032,
       "source_file": "backend/src/main/java/com/bankjatim/jims/security/JwtAuthenticationFilter.java",
-      "status": "tentative",
-      "uses": 1
+      "status": "preferred",
+      "uses": 2
     },
     "backend_src_main_java_com_bankjatim_jims_service_miniostorageservice_miniostorageservice": {
       "code_fingerprint": "7e20df65663f4e686e6dda99f15ebee1d89d141e3d89a7f96a4dc6687a7bbb39",
       "label": "MinioStorageService",
-      "last": "2026-09-14T03:21:34.681972+00:00",
+      "last": "2026-09-15T02:29:07.054969+00:00",
       "provenance": [
+        {
+          "date": "2026-09-15T02:29:07.054969+00:00",
+          "outcome": "useful",
+          "q": "tanpa docker?"
+        },
+        {
+          "date": "2026-09-15T02:26:33.355537+00:00",
+          "outcome": "useful",
+          "q": "pertama kali clone apa saja yang perlu di install kalau belum punya installer apa supaya running kecuali db karena pake remote"
+        },
+        {
+          "date": "2026-09-14T03:51:13.961916+00:00",
+          "outcome": "useful",
+          "q": "dinaikkan stack nya menjadi Backend: Java 21 Spring Boot 4.1.1 bagaimana?"
+        },
         {
           "date": "2026-09-14T03:21:34.681972+00:00",
           "outcome": "useful",
           "q": "tech stack?"
         }
       ],
-      "score": 0.999541232,
+      "score": 3.866444301,
       "source_file": "backend/src/main/java/com/bankjatim/jims/service/MinioStorageService.java",
-      "status": "tentative",
-      "uses": 1
+      "status": "preferred",
+      "uses": 4
     },
     "frontend_package_dependencies": {
       "code_fingerprint": "b261e232f58c01b36ed962343c1721a8f29c671adadd7c1e48e3e82f270ffcfa",
       "label": "dependencies",
-      "last": "2026-09-14T03:21:34.681972+00:00",
+      "last": "2026-09-15T02:29:07.054969+00:00",
       "provenance": [
+        {
+          "date": "2026-09-15T02:29:07.054969+00:00",
+          "outcome": "useful",
+          "q": "tanpa docker?"
+        },
+        {
+          "date": "2026-09-15T02:26:33.355537+00:00",
+          "outcome": "useful",
+          "q": "pertama kali clone apa saja yang perlu di install kalau belum punya installer apa supaya running kecuali db karena pake remote"
+        },
         {
           "date": "2026-09-14T03:21:34.681972+00:00",
           "outcome": "useful",
           "q": "tech stack?"
         }
       ],
-      "score": 0.999541232,
+      "score": 2.910240353,
       "source_file": "frontend/package.json",
-      "status": "tentative",
-      "uses": 1
+      "status": "preferred",
+      "uses": 3
     },
     "springapplication": {
       "code_fingerprint": "",
       "label": "SpringApplication",
-      "last": "2026-09-14T03:21:34.681972+00:00",
+      "last": "2026-09-15T02:29:07.054969+00:00",
       "provenance": [
+        {
+          "date": "2026-09-15T02:29:07.054969+00:00",
+          "outcome": "useful",
+          "q": "tanpa docker?"
+        },
+        {
+          "date": "2026-09-15T02:26:33.355537+00:00",
+          "outcome": "useful",
+          "q": "pertama kali clone apa saja yang perlu di install kalau belum punya installer apa supaya running kecuali db karena pake remote"
+        },
+        {
+          "date": "2026-09-14T03:51:13.961916+00:00",
+          "outcome": "useful",
+          "q": "dinaikkan stack nya menjadi Backend: Java 21 Spring Boot 4.1.1 bagaimana?"
+        },
         {
           "date": "2026-09-14T03:21:34.681972+00:00",
           "outcome": "useful",
           "q": "tech stack?"
         }
       ],
-      "score": 0.999541232,
+      "score": 3.866444301,
       "source_file": "",
-      "status": "tentative",
-      "uses": 1
+      "status": "preferred",
+      "uses": 4
     }
   },
   "version": 1
