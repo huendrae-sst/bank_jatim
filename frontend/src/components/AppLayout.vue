@@ -7,7 +7,7 @@
         <ul class="navbar-nav align-items-center">
           <!-- Official Logo Bank Jatim + JIMS Badge in Topbar Left -->
           <li class="nav-item me-2 me-md-3">
-            <router-link to="/dashboard" class="topbar-brand">
+            <router-link to="/" class="topbar-brand">
               <img
                 v-if="resolvedTheme === 'dark'"
                 src="/images/logo-bankjatim-white.png"
@@ -34,31 +34,19 @@
               <i class="bi bi-list fs-4"></i>
             </button>
           </li>
-          <li class="nav-item d-none d-md-block ms-2">
+          <li
+            v-for="(shortcut, index) in topbarShortcuts"
+            :key="shortcut.code"
+            class="nav-item d-none d-md-block"
+            :class="{ 'ms-2': index === 0 }"
+          >
             <router-link
-              to="/dashboard"
+              :to="shortcut.path"
               class="nav-link"
-              :class="{ 'active fw-bold text-danger': $route.path === '/dashboard' || $route.path === '/dashboard/operational' }"
+              :class="{ 'active fw-bold text-danger': ownsCurrentRoute(shortcut) }"
             >
-              <i class="bi bi-speedometer2 me-1"></i> Dashboard
-            </router-link>
-          </li>
-          <li class="nav-item d-none d-md-block">
-            <router-link
-              to="/orders"
-              class="nav-link"
-              :class="{ 'active fw-bold text-danger': $route.path.startsWith('/orders') }"
-            >
-              <i class="bi bi-cart3 me-1"></i> Orders
-            </router-link>
-          </li>
-          <li class="nav-item d-none d-md-block">
-            <router-link
-              to="/inventory/balances"
-              class="nav-link"
-              :class="{ 'active fw-bold text-danger': $route.path.startsWith('/inventory') }"
-            >
-              <i class="bi bi-boxes me-1"></i> Stock Balances
+              <i :class="['bi', shortcut.icon, 'me-1']"></i>
+              {{ shortcut.title }}
             </router-link>
           </li>
         </ul>
@@ -251,445 +239,82 @@
           <nav class="mt-2" aria-label="Main navigation">
             <ul class="nav sidebar-menu flex-column">
               
-              <!-- 1. Dashboard Overview -->
-              <li class="nav-item">
-                <router-link
-                  to="/dashboard"
-                  class="nav-link"
-                  :class="{ active: $route.path === '/dashboard' || $route.path === '/dashboard/operational' }"
+              <li v-if="navigationStore.loading" class="nav-item px-3 py-3 text-secondary fs-8">
+                <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+                Memuat navigasi...
+              </li>
+
+              <li
+                v-else-if="navigationGroups.length === 0"
+                class="nav-item px-3 py-3 text-secondary fs-8"
+              >
+                <i class="bi bi-info-circle me-2"></i>
+                Tidak ada menu yang diberikan
+              </li>
+
+              <template v-else v-for="group in navigationGroups" :key="group.key">
+                <li
+                  v-if="group.items.length === 1 && group.items[0].children.length === 0"
+                  class="nav-item"
                 >
-                  <i class="nav-icon bi bi-speedometer2"></i>
-                  <span class="nav-text">Dashboard Overview</span>
-                </router-link>
-              </li>
+                  <router-link
+                    :to="group.items[0].path"
+                    class="nav-link"
+                    :class="{ active: ownsCurrentRoute(group.items[0]) }"
+                  >
+                    <i :class="['nav-icon', 'bi', group.items[0].icon]"></i>
+                    <span class="nav-text">{{ group.items[0].title }}</span>
+                  </router-link>
+                </li>
 
-              <!-- 2. Permintaan & Order -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.orders }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('orders')" :class="{ active: isOrdersActive }">
-                  <i class="nav-icon bi bi-cart3"></i>
-                  <span class="nav-text">Permintaan & Order</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.orders }"></i>
-                </a>
-                <ul v-show="openMenus.orders" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/orders" class="nav-link" :class="{ active: $route.path === '/orders' || $route.path === '/orders/branch' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Order</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/orders/approvals" class="nav-link" :class="{ active: $route.path === '/orders/approvals' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Persetujuan Order</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/emboss" class="nav-link" :class="{ active: $route.path === '/emboss' || $route.path === '/emboss/cards' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Riwayat Berkas</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/emboss/reject-queue" class="nav-link" :class="{ active: $route.path === '/emboss/reject-queue' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Antrean Reject Emboss</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/production" class="nav-link" :class="{ active: $route.path === '/production' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Bon Produksi</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
-
-              <!-- 3. Gudang & Distribusi -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.warehouse }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('warehouse')" :class="{ active: isWarehouseActive }">
-                  <i class="nav-icon bi bi-box-seam"></i>
-                  <span class="nav-text">Gudang & Distribusi</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.warehouse }"></i>
-                </a>
-                <ul v-show="openMenus.warehouse" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/warehouse/picking" class="nav-link" :class="{ active: $route.path === '/warehouse/picking' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Antrean Picking</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/warehouse/packing" class="nav-link" :class="{ active: $route.path === '/warehouse/packing' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Antrean Packing</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/distribution/shipments" class="nav-link" :class="{ active: $route.path === '/distribution/shipments' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Pengiriman & Manifest</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
-
-              <!-- 4. Penerimaan -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.receiving }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('receiving')" :class="{ active: isReceivingActive }">
-                  <i class="nav-icon bi bi-truck"></i>
-                  <span class="nav-text">Penerimaan</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.receiving }"></i>
-                </a>
-                <ul v-show="openMenus.receiving" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/receiving/po" class="nav-link" :class="{ active: $route.path === '/receiving/po' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Penerimaan PO</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/receiving" class="nav-link" :class="{ active: $route.path === '/receiving' || $route.path.startsWith('/receiving/confirm') }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Penerimaan Cabang</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/receiving/discrepancies" class="nav-link" :class="{ active: $route.path === '/receiving/discrepancies' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Berita Acara Selisih</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
-
-              <!-- 5. Persediaan -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.inventory }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('inventory')" :class="{ active: isInventoryActive }">
-                  <i class="nav-icon bi bi-stack"></i>
-                  <span class="nav-text">Persediaan</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.inventory }"></i>
-                </a>
-                <ul v-show="openMenus.inventory" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/inventory/balances" class="nav-link" :class="{ active: $route.path === '/inventory/balances' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Stock Balances</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/reconciliation" class="nav-link" :class="{ active: $route.path === '/inventory/reconciliation' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Rekonsiliasi Stok</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/movement-inquiry" class="nav-link" :class="{ active: $route.path === '/inventory/movement-inquiry' || $route.path === '/inventory/ledger' || $route.path === '/inventory/stock-card' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Inquiry Histori Mutasi</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/initial-stock" class="nav-link" :class="{ active: $route.path === '/inventory/initial-stock' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Saldo Awal Gudang</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/stock-opname" class="nav-link" :class="{ active: $route.path === '/inventory/stock-opname' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Stock Opname Fisik</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/stock-opname/history" class="nav-link" :class="{ active: $route.path === '/inventory/stock-opname/history' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">History Stock Opname</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/early-warning" class="nav-link" :class="{ active: $route.path === '/inventory/early-warning' || $route.path === '/inventory/ews' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Early Warning</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/forecasting" class="nav-link" :class="{ active: $route.path === '/inventory/forecasting' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Forecasting</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/switching" class="nav-link" :class="{ active: $route.path === '/inventory/switching' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Switching Stock</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/inventory/switching/approvals" class="nav-link" :class="{ active: $route.path === '/inventory/switching/approvals' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Persetujuan Switching</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/returns" class="nav-link" :class="{ active: $route.path === '/returns' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Retur Barang</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/destructions" class="nav-link" :class="{ active: $route.path === '/destructions' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Pemusnahan (BA)</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
-
-              <!-- 6. Pengadaan (Procurement) -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.procurement }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('procurement')" :class="{ active: isProcurementActive }">
-                  <i class="nav-icon bi bi-bag-check"></i>
-                  <span class="nav-text">Pengadaan</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.procurement }"></i>
-                </a>
-                <ul v-show="openMenus.procurement" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/procurement/pr" class="nav-link" :class="{ active: $route.path === '/procurement/pr' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Purchase Request (PR)</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/procurement/approvals/pr" class="nav-link" :class="{ active: $route.path === '/procurement/approvals/pr' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Approval PR</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/procurement/consolidation" class="nav-link" :class="{ active: $route.path === '/procurement/consolidation' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Konsolidasi PR</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/procurement/po" class="nav-link" :class="{ active: $route.path === '/procurement/po' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Purchase Order (PO)</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/procurement/approvals/po" class="nav-link" :class="{ active: $route.path === '/procurement/approvals/po' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Approval PO</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
-
-              <!-- 7. Finance -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.finance }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('finance')" :class="{ active: isFinanceActive }">
-                  <i class="nav-icon bi bi-cash-stack"></i>
-                  <span class="nav-text">Finance</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.finance }"></i>
-                </a>
-                <ul v-show="openMenus.finance" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/finance/settlements" class="nav-link" :class="{ active: $route.path === '/finance/settlements' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Settlement</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/budgets/early-warning" class="nav-link" :class="{ active: $route.path === '/master/budgets/early-warning' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">EWS Anggaran</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
-
-              <!-- 8. Master Data -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.master }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('master')" :class="{ active: isMasterActive }">
-                  <i class="nav-icon bi bi-gear-wide-connected"></i>
-                  <span class="nav-text">Master Data</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.master }"></i>
-                </a>
-                <ul v-show="openMenus.master" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/master/organizations" class="nav-link" :class="{ active: $route.path === '/master/organizations' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Unit Kerja & Gudang</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/items" class="nav-link" :class="{ active: $route.path === '/master/items' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Master Barang (SKU)</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/budgets" class="nav-link" :class="{ active: $route.path === '/master/budgets' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Pagu Anggaran</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/accounting" class="nav-link" :class="{ active: $route.path === '/master/accounting' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">COA & Cost Center</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/vendors" class="nav-link" :class="{ active: $route.path === '/master/vendors' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Vendor & Ekspedisi</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/expedition-mappings" class="nav-link" :class="{ active: $route.path === '/master/expedition-mappings' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Pemetaan Ekspedisi</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/users" class="nav-link" :class="{ active: $route.path === '/master/users' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Manajemen Pengguna</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/roles" class="nav-link" :class="{ active: $route.path === '/master/roles' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Manajemen Peran (Role)</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/menus" class="nav-link" :class="{ active: $route.path === '/master/menus' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Manajemen Menu</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/master/role-menus" class="nav-link" :class="{ active: $route.path === '/master/role-menus' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Mapping Role & Menu</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
-
-              <!-- 9. Audit Trail Sistem -->
-              <li class="nav-item">
-                <router-link to="/audit-trail" class="nav-link" :class="{ active: $route.path === '/audit-trail' }">
-                  <i class="nav-icon bi bi-shield-check"></i>
-                  <span class="nav-text">Audit Trail Sistem</span>
-                </router-link>
-              </li>
-
-              <!-- 10. Notifikasi -->
-              <li class="nav-item">
-                <router-link to="/notifications" class="nav-link" :class="{ active: $route.path === '/notifications' }">
-                  <i class="nav-icon bi bi-bell"></i>
-                  <span class="nav-text">Notifikasi</span>
-                  <span class="badge text-bg-danger ms-auto fs-9">3</span>
-                </router-link>
-              </li>
-
-              <!-- 11. Executive Support System (ESS) -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.ess }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('ess')" :class="{ active: isEssActive }">
-                  <i class="nav-icon bi bi-speedometer2 text-danger"></i>
-                  <span class="nav-text">Executive Support (ESS)</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.ess }"></i>
-                </a>
-                <ul v-show="openMenus.ess" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/ess/valuation-budget" class="nav-link" :class="{ active: $route.path === '/ess/valuation-budget' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Valuasi & Anggaran</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/ess/cost-saving" class="nav-link" :class="{ active: $route.path === '/ess/cost-saving' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Efisiensi Biaya Switching</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/ess/inventory-turnover" class="nav-link" :class="{ active: $route.path === '/ess/inventory-turnover' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Perputaran Stok (ITO)</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/ess/risk-heatmap" class="nav-link" :class="{ active: $route.path === '/ess/risk-heatmap' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Peta Ketahanan Jaringan</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/ess/service-level" class="nav-link" :class="{ active: $route.path === '/ess/service-level' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Kinerja Layanan (SLA)</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/ess/audit-compliance" class="nav-link" :class="{ active: $route.path === '/ess/audit-compliance' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Akuntabilitas & Audit</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/ess/predictive-budget" class="nav-link" :class="{ active: $route.path === '/ess/predictive-budget' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Proyeksi Belanja Logistik</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
-
-              <!-- 12. Laporan & Rekapitulasi -->
-              <li class="nav-item has-treeview" :class="{ 'menu-open': openMenus.reports }">
-                <a href="#" class="nav-link" @click.prevent="toggleMenu('reports')" :class="{ active: isReportsActive }">
-                  <i class="nav-icon bi bi-bar-chart-line"></i>
-                  <span class="nav-text">Laporan & Rekapitulasi</span>
-                  <i class="nav-arrow bi bi-chevron-right" :class="{ rotated: openMenus.reports }"></i>
-                </a>
-                <ul v-show="openMenus.reports" class="nav nav-treeview">
-                  <li class="nav-item">
-                    <router-link to="/reports/stock-valuation" class="nav-link" :class="{ active: $route.path === '/reports/stock-valuation' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Valuasi Persediaan</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/reports/stock-distribution" class="nav-link" :class="{ active: $route.path === '/reports/stock-distribution' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Sebaran Stok Wilayah</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/reports/settlements" class="nav-link" :class="{ active: $route.path === '/reports/settlements' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Rekapitulasi Settlement</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/reports/general-ledger" class="nav-link" :class="{ active: $route.path === '/reports/general-ledger' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Jurnal Buku Besar</span>
-                    </router-link>
-                  </li>
-                  <li class="nav-item">
-                    <router-link to="/reports/procurement-coverage" class="nav-link" :class="{ active: $route.path === '/reports/procurement-coverage' }">
-                      <i class="nav-icon bi bi-circle"></i>
-                      <span class="nav-text">Keterlacakan Pengadaan</span>
-                    </router-link>
-                  </li>
-                </ul>
-              </li>
+                <li
+                  v-else
+                  class="nav-item has-treeview"
+                  :class="{ 'menu-open': openMenus[group.key] }"
+                >
+                  <a
+                    href="#"
+                    class="nav-link"
+                    :class="{ active: groupOwnsCurrentRoute(group) }"
+                    @click.prevent="toggleMenu(group.key)"
+                  >
+                    <i :class="['nav-icon', 'bi', group.icon]"></i>
+                    <span class="nav-text">{{ group.module }}</span>
+                    <i
+                      class="nav-arrow bi bi-chevron-right"
+                      :class="{ rotated: openMenus[group.key] }"
+                    ></i>
+                  </a>
+                  <ul v-show="openMenus[group.key]" class="nav nav-treeview">
+                    <template v-for="item in group.items" :key="item.code">
+                      <li class="nav-item">
+                        <router-link
+                          :to="item.path"
+                          class="nav-link"
+                          :class="{ active: ownsCurrentRoute(item) }"
+                        >
+                          <i :class="['nav-icon', 'bi', item.icon]"></i>
+                          <span class="nav-text">{{ item.title }}</span>
+                        </router-link>
+                      </li>
+                      <li
+                        v-for="child in item.children"
+                        :key="child.code"
+                        class="nav-item ms-3"
+                      >
+                        <router-link
+                          :to="child.path"
+                          class="nav-link"
+                          :class="{ active: ownsCurrentRoute(child) }"
+                        >
+                          <i :class="['nav-icon', 'bi', child.icon]"></i>
+                          <span class="nav-text">{{ child.title }}</span>
+                        </router-link>
+                      </li>
+                    </template>
+                  </ul>
+                </li>
+              </template>
 
             </ul>
           </nav>
@@ -762,14 +387,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useNavigationStore } from '@/stores/navigation';
 import api from '@/api/client';
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
+const navigationStore = useNavigationStore();
 
 const sidebarOpen = ref(true);
 const showThemeMenu = ref(false);
@@ -785,31 +412,29 @@ const scanLoading = ref(false);
 const colorMode = ref('light');
 const resolvedTheme = ref('light');
 
-const openMenus = ref({
-  orders: true,
-  warehouse: false,
-  receiving: false,
-  inventory: true,
-  procurement: false,
-  finance: false,
-  master: false,
-  ess: false,
-  reports: false
-});
+const openMenus = ref({});
+const navigationGroups = computed(() => navigationStore.groups);
+const topbarShortcuts = computed(() => navigationStore.accessibleItems.slice(0, 3));
+const currentOwner = computed(() => navigationStore.resolveRoute(route.path));
 
-const isOrdersActive = computed(() => route.path.startsWith('/orders') || route.path.startsWith('/emboss') || route.path.startsWith('/production'));
-const isWarehouseActive = computed(() => route.path.startsWith('/warehouse') || route.path.startsWith('/distribution'));
-const isReceivingActive = computed(() => route.path.startsWith('/receiving'));
-const isInventoryActive = computed(() => route.path.startsWith('/inventory') || route.path.startsWith('/returns') || route.path.startsWith('/destructions'));
-const isProcurementActive = computed(() => route.path.startsWith('/procurement'));
-const isFinanceActive = computed(() => route.path.startsWith('/finance'));
-const isMasterActive = computed(() => route.path.startsWith('/master'));
-const isEssActive = computed(() => route.path.startsWith('/ess'));
-const isReportsActive = computed(() => route.path.startsWith('/reports'));
+const ownsCurrentRoute = (item) => currentOwner.value?.code === item.code;
+
+const groupOwnsCurrentRoute = (group) => group.items.some((item) =>
+  ownsCurrentRoute(item) || item.children.some(ownsCurrentRoute)
+);
 
 const toggleMenu = (key) => {
   openMenus.value[key] = !openMenus.value[key];
 };
+
+watch(
+  [() => route.path, navigationGroups],
+  () => {
+    const activeGroup = navigationGroups.value.find(groupOwnsCurrentRoute);
+    if (activeGroup) openMenus.value[activeGroup.key] = true;
+  },
+  { immediate: true }
+);
 
 const userInitials = computed(() => {
   if (!authStore.userName) return 'BJ';
@@ -819,17 +444,6 @@ const userInitials = computed(() => {
 onMounted(() => {
   colorMode.value = localStorage.getItem('lte-theme') || 'light';
   applyTheme(colorMode.value);
-
-  // Auto expand menu based on active route
-  if (isOrdersActive.value) openMenus.value.orders = true;
-  if (isWarehouseActive.value) openMenus.value.warehouse = true;
-  if (isReceivingActive.value) openMenus.value.receiving = true;
-  if (isInventoryActive.value) openMenus.value.inventory = true;
-  if (isProcurementActive.value) openMenus.value.procurement = true;
-  if (isFinanceActive.value) openMenus.value.finance = true;
-  if (isMasterActive.value) openMenus.value.master = true;
-  if (isEssActive.value) openMenus.value.ess = true;
-  if (isReportsActive.value) openMenus.value.reports = true;
 
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.dropdown')) {
@@ -906,6 +520,7 @@ const executeScan = async () => {
 };
 
 const handleLogout = () => {
+  navigationStore.clear();
   authStore.logout();
   router.push('/login');
 };

@@ -1,6 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useNavigationStore } from '@/stores/navigation';
 import AppLayout from '@/components/AppLayout.vue';
+import { createNavigationGuard } from '@/router/navigationGuard';
 
 const routes = [
   // -------------------------------------------------------------
@@ -23,6 +25,12 @@ const routes = [
     name: 'forgot-password',
     component: () => import('@/views/auth/ForgotPasswordView.vue'),
     meta: { public: true }
+  },
+  {
+    path: '/access-denied',
+    name: 'access-denied',
+    component: () => import('@/views/errors/AccessDeniedView.vue'),
+    meta: { system: true }
   },
 
   // -------------------------------------------------------------
@@ -80,7 +88,6 @@ const routes = [
   {
     path: '/',
     component: AppLayout,
-    redirect: '/dashboard',
     children: [
       // 1. Dashboard Overview
       {
@@ -540,7 +547,10 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/dashboard'
+    redirect: (to) => ({
+      name: 'access-denied',
+      query: { from: to.fullPath, reason: 'unmatched' }
+    })
   }
 ];
 
@@ -549,13 +559,9 @@ const router = createRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore();
-  if (!to.meta.public && !authStore.isAuthenticated) {
-    next('/login');
-  } else {
-    next();
-  }
-});
+router.beforeEach(createNavigationGuard({
+  getAuthStore: () => useAuthStore(),
+  getNavigationStore: () => useNavigationStore()
+}));
 
 export default router;

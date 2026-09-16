@@ -132,7 +132,7 @@ const handleLogin = async () => {
   try {
     const res = await authStore.login(email.value, password.value);
     if (res.success) {
-      router.push('/dashboard/operational');
+      router.push('/');
     } else {
       errorMessage.value = res.message || res.error || 'Email atau kata sandi tidak valid.';
     }
