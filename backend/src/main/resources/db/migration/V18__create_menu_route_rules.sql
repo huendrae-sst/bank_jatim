@@ -4,6 +4,8 @@ CREATE TABLE menu_route_rules (
     path VARCHAR(255) NOT NULL,
     match_type VARCHAR(20) NOT NULL CHECK (match_type IN ('EXACT', 'PREFIX')),
     sort_order INTEGER NOT NULL DEFAULT 1,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT uk_menu_route_rule UNIQUE (menu_id, path, match_type)
 );
 

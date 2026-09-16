@@ -129,65 +129,6 @@
             </div>
           </li>
 
-          <!-- Notifications Dropdown Menu -->
-          <li class="nav-item dropdown position-relative">
-            <button
-              class="nav-link btn-action-icon position-relative"
-              @click="showNotifMenu = !showNotifMenu"
-              role="button"
-              title="Notifikasi"
-            >
-              <i class="bi bi-bell fs-5"></i>
-              <span class="navbar-badge badge text-bg-danger">3</span>
-            </button>
-            <div v-show="showNotifMenu" class="dropdown-menu dropdown-menu-end show shadow notif-dropdown">
-              <div class="dropdown-header d-flex justify-content-between align-items-center fw-bold py-2 px-3 border-bottom">
-                <span>3 Notifikasi Baru</span>
-                <button
-                  type="button"
-                  class="btn btn-link btn-sm p-0 text-decoration-none fs-8 text-danger fw-normal"
-                  @click="showNotifMenu = false"
-                >
-                  Tandai semua dibaca
-                </button>
-              </div>
-              <div class="notif-list">
-                <router-link to="/orders/approvals" class="dropdown-item py-2 border-bottom" @click="showNotifMenu = false">
-                  <div class="d-flex align-items-start gap-2">
-                    <i class="bi bi-clipboard-check-fill text-warning fs-6 mt-1"></i>
-                    <div class="flex-grow-1 text-truncate">
-                      <div class="fs-7 fw-bold text-truncate">Order Butuh Persetujuan</div>
-                      <div class="fs-8 text-secondary text-truncate">KC Surabaya mengajukan 500 Buku Tabungan</div>
-                      <div class="fs-9 text-muted">10 menit yang lalu</div>
-                    </div>
-                  </div>
-                </router-link>
-                <router-link to="/inventory/early-warning" class="dropdown-item py-2 border-bottom" @click="showNotifMenu = false">
-                  <div class="d-flex align-items-start gap-2">
-                    <i class="bi bi-exclamation-triangle-fill text-danger fs-6 mt-1"></i>
-                    <div class="flex-grow-1 text-truncate">
-                      <div class="fs-7 fw-bold text-truncate">Peringatan EWS Stok Menipis</div>
-                      <div class="fs-8 text-secondary text-truncate">KARTU-ATM-SILVER di bawah Safety Stock</div>
-                      <div class="fs-9 text-muted">1 jam yang lalu</div>
-                    </div>
-                  </div>
-                </router-link>
-                <router-link to="/distribution/shipments" class="dropdown-item py-2 border-bottom" @click="showNotifMenu = false">
-                  <div class="d-flex align-items-start gap-2">
-                    <i class="bi bi-truck text-info fs-6 mt-1"></i>
-                    <div class="flex-grow-1 text-truncate">
-                      <div class="fs-7 fw-bold text-truncate">Manifest Ekspedisi Siap Kirim</div>
-                      <div class="fs-8 text-secondary text-truncate">Pengiriman ke KC Malang selesai packing</div>
-                      <div class="fs-9 text-muted">2 jam yang lalu</div>
-                    </div>
-                  </div>
-                </router-link>
-              </div>
-              <router-link to="/notifications" class="dropdown-item text-center fs-7 text-danger fw-bold py-2" @click="showNotifMenu = false">
-                Lihat Semua Notifikasi
-              </router-link>
-            </div>
-          </li>
 
           <!-- User Profile Dropdown Menu -->
           <li class="nav-item dropdown position-relative">
@@ -234,7 +175,7 @@
     <div class="app-body-container">
       <!-- App Sidebar -->
       <aside class="app-sidebar shadow" :data-bs-theme="resolvedTheme">
-        <!-- Sidebar Navigation Menu (Complete treeviews matching jatim_php) -->
+        <!-- Sidebar navigation rendered from authenticated role-menu data -->
         <div class="sidebar-wrapper">
           <nav class="mt-2" aria-label="Main navigation">
             <ul class="nav sidebar-menu flex-column">
@@ -364,11 +305,6 @@
             <div><strong>Nama:</strong> {{ scanResult.name }}</div>
             <div><strong>Barcode:</strong> {{ scanResult.barcode || '-' }}</div>
             <div><strong>Kategori:</strong> {{ scanResult.category || '-' }}</div>
-            <div class="mt-2">
-              <router-link to="/inventory/balances" class="btn btn-sm btn-outline-danger" @click="showScannerModal = false">
-                Buka di Stock Balances &rarr;
-              </router-link>
-            </div>
           </div>
           <div v-else-if="scanError" class="alert alert-danger py-2 px-3 fs-8 mb-0">
             <i class="bi bi-exclamation-octagon-fill me-1"></i> {{ scanError }}
@@ -400,7 +336,6 @@ const navigationStore = useNavigationStore();
 
 const sidebarOpen = ref(true);
 const showThemeMenu = ref(false);
-const showNotifMenu = ref(false);
 const showUserMenu = ref(false);
 const showScannerModal = ref(false);
 const scanInput = ref('');
@@ -448,7 +383,6 @@ onMounted(() => {
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.dropdown')) {
       showThemeMenu.value = false;
-      showNotifMenu.value = false;
       showUserMenu.value = false;
     }
   });
@@ -611,18 +545,6 @@ const handleLogout = () => {
   min-width: 250px;
   padding: 0;
   overflow: hidden;
-  position: absolute;
-  right: 0;
-  top: 100%;
-  z-index: 1050;
-  background-color: var(--bs-secondary-bg, #ffffff);
-  border: 1px solid var(--bs-border-color, #e2e8f0);
-  border-radius: 0.375rem;
-}
-
-.notif-dropdown {
-  width: 320px;
-  padding: 0;
   position: absolute;
   right: 0;
   top: 100%;

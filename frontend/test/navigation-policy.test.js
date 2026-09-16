@@ -60,6 +60,36 @@ test('the most specific rule owns a route even when access is denied', () => {
   assert.equal(result.allowed, false);
 });
 
+test('exact rule wins an equal-length tie with a prefix rule', () => {
+  const items = [
+    nav('PREFIX_OWNER', 'Admin', '/menus', true, 1, null, [
+      { path: '/menus', matchType: 'PREFIX', order: 1 }
+    ]),
+    nav('EXACT_OWNER', 'Admin', '/menus', false, 2, null, [
+      { path: '/menus', matchType: 'EXACT', order: 2 }
+    ])
+  ];
+
+  assert.equal(resolveNavigationItem(items, '/menus').code, 'EXACT_OWNER');
+});
+
+test('detail create print and alias paths resolve from database rules', () => {
+  const items = [
+    nav('ORD_LIST', 'Order', '/orders', true, 10, null, [
+      { path: '/orders', matchType: 'PREFIX', order: 1 }
+    ]),
+    nav('INV_MUTATION', 'Inventory', '/inventory/movement-inquiry', true, 42, null, [
+      { path: '/inventory/movement-inquiry', matchType: 'PREFIX', order: 1 },
+      { path: '/inventory/stock-card', matchType: 'PREFIX', order: 2 }
+    ])
+  ];
+
+  assert.equal(resolveNavigationItem(items, '/orders/create').code, 'ORD_LIST');
+  assert.equal(resolveNavigationItem(items, '/orders/42').code, 'ORD_LIST');
+  assert.equal(resolveNavigationItem(items, '/orders/42/print').code, 'ORD_LIST');
+  assert.equal(resolveNavigationItem(items, '/inventory/stock-card/9').code, 'INV_MUTATION');
+});
+
 test('groups filter denied items, honor order, and attach children', () => {
   const groups = buildNavigationGroups([
     nav('MASTER', 'Administration', '/master', true, 10),
