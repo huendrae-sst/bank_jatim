@@ -185,7 +185,7 @@
                   <label class="form-label fw-bold mb-1">Unit Kerja / Kantor Cabang</label>
                   <select v-model="userForm.organizationId" class="form-select form-select-sm">
                     <option :value="null">Tidak ditentukan</option>
-                    <option v-for="org in organizationOptions" :key="org.id" :value="org.id">
+                    <option v-for="org in organizationOptions" :key="org.id" :value="Number(org.id)">
                       {{ org.code }} - {{ org.name }}
                     </option>
                   </select>
@@ -194,8 +194,20 @@
                   <label class="form-label fw-bold mb-1">Gudang / Penempatan</label>
                   <select v-model="userForm.warehouseId" class="form-select form-select-sm">
                     <option :value="null">Tidak ditentukan</option>
-                    <option v-for="warehouse in warehouseOptions" :key="warehouse.id" :value="warehouse.id">
+                    <option v-for="warehouse in warehouseOptions" :key="warehouse.id" :value="Number(warehouse.id)">
                       {{ warehouse.code }} - {{ warehouse.name }}
+                    </option>
+                  </select>
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-bold mb-1">
+                    Wilayah Kerja
+                    <span v-if="userForm.role === 'REGIONAL_MONITOR'" class="text-danger">*</span>
+                  </label>
+                  <select v-model="userForm.regionId" class="form-select form-select-sm" :required="userForm.role === 'REGIONAL_MONITOR'">
+                    <option :value="null">Tidak ditentukan</option>
+                    <option v-for="reg in regionOptions" :key="reg.id" :value="reg.id">
+                      {{ reg.code }} - {{ reg.name }}
                     </option>
                   </select>
                 </div>
@@ -237,7 +249,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoleStore } from '@/stores/role';
 import api from '@/api/client';
-
+import { extractList } from '@/utils/responseParser';
 
 const roleStore = useRoleStore();
 
@@ -256,6 +268,7 @@ const formError = ref('');
 const userList = ref([]);
 const organizationOptions = ref([]);
 const warehouseOptions = ref([]);
+const regionOptions = ref([]);
 
 const roleList = computed(() => roleStore.roles);
 const roles = computed(() => roleStore.roleCodes);
@@ -267,6 +280,7 @@ const userForm = reactive({
   password: '',
   organizationId: null,
   warehouseId: null,
+  regionId: null,
   role: 'REQUESTER_CABANG',
   status: 'AKTIF'
 });
@@ -284,34 +298,65 @@ const mapUser = (user) => ({
   email: user.email || '-',
   nip: user.nip || '',
   phone: user.phone || '',
-  organizationId: user.organization?.id || null,
-  warehouseId: user.warehouse?.id || null,
-  organization: user.organization?.name || user.warehouse?.name || '-',
+  organizationId: user.organization?.id != null ? Number(user.organization.id) : (user.organizationId != null ? Number(user.organizationId) : null),
+  warehouseId: user.warehouse?.id != null ? Number(user.warehouse.id) : (user.warehouseId != null ? Number(user.warehouseId) : null),
+  regionId: user.region?.id != null ? Number(user.region.id) : (user.regionId != null ? Number(user.regionId) : null),
+  regionName: user.region?.name || null,
+  organization: user.region?.name ? `[Wilayah] ${user.region.name}` : (user.organization?.name || user.warehouse?.name || '-'),
   role: user.role || '-',
   status: user.isActive === false ? 'SUSPENDED' : 'AKTIF'
 });
 
 const loadReferenceData = async () => {
-  try {
-    const [orgResponse, warehouseResponse] = await Promise.all([
-      api.get('/master/organizations'),
-      api.get('/master/warehouses')
-    ]);
-    const rawOrgs = Array.isArray(orgResponse?.data) ? orgResponse.data : (Array.isArray(orgResponse) ? orgResponse : null);
-    organizationOptions.value = rawOrgs || [];
-    const rawWh = Array.isArray(warehouseResponse?.data) ? warehouseResponse.data : (Array.isArray(warehouseResponse) ? warehouseResponse : null);
-    warehouseOptions.value = rawWh || [];
-  } catch (err) {
-    console.warn('Failed loading organization reference for users:', err);
-    organizationOptions.value = [];
-    warehouseOptions.value = [];
+  const [orgRes, whRes, regRes] = await Promise.allSettled([
+    api.get('/master/organizations'),
+    api.get('/master/warehouses'),
+    api.get('/master/regions')
+  ]);
+
+  if (orgRes.status === 'fulfilled') {
+    const list = extractList(orgRes.value);
+    if (Array.isArray(list)) organizationOptions.value = list;
+  } else {
+    console.warn('Failed loading organizations:', orgRes.reason);
+  }
+
+  if (whRes.status === 'fulfilled') {
+    const list = extractList(whRes.value);
+    if (Array.isArray(list)) warehouseOptions.value = list;
+  } else {
+    console.warn('Failed loading warehouses:', whRes.reason);
+  }
+
+  if (regRes.status === 'fulfilled') {
+    const list = extractList(regRes.value);
+    if (Array.isArray(list)) regionOptions.value = list;
+  } else {
+    console.warn('Failed loading regions:', regRes.reason);
+  }
+};
+
+const ensureReferenceData = async () => {
+  if (organizationOptions.value.length === 0 || warehouseOptions.value.length === 0) {
+    await loadReferenceData();
+  }
+  if (warehouseOptions.value.length === 0) {
+    try {
+      const res = await api.get('/master/warehouses');
+      const list = extractList(res);
+      if (Array.isArray(list) && list.length > 0) {
+        warehouseOptions.value = list;
+      }
+    } catch (err) {
+      console.warn('Retry fetch /master/warehouses error:', err);
+    }
   }
 };
 
 const loadUsers = async () => {
   try {
     const response = await api.get('/master/users');
-    const rawUsers = Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : null);
+    const rawUsers = extractList(response);
     userList.value = rawUsers ? rawUsers.map(mapUser) : [];
   } catch (err) {
     console.warn('Backend /master/users unavailable:', err);
@@ -348,7 +393,8 @@ const paginatedUserList = computed(() => {
   return filteredUserList.value.slice(start, start + perPage.value);
 });
 
-const openCreateModal = () => {
+const openCreateModal = async () => {
+  await ensureReferenceData();
   isEditMode.value = false;
   editingUsername.value = null;
   const initialRole = roles.value.includes('REQUESTER_CABANG')
@@ -361,6 +407,7 @@ const openCreateModal = () => {
     password: '',
     organizationId: null,
     warehouseId: null,
+    regionId: null,
     role: initialRole,
     status: 'AKTIF'
   });
@@ -368,7 +415,8 @@ const openCreateModal = () => {
   showModal.value = true;
 };
 
-const openEditModal = (u) => {
+const openEditModal = async (u) => {
+  await ensureReferenceData();
   isEditMode.value = true;
   editingUsername.value = u.username;
   Object.assign(userForm, {
@@ -376,8 +424,9 @@ const openEditModal = (u) => {
     username: u.nip || u.username,
     email: u.email,
     password: '',
-    organizationId: u.organizationId,
-    warehouseId: u.warehouseId,
+    organizationId: u.organizationId != null ? Number(u.organizationId) : null,
+    warehouseId: u.warehouseId != null ? Number(u.warehouseId) : null,
+    regionId: u.regionId != null ? Number(u.regionId) : null,
     role: u.role,
     status: u.status || 'AKTIF'
   });
@@ -393,6 +442,7 @@ const buildUserPayload = () => ({
   role: userForm.role,
   organizationId: userForm.organizationId || null,
   warehouseId: userForm.warehouseId || null,
+  regionId: userForm.regionId || null,
   isActive: userForm.status === 'AKTIF'
 });
 

@@ -61,6 +61,34 @@ export const useMenuStore = defineStore('menu', {
       const modules = Object.values(groups).sort((a, b) => a.minOrder - b.minOrder);
       modules.forEach((group) => group.items.sort((a, b) => (a.order || 0) - (b.order || 0)));
       return modules;
+    },
+    authorizedModulesForRole: (state) => (roleCode) => {
+      if (!roleCode || roleCode === 'GUEST') return [];
+      const isSuperAdmin = roleCode === 'SUPER_ADMIN';
+
+      const allowedMenus = state.menus.filter((menu) => {
+        if (menu.status && menu.status !== 'AKTIF') return false;
+        if (isSuperAdmin) return true;
+        return Array.isArray(menu.roles) && menu.roles.includes(roleCode);
+      });
+
+      const groups = {};
+      allowedMenus.forEach((item) => {
+        const moduleName = item.module || 'Lainnya';
+        if (!groups[moduleName]) {
+          const modIndex = MODULE_CATEGORIES.indexOf(moduleName);
+          groups[moduleName] = {
+            module: moduleName,
+            minOrder: modIndex >= 0 ? modIndex : (item.order || 999),
+            items: []
+          };
+        }
+        groups[moduleName].items.push(item);
+      });
+
+      const modules = Object.values(groups).sort((a, b) => a.minOrder - b.minOrder);
+      modules.forEach((group) => group.items.sort((a, b) => (a.order || 0) - (b.order || 0)));
+      return modules;
     }
   },
 
@@ -142,6 +170,7 @@ export const useMenuStore = defineStore('menu', {
         await roleMenuApi.replaceForRole(roleCode, selectedMenuCodes);
         const assignedCodes = await this.fetchRoleMenus(roleCode);
         await this.fetchRoleMenuMappings();
+        await this.fetchMenus();
         return assignedCodes;
       } finally {
         this.assignmentLoading = false;

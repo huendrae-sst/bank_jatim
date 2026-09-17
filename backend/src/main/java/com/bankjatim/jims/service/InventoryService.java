@@ -111,6 +111,92 @@ public class InventoryService {
     }
 
     @Transactional
+    public Map<String, Object> recordInitialStockBatch(Long warehouseId, String cutoffDate, String notes, List<InitialStockItemRow> items, User user) {
+        Warehouse warehouse = warehouseRepository.findById(warehouseId)
+                .orElseThrow(() -> new RuntimeException("Gudang tidak ditemukan: " + warehouseId));
+
+        java.time.LocalDate date = (cutoffDate != null && !cutoffDate.isBlank())
+                ? java.time.LocalDate.parse(cutoffDate.substring(0, 10))
+                : java.time.LocalDate.now();
+        String year = String.valueOf(date.getYear());
+        String month = String.format("%02d", date.getMonthValue());
+        String refNo = String.format("INIT/%s/%s/%04d", year, month, (int) (Math.random() * 9000 + 1000));
+
+        int postedSku = 0;
+        int totalQty = 0;
+        BigDecimal totalValuation = BigDecimal.ZERO;
+
+        for (InitialStockItemRow row : items) {
+            int qtyGood = row.qtyGood() != null ? Math.max(0, row.qtyGood()) : 0;
+            int qtyDamaged = row.qtyDamaged() != null ? Math.max(0, row.qtyDamaged()) : 0;
+            int sumQty = qtyGood + qtyDamaged;
+            if (sumQty <= 0) {
+                continue;
+            }
+
+            Item item = itemRepository.findById(row.itemId())
+                    .orElseThrow(() -> new RuntimeException("Barang tidak ditemukan: " + row.itemId()));
+
+            StockBalance balance = stockBalanceRepository.findByWarehouseIdAndItemId(warehouseId, row.itemId())
+                    .orElseGet(() -> StockBalance.builder()
+                            .warehouse(warehouse)
+                            .item(item)
+                            .onHand(0)
+                            .reserved(0)
+                            .allocated(0)
+                            .inTransit(0)
+                            .hold(0)
+                            .damaged(0)
+                            .build());
+
+            balance.setOnHand(qtyGood);
+            balance.setDamaged(qtyDamaged);
+            stockBalanceRepository.save(balance);
+
+            BigDecimal effectiveUnitCost = (row.unitCost() != null && row.unitCost().compareTo(BigDecimal.ZERO) > 0)
+                    ? row.unitCost()
+                    : (item.getEstimatedUnitPrice() != null ? item.getEstimatedUnitPrice() : BigDecimal.ZERO);
+            BigDecimal rowValuation = effectiveUnitCost.multiply(BigDecimal.valueOf(sumQty));
+
+            StockLedger ledger = StockLedger.builder()
+                    .warehouse(warehouse)
+                    .item(item)
+                    .transactionType("STOCK_INITIAL")
+                    .referenceNumber(refNo)
+                    .qtyIn(sumQty)
+                    .qtyOut(0)
+                    .balanceAfter(qtyGood)
+                    .unitCost(effectiveUnitCost)
+                    .totalValue(rowValuation)
+                    .notes(notes != null && !notes.isBlank() ? notes : "Penetapan Saldo Awal Cut-Off")
+                    .createdByUser(user)
+                    .build();
+            stockLedgerRepository.save(ledger);
+
+            postedSku++;
+            totalQty += sumQty;
+            totalValuation = totalValuation.add(rowValuation);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("referenceNumber", refNo);
+        result.put("warehouseId", warehouseId);
+        result.put("warehouseName", warehouse.getName());
+        result.put("postedSkuCount", postedSku);
+        result.put("totalQuantity", totalQty);
+        result.put("totalValuation", totalValuation);
+        result.put("status", "POSTED");
+        return result;
+    }
+
+    public record InitialStockItemRow(
+            Long itemId,
+            Integer qtyGood,
+            Integer qtyDamaged,
+            BigDecimal unitCost
+    ) {}
+
+    @Transactional
     public Map<String, Object> recordStockOpname(Long warehouseId, String docNo, List<OpnameItemRequest> items, User user) {
         String effectiveDocNo = (docNo != null && !docNo.isBlank()) ? docNo : "SO-" + System.currentTimeMillis();
         int matched = 0;

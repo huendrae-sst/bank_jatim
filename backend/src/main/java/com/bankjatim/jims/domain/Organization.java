@@ -26,6 +26,10 @@ public class Organization extends BaseEntity {
     @JoinColumn(name = "parent_id")
     private Organization parent;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "region_id")
+    private Region region;
+
     @Column(columnDefinition = "TEXT")
     private String address;
 

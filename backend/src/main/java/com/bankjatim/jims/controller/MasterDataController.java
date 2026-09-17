@@ -6,8 +6,10 @@ import com.bankjatim.jims.dto.ExpeditionMappingRequest;
 import com.bankjatim.jims.dto.ExpeditionMappingResponse;
 import com.bankjatim.jims.dto.MenuRequest;
 import com.bankjatim.jims.dto.MenuResponse;
+import com.bankjatim.jims.dto.OrganizationResponse;
 import com.bankjatim.jims.dto.UserRequest;
 import com.bankjatim.jims.dto.UserResponse;
+import com.bankjatim.jims.dto.WarehouseResponse;
 import com.bankjatim.jims.repository.*;
 import com.bankjatim.jims.service.ExpeditionMappingService;
 import com.bankjatim.jims.service.MenuService;
@@ -15,16 +17,20 @@ import com.bankjatim.jims.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import com.bankjatim.jims.dto.RegionRequest;
+import com.bankjatim.jims.dto.RegionResponse;
+import com.bankjatim.jims.service.RegionService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/master")
-@RequiredArgsConstructor
 @Tag(name = "Master Data", description = "Endpoints untuk Data Referensi: Barang, Kategori, Organisasi, Gudang, Pagu Anggaran, Vendor")
 public class MasterDataController {
 
@@ -38,6 +44,110 @@ public class MasterDataController {
     private final UserService userService;
     private final ExpeditionMappingService expeditionMappingService;
     private final MenuService menuService;
+    private final RegionRepository regionRepository;
+    private final RegionService regionService;
+
+    @Autowired
+    public MasterDataController(ItemRepository itemRepository,
+                                CategoryRepository categoryRepository,
+                                OrganizationRepository organizationRepository,
+                                WarehouseRepository warehouseRepository,
+                                BudgetRepository budgetRepository,
+                                VendorRepository vendorRepository,
+                                CourierRepository courierRepository,
+                                UserService userService,
+                                ExpeditionMappingService expeditionMappingService,
+                                MenuService menuService,
+                                RegionRepository regionRepository,
+                                RegionService regionService) {
+        this.itemRepository = itemRepository;
+        this.categoryRepository = categoryRepository;
+        this.organizationRepository = organizationRepository;
+        this.warehouseRepository = warehouseRepository;
+        this.budgetRepository = budgetRepository;
+        this.vendorRepository = vendorRepository;
+        this.courierRepository = courierRepository;
+        this.userService = userService;
+        this.expeditionMappingService = expeditionMappingService;
+        this.menuService = menuService;
+        this.regionRepository = regionRepository;
+        this.regionService = regionService;
+    }
+
+    public MasterDataController(ItemRepository itemRepository,
+                                CategoryRepository categoryRepository,
+                                OrganizationRepository organizationRepository,
+                                WarehouseRepository warehouseRepository,
+                                BudgetRepository budgetRepository,
+                                VendorRepository vendorRepository,
+                                CourierRepository courierRepository,
+                                UserService userService,
+                                ExpeditionMappingService expeditionMappingService,
+                                MenuService menuService) {
+        this(itemRepository, categoryRepository, organizationRepository, warehouseRepository, budgetRepository, vendorRepository, courierRepository, userService, expeditionMappingService, menuService, null, null);
+    }
+
+    @GetMapping("/regions")
+    @Operation(summary = "Daftar Master Wilayah & Pemetaan Cabang")
+    public ResponseEntity<ApiResponse<List<RegionResponse>>> getRegions() {
+        if (regionService != null) {
+            return ResponseEntity.ok(ApiResponse.ok(regionService.getRegions()));
+        }
+        List<RegionResponse> regions = regionRepository != null
+                ? regionRepository.findAllByOrderByCodeAsc().stream()
+                .map(r -> RegionResponse.from(r, List.of()))
+                .toList()
+                : List.of();
+        return ResponseEntity.ok(ApiResponse.ok(regions));
+    }
+
+    @GetMapping("/regions/{id}")
+    @Operation(summary = "Detail Master Wilayah")
+    public ResponseEntity<ApiResponse<RegionResponse>> getRegionById(@PathVariable Long id) {
+        if (regionService == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(ApiResponse.ok(regionService.getRegionById(id)));
+    }
+
+    @PostMapping("/regions")
+    @Operation(summary = "Tambah Master Wilayah Baru")
+    public ResponseEntity<ApiResponse<RegionResponse>> createRegion(@Valid @RequestBody RegionRequest request) {
+        if (regionService == null) {
+            throw new IllegalStateException("RegionService belum terkonfigurasi");
+        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.ok("Wilayah berhasil dibuat", regionService.createRegion(request)));
+    }
+
+    @PutMapping("/regions/{id}")
+    @Operation(summary = "Ubah Master Wilayah")
+    public ResponseEntity<ApiResponse<RegionResponse>> updateRegion(
+            @PathVariable Long id, @Valid @RequestBody RegionRequest request) {
+        if (regionService == null) {
+            throw new IllegalStateException("RegionService belum terkonfigurasi");
+        }
+        return ResponseEntity.ok(ApiResponse.ok("Wilayah berhasil diperbarui", regionService.updateRegion(id, request)));
+    }
+
+    @DeleteMapping("/regions/{id}")
+    @Operation(summary = "Hapus Master Wilayah")
+    public ResponseEntity<ApiResponse<Void>> deleteRegion(@PathVariable Long id) {
+        if (regionService != null) {
+            regionService.deleteRegion(id);
+        }
+        return ResponseEntity.ok(ApiResponse.ok("Wilayah berhasil dihapus", null));
+    }
+
+    @PutMapping("/regions/{id}/branches")
+    @Operation(summary = "Petakan Cabang ke Wilayah")
+    public ResponseEntity<ApiResponse<RegionResponse>> assignBranches(
+            @PathVariable Long id, @RequestBody List<Long> organizationIds) {
+        if (regionService == null) {
+            throw new IllegalStateException("RegionService belum terkonfigurasi");
+        }
+        return ResponseEntity.ok(ApiResponse.ok("Pemetaan cabang berhasil diperbarui", regionService.assignBranches(id, organizationIds)));
+    }
 
     @GetMapping("/items")
     @Operation(summary = "Daftar Master Barang")
@@ -53,8 +163,11 @@ public class MasterDataController {
 
     @GetMapping("/organizations")
     @Operation(summary = "Daftar Unit Kerja & Cabang")
-    public ResponseEntity<ApiResponse<List<Organization>>> getOrganizations() {
-        return ResponseEntity.ok(ApiResponse.ok(organizationRepository.findAll()));
+    public ResponseEntity<ApiResponse<List<OrganizationResponse>>> getOrganizations() {
+        List<OrganizationResponse> responses = organizationRepository.findAllWithParentAndRegion().stream()
+                .map(OrganizationResponse::from)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.ok(responses));
     }
 
     @GetMapping("/users")
@@ -86,8 +199,52 @@ public class MasterDataController {
 
     @GetMapping("/warehouses")
     @Operation(summary = "Daftar Gudang Logistik")
-    public ResponseEntity<ApiResponse<List<Warehouse>>> getWarehouses() {
-        return ResponseEntity.ok(ApiResponse.ok(warehouseRepository.findAllWithOrganization()));
+    @Transactional
+    public ResponseEntity<ApiResponse<List<WarehouseResponse>>> getWarehouses(
+            @RequestParam(required = false) Long organizationId) {
+        List<Warehouse> warehouses;
+        if (organizationId != null) {
+            warehouses = warehouseRepository.findByOrganizationId(organizationId);
+        } else {
+            warehouses = warehouseRepository.findAllWithOrganization();
+            if (warehouses.isEmpty()) {
+                warehouses = warehouseRepository.findAll();
+            }
+        }
+        if (warehouses.isEmpty()) {
+            List<Organization> orgs = organizationRepository.findAll();
+            if (!orgs.isEmpty()) {
+                List<Warehouse> toSave = new ArrayList<>();
+                for (Organization org : orgs) {
+                    String cleanCode = org.getCode().replaceAll("[^A-Za-z0-9]", "_").toUpperCase();
+                    String whCode = "WH_" + cleanCode;
+                    if (warehouseRepository.findByCode(whCode).isEmpty()) {
+                        Warehouse wh = Warehouse.builder()
+                                .organization(org)
+                                .code(whCode)
+                                .name("Gudang Logistik " + org.getName())
+                                .type("HEAD_OFFICE".equalsIgnoreCase(org.getType()) ? "CENTRAL_LOGISTICS" : "BRANCH_STORAGE")
+                                .address(org.getAddress() != null ? org.getAddress() : "Surabaya, Jawa Timur")
+                                .isActive(true)
+                                .build();
+                        toSave.add(wh);
+                    }
+                }
+                if (!toSave.isEmpty()) {
+                    warehouseRepository.saveAll(toSave);
+                    warehouses = organizationId != null
+                            ? warehouseRepository.findByOrganizationId(organizationId)
+                            : warehouseRepository.findAllWithOrganization();
+                    if (warehouses.isEmpty()) {
+                        warehouses = warehouseRepository.findAll();
+                    }
+                }
+            }
+        }
+        List<WarehouseResponse> responses = warehouses.stream()
+                .map(WarehouseResponse::from)
+                .toList();
+        return ResponseEntity.ok(ApiResponse.ok(responses));
     }
 
     @GetMapping("/budgets")

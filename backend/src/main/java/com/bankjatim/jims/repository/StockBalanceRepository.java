@@ -19,6 +19,9 @@ public interface StockBalanceRepository extends JpaRepository<StockBalance, Long
 
     List<StockBalance> findByWarehouseId(Long warehouseId);
 
+    @Query("SELECT sb FROM StockBalance sb JOIN FETCH sb.item item LEFT JOIN FETCH item.category WHERE sb.warehouse.id = :warehouseId")
+    List<StockBalance> findByWarehouseIdWithItem(@Param("warehouseId") Long warehouseId);
+
     @Query(value = """
             SELECT sb FROM StockBalance sb
             JOIN FETCH sb.item item

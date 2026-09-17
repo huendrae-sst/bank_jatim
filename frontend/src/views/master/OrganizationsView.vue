@@ -191,6 +191,11 @@
                       <div class="font-monospace fs-9 text-secondary">{{ org.parent.code }}</div>
                     </div>
                     <span v-else class="text-muted fst-italic fs-8">- Tingkat Teratas -</span>
+                    <div v-if="org.region" class="mt-1">
+                      <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-9">
+                        <i class="bi bi-geo-alt me-0.5"></i>{{ org.region.name }}
+                      </span>
+                    </div>
                   </td>
 
                   <!-- Kota & Alamat -->

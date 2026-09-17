@@ -31,7 +31,7 @@ class InventoryControllerTest {
     @Test
     void stockBalancesResponseDoesNotExposeWarehouseOrganizationAssociation() throws Exception {
         InventoryService inventoryService = new StubInventoryService(stockBalance());
-        InventoryController controller = new InventoryController(inventoryService, null);
+        InventoryController controller = new InventoryController(inventoryService, null, null, null);
 
         ResponseEntity<ApiResponse<PageResponse<StockBalanceResponse>>> response =
                 controller.getStockBalances(null, PageRequest.of(0, 20));

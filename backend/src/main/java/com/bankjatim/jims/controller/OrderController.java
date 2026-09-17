@@ -34,8 +34,10 @@ public class OrderController {
     @GetMapping
     @Operation(summary = "Daftar Pesanan Cabang")
     public ResponseEntity<ApiResponse<PageResponse<OrderResponse>>> getOrders(
-            @RequestParam(required = false) Long organizationId, Pageable pageable) {
-        Page<OrderResponse> page = orderService.getOrders(organizationId, pageable);
+            @RequestParam(required = false) Long organizationId,
+            @AuthenticationPrincipal UserPrincipal principal,
+            Pageable pageable) {
+        Page<OrderResponse> page = orderService.getOrders(principal, organizationId, pageable);
         return ResponseEntity.ok(ApiResponse.ok(PageResponse.from(page)));
     }
 

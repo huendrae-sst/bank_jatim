@@ -1,9 +1,11 @@
 package com.bankjatim.jims.service;
 
+import com.bankjatim.jims.common.BadRequestException;
 import com.bankjatim.jims.domain.*;
 import com.bankjatim.jims.dto.OrderRequest;
 import com.bankjatim.jims.dto.OrderResponse;
 import com.bankjatim.jims.repository.*;
+import com.bankjatim.jims.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +42,34 @@ public class OrderService {
                 ? orderRepository.findAllWithDetails(organizationId, pageable)
                 : orderRepository.findAllWithDetails(pageable);
         return orders.map(OrderResponse::from);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<OrderResponse> getOrders(UserPrincipal principal, Long requestedOrgId, Pageable pageable) {
+        if (principal == null || "SUPER_ADMIN".equalsIgnoreCase(principal.getRole()) || "MANAGEMENT".equalsIgnoreCase(principal.getRole())) {
+            return getOrders(requestedOrgId, pageable);
+        }
+
+        if ("REGIONAL_MONITOR".equalsIgnoreCase(principal.getRole())) {
+            Long regionId = principal.getRegionId();
+            if (regionId == null) {
+                return Page.empty(pageable);
+            }
+            List<Long> affiliatedOrgIds = organizationRepository.findAffiliatedOrgIdsByRegionId(regionId);
+            if (affiliatedOrgIds.isEmpty()) {
+                return Page.empty(pageable);
+            }
+            if (requestedOrgId != null) {
+                if (!affiliatedOrgIds.contains(requestedOrgId)) {
+                    throw new BadRequestException("Cabang yang dipilih tidak berada di bawah wilayah Anda");
+                }
+                return orderRepository.findAllWithDetails(requestedOrgId, pageable).map(OrderResponse::from);
+            }
+            return orderRepository.findAllByOrganizationIdsIn(affiliatedOrgIds, pageable).map(OrderResponse::from);
+        }
+
+        Long orgId = principal.getOrganizationId() != null ? principal.getOrganizationId() : requestedOrgId;
+        return getOrders(orgId, pageable);
     }
 
     @Transactional(readOnly = true)

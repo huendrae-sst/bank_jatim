@@ -458,9 +458,13 @@ const routes = [
         redirect: '/master/role-menus'
       },
       {
+        path: 'master/regions',
+        name: 'master-regions',
+        component: () => import('@/views/master/RegionsView.vue')
+      },
+      {
         path: 'master/data',
-        name: 'master-data',
-        component: () => import('@/views/master/MasterDataView.vue')
+        redirect: '/master/regions'
       },
 
       // 9. Audit & Notifikasi

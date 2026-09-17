@@ -52,7 +52,7 @@
         </ul>
 
         <!-- Section Tombol Tambah Aligned with Tabs -->
-        <div class="card-tools ms-md-auto">
+        <div v-if="!authStore.isRegionalUser" class="card-tools ms-md-auto">
           <button type="button" @click="openCreateModal" class="btn btn-sm btn-danger fw-bold shadow-xs">
             <i class="bi bi-plus-lg me-1"></i> Buat Order Baru
           </button>
@@ -236,6 +236,7 @@
                       <i class="bi bi-printer"></i>
                     </router-link>
                     <button
+                      v-if="!authStore.isRegionalUser"
                       type="button"
                       @click="openEditModal(ord)"
                       class="btn-action-icon text-primary"
@@ -244,6 +245,7 @@
                       <i class="bi bi-pencil"></i>
                     </button>
                     <button
+                      v-if="!authStore.isRegionalUser"
                       type="button"
                       @click="openDeleteModal(ord)"
                       class="btn-action-icon text-danger"
@@ -786,6 +788,9 @@
 import { ref, computed, onMounted } from 'vue';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 import api from '@/api/client';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
 
 // --- State & Filters ---
 const currentTab = ref('open');
@@ -866,7 +871,11 @@ const loadReferences = async () => {
     ]);
 
     if (orgRes.status === 'fulfilled' && Array.isArray(orgRes.value.data) && orgRes.value.data.length > 0) {
-      organizations.value = orgRes.value.data.map((org) => ({
+      let rawOrgs = orgRes.value.data;
+      if (authStore.isRegionalUser && authStore.regionId) {
+        rawOrgs = rawOrgs.filter(org => (org.region?.id === authStore.regionId) || (org.parent?.region?.id === authStore.regionId));
+      }
+      organizations.value = rawOrgs.map((org) => ({
         id: org.id,
         name: org.name,
         code: org.code

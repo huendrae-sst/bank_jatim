@@ -30,6 +30,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getRole().getCode(),
                 user.getOrganization() != null ? user.getOrganization().getId() : null,
                 user.getWarehouse() != null ? user.getWarehouse().getId() : null,
+                user.getRegion() != null ? user.getRegion().getId() : null,
+                user.getRegion() != null ? user.getRegion().getName() : null,
                 user.getApprovalLimit(),
                 user.getIsActive() != null ? user.getIsActive() : true
         );

@@ -25,5 +25,8 @@ public class LoginResponse {
     private String organizationName;
     private String organizationCode;
     private Long warehouseId;
+    private Long regionId;
+    private String regionName;
+    private String regionCode;
     private BigDecimal approvalLimit;
 }

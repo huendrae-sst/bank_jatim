@@ -3,15 +3,17 @@ package com.bankjatim.jims.service;
 import com.bankjatim.jims.common.BadRequestException;
 import com.bankjatim.jims.common.ResourceNotFoundException;
 import com.bankjatim.jims.domain.Organization;
+import com.bankjatim.jims.domain.Region;
 import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.domain.Warehouse;
 import com.bankjatim.jims.dto.UserRequest;
 import com.bankjatim.jims.dto.UserResponse;
 import com.bankjatim.jims.repository.OrganizationRepository;
+import com.bankjatim.jims.repository.RegionRepository;
 import com.bankjatim.jims.repository.RoleRepository;
 import com.bankjatim.jims.repository.UserRepository;
 import com.bankjatim.jims.repository.WarehouseRepository;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +22,6 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
@@ -28,6 +29,30 @@ public class UserService {
     private final WarehouseRepository warehouseRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RegionRepository regionRepository;
+
+    @Autowired
+    public UserService(UserRepository userRepository,
+                       OrganizationRepository organizationRepository,
+                       WarehouseRepository warehouseRepository,
+                       RoleRepository roleRepository,
+                       PasswordEncoder passwordEncoder,
+                       RegionRepository regionRepository) {
+        this.userRepository = userRepository;
+        this.organizationRepository = organizationRepository;
+        this.warehouseRepository = warehouseRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.regionRepository = regionRepository;
+    }
+
+    public UserService(UserRepository userRepository,
+                       OrganizationRepository organizationRepository,
+                       WarehouseRepository warehouseRepository,
+                       RoleRepository roleRepository,
+                       PasswordEncoder passwordEncoder) {
+        this(userRepository, organizationRepository, warehouseRepository, roleRepository, passwordEncoder, null);
+    }
 
     @Transactional(readOnly = true)
     public List<UserResponse> getUsers() {
@@ -48,6 +73,10 @@ public class UserService {
             throw new BadRequestException("NIP sudah digunakan");
         }
 
+        if ("REGIONAL_MONITOR".equalsIgnoreCase(request.getRole()) && request.getRegionId() == null) {
+            throw new BadRequestException("Pengguna dengan peran Pengawas Wilayah wajib memilih wilayah");
+        }
+
         User user = User.builder()
                 .name(request.getName())
                 .email(request.getEmail())
@@ -56,6 +85,7 @@ public class UserService {
                 .role(resolveRole(request.getRole()))
                 .organization(resolveOrganization(request.getOrganizationId()))
                 .warehouse(resolveWarehouse(request.getWarehouseId()))
+                .region(resolveRegion(request.getRegionId()))
                 .approvalLimit(defaultMoney(request.getApprovalLimit()))
                 .phone(blankToNull(request.getPhone()))
                 .isActive(Boolean.TRUE.equals(request.getIsActive()))
@@ -87,8 +117,12 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setNip(blankToNull(request.getNip()));
         user.setRole(resolveRole(request.getRole()));
+        if ("REGIONAL_MONITOR".equalsIgnoreCase(request.getRole()) && request.getRegionId() == null && user.getRegion() == null) {
+            throw new BadRequestException("Pengguna dengan peran Pengawas Wilayah wajib memilih wilayah");
+        }
         user.setOrganization(resolveOrganization(request.getOrganizationId()));
         user.setWarehouse(resolveWarehouse(request.getWarehouseId()));
+        user.setRegion(resolveRegion(request.getRegionId()));
         user.setApprovalLimit(defaultMoney(request.getApprovalLimit()));
         user.setPhone(blankToNull(request.getPhone()));
         user.setIsActive(Boolean.TRUE.equals(request.getIsActive()));
@@ -105,6 +139,14 @@ public class UserService {
             throw new ResourceNotFoundException("Pengguna tidak ditemukan: " + id);
         }
         userRepository.deleteById(id);
+    }
+
+    private Region resolveRegion(Long regionId) {
+        if (regionId == null || regionRepository == null) {
+            return null;
+        }
+        return regionRepository.findById(regionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Wilayah tidak ditemukan: " + regionId));
     }
 
     private Organization resolveOrganization(Long organizationId) {

@@ -46,6 +46,9 @@ public class AuthService {
                 .organizationName(user.getOrganization() != null ? user.getOrganization().getName() : null)
                 .organizationCode(user.getOrganization() != null ? user.getOrganization().getCode() : null)
                 .warehouseId(user.getWarehouse() != null ? user.getWarehouse().getId() : null)
+                .regionId(user.getRegion() != null ? user.getRegion().getId() : null)
+                .regionName(user.getRegion() != null ? user.getRegion().getName() : null)
+                .regionCode(user.getRegion() != null ? user.getRegion().getCode() : null)
                 .approvalLimit(user.getApprovalLimit())
                 .build();
     }

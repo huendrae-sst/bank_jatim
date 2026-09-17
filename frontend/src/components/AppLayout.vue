@@ -305,6 +305,11 @@
             <div><strong>Nama:</strong> {{ scanResult.name }}</div>
             <div><strong>Barcode:</strong> {{ scanResult.barcode || '-' }}</div>
             <div><strong>Kategori:</strong> {{ scanResult.category || '-' }}</div>
+            <div class="mt-2">
+              <router-link to="/inventory/balances" class="btn btn-sm btn-outline-danger" @click="showScannerModal = false">
+                Buka di Stock Balances &rarr;
+              </router-link>
+            </div>
           </div>
           <div v-else-if="scanError" class="alert alert-danger py-2 px-3 fs-8 mb-0">
             <i class="bi bi-exclamation-octagon-fill me-1"></i> {{ scanError }}

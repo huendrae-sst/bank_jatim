@@ -12,8 +12,8 @@
               <li class="breadcrumb-item">
                 <router-link to="/dashboard" class="text-decoration-none text-body">Beranda</router-link>
               </li>
-              <li class="breadcrumb-item">
-                <router-link to="/master/data" class="text-decoration-none text-body">Master Data</router-link>
+              <li class="breadcrumb-item text-secondary">
+                Master Data
               </li>
               <li class="breadcrumb-item active text-danger fw-semibold" aria-current="page">
                 Manajemen Menu

@@ -28,6 +28,7 @@ public class UserRequest {
 
     private Long organizationId;
     private Long warehouseId;
+    private Long regionId;
     private BigDecimal approvalLimit = BigDecimal.ZERO;
     private String phone;
     private Boolean isActive = true;

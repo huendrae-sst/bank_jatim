@@ -11,6 +11,11 @@
       </div>
     </div>
 
+    <div v-if="authStore.isRegionalUser" class="alert alert-info py-2 px-3 fs-8 mb-3 d-flex align-items-center gap-2">
+      <i class="bi bi-geo-alt-fill text-primary"></i>
+      <span>Menampilkan data pemantauan sebaran stok untuk <strong>{{ authStore.regionName || 'Wilayah Kerja Anda' }}</strong>.</span>
+    </div>
+
     <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
     <!-- Table Card -->
@@ -54,6 +59,9 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import { exportToCsv } from '@/utils/exportHelper';
+import { useAuthStore } from '@/stores/auth';
+
+const authStore = useAuthStore();
 
 const currentPage = ref(1);
 const perPage = ref(10);

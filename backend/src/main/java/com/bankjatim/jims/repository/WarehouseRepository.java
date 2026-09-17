@@ -15,6 +15,6 @@ public interface WarehouseRepository extends JpaRepository<Warehouse, Long> {
     List<Warehouse> findByIsActiveTrue();
     Optional<Warehouse> findByType(String type);
 
-    @Query("SELECT w FROM Warehouse w JOIN FETCH w.organization ORDER BY w.code ASC")
+    @Query("SELECT w FROM Warehouse w LEFT JOIN FETCH w.organization ORDER BY w.code ASC")
     List<Warehouse> findAllWithOrganization();
 }

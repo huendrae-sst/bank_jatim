@@ -43,6 +43,8 @@ public class JwtTokenProvider {
         claims.put("role", userPrincipal.getRole());
         claims.put("organizationId", userPrincipal.getOrganizationId());
         claims.put("warehouseId", userPrincipal.getWarehouseId());
+        claims.put("regionId", userPrincipal.getRegionId());
+        claims.put("regionName", userPrincipal.getRegionName());
 
         return Jwts.builder()
                 .subject(userPrincipal.getEmail())

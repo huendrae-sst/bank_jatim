@@ -1,6 +1,7 @@
 package com.bankjatim.jims.dto;
 
 import com.bankjatim.jims.domain.Organization;
+import com.bankjatim.jims.domain.Region;
 import com.bankjatim.jims.domain.User;
 import com.bankjatim.jims.domain.Warehouse;
 
@@ -16,7 +17,8 @@ public record UserResponse(
         String phone,
         Boolean isActive,
         OrganizationSummary organization,
-        WarehouseSummary warehouse
+        WarehouseSummary warehouse,
+        RegionSummary region
 ) {
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -29,7 +31,8 @@ public record UserResponse(
                 user.getPhone(),
                 user.getIsActive(),
                 OrganizationSummary.from(user.getOrganization()),
-                WarehouseSummary.from(user.getWarehouse())
+                WarehouseSummary.from(user.getWarehouse()),
+                RegionSummary.from(user.getRegion())
         );
     }
 
@@ -48,6 +51,15 @@ public record UserResponse(
                 return null;
             }
             return new WarehouseSummary(warehouse.getId(), warehouse.getCode(), warehouse.getName());
+        }
+    }
+
+    public record RegionSummary(Long id, String code, String name) {
+        static RegionSummary from(Region region) {
+            if (region == null) {
+                return null;
+            }
+            return new RegionSummary(region.getId(), region.getCode(), region.getName());
         }
     }
 }
