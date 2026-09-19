@@ -523,26 +523,34 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(it, idx) in viewOrder.items" :key="idx">
-                      <td class="ps-3 text-secondary font-monospace">{{ idx + 1 }}</td>
-                      <td>
-                        <span class="fw-semibold text-body">{{ it.item?.name || ('Item #' + it.item_id) }}</span>
-                        <div class="fs-9 text-secondary font-monospace">{{ it.item?.sku || '' }}</div>
-                      </td>
-                      <td class="text-center">
-                        <span class="badge bg-secondary-subtle text-secondary">{{ it.item?.uom || '-' }}</span>
-                      </td>
-                      <td class="text-center font-monospace fw-bold">{{ it.qty_requested }}</td>
-                      <td class="text-end font-monospace text-secondary">
-                        {{ formatRupiah(it.unit_price_ref || it.item?.estimated_unit_price) }}
-                      </td>
-                      <td class="text-end font-monospace pe-3 fw-bold text-body">
-                        {{ formatRupiah(it.subtotal_ref || ((it.unit_price_ref || it.item?.estimated_unit_price || 0) * it.qty_requested)) }}
+                    <tr v-if="viewLoading">
+                      <td colspan="6" class="text-center py-4 text-secondary">
+                        <div class="spinner-border spinner-border-sm text-danger me-2" role="status"></div>
+                        Memuat rincian barang...
                       </td>
                     </tr>
-                    <tr v-if="!viewOrder.items || viewOrder.items.length === 0">
-                      <td colspan="6" class="text-center py-3 text-secondary">Tidak ada rincian item.</td>
-                    </tr>
+                    <template v-else>
+                      <tr v-for="(it, idx) in viewOrder.items" :key="idx">
+                        <td class="ps-3 text-secondary font-monospace">{{ idx + 1 }}</td>
+                        <td>
+                          <span class="fw-semibold text-body">{{ it.item?.name || ('Item #' + it.item_id) }}</span>
+                          <div class="fs-9 text-secondary font-monospace">{{ it.item?.sku || '' }}</div>
+                        </td>
+                        <td class="text-center">
+                          <span class="badge bg-secondary-subtle text-secondary">{{ it.item?.uom || '-' }}</span>
+                        </td>
+                        <td class="text-center font-monospace fw-bold">{{ it.qty_requested }}</td>
+                        <td class="text-end font-monospace text-secondary">
+                          {{ formatRupiah(it.unit_price_ref || it.item?.estimated_unit_price) }}
+                        </td>
+                        <td class="text-end font-monospace pe-3 fw-bold text-body">
+                          {{ formatRupiah(it.subtotal_ref || ((it.unit_price_ref || it.item?.estimated_unit_price || 0) * it.qty_requested)) }}
+                        </td>
+                      </tr>
+                      <tr v-if="!viewOrder.items || viewOrder.items.length === 0">
+                        <td colspan="6" class="text-center py-3 text-secondary">Tidak ada rincian item.</td>
+                      </tr>
+                    </template>
                   </tbody>
                 </table>
               </div>
@@ -679,63 +687,77 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(item, index) in editOrder.items" :key="index">
-                      <td class="ps-3 py-1.5">
-                        <template v-if="editOrder.is_editable">
-                          <select
-                            v-model="item.item_id"
-                            @change="onEditItemChange(index)"
-                            class="form-select form-select-sm fs-8"
+                    <tr v-if="editLoading">
+                      <td colspan="4" class="text-center py-4 text-secondary">
+                        <div class="spinner-border spinner-border-sm text-danger me-2" role="status"></div>
+                        Memuat data barang pesanan...
+                      </td>
+                    </tr>
+                    <template v-else>
+                      <tr v-for="(item, index) in editOrder.items" :key="index">
+                        <td class="ps-3 py-1.5">
+                          <template v-if="editOrder.is_editable">
+                            <select
+                              v-model="item.item_id"
+                              @change="onEditItemChange(index)"
+                              class="form-select form-select-sm fs-8"
+                              required
+                            >
+                              <option value="">-- Pilih Barang / Item --</option>
+                              <option
+                                v-if="item.item_id && !itemsCatalog.some(it => String(it.id) === String(item.item_id))"
+                                :value="item.item_id"
+                              >
+                                {{ item.item_name }} [{{ item.item_sku }}] ({{ item.item_uom }})
+                              </option>
+                              <option v-for="it in itemsCatalog" :key="it.id" :value="it.id">
+                                {{ it.name }} [{{ it.sku }}] ({{ it.uom }})
+                              </option>
+                            </select>
+                            <div class="fs-9 text-secondary font-monospace mt-1" v-if="item.item_id">
+                              Harga Ref: {{ formatRupiah(item.price) }}
+                            </div>
+                          </template>
+                          <template v-else>
+                            <span class="fw-semibold text-body">
+                              {{ item.item_name || (itemsCatalog.find(c => String(c.id) === String(item.item_id))?.name) || 'Item #' + item.item_id }}
+                            </span>
+                            <div class="fs-9 text-secondary font-monospace">
+                              {{ item.item_sku || itemsCatalog.find(c => String(c.id) === String(item.item_id))?.sku || '' }}
+                            </div>
+                          </template>
+                        </td>
+                        <td class="text-center py-1.5">
+                          <input
+                            v-if="editOrder.is_editable"
+                            type="number"
+                            v-model.number="item.qty"
+                            @input="onEditQtyChange(index)"
+                            min="1"
                             required
+                            class="form-control form-control-sm text-center fw-bold font-monospace fs-8"
+                          />
+                          <span v-else class="fw-bold font-monospace">{{ item.qty }}</span>
+                        </td>
+                        <td class="text-end font-monospace pe-2 py-1.5">
+                          <span class="fw-semibold text-body">{{ formatRupiah(item.subtotal) }}</span>
+                        </td>
+                        <td v-if="editOrder.is_editable" class="text-center py-1.5">
+                          <button
+                            type="button"
+                            @click="removeEditItemRow(index)"
+                            :disabled="editOrder.items.length <= 1"
+                            class="btn btn-sm text-danger py-0 px-1"
+                            title="Hapus baris barang"
                           >
-                            <option value="">-- Pilih Barang / Item --</option>
-                            <option v-for="it in itemsCatalog" :key="it.id" :value="it.id">
-                              {{ it.name }} [{{ it.sku }}] ({{ it.uom }})
-                            </option>
-                          </select>
-                          <div class="fs-9 text-secondary font-monospace mt-1" v-if="item.item_id">
-                            Harga Ref: {{ formatRupiah(item.price) }}
-                          </div>
-                        </template>
-                        <template v-else>
-                          <span class="fw-semibold text-body">
-                            {{ (itemsCatalog.find(c => c.id === item.item_id)?.name) || 'Item #' + item.item_id }}
-                          </span>
-                          <div class="fs-9 text-secondary font-monospace">
-                            {{ itemsCatalog.find(c => c.id === item.item_id)?.sku || '' }}
-                          </div>
-                        </template>
-                      </td>
-                      <td class="text-center py-1.5">
-                        <input
-                          v-if="editOrder.is_editable"
-                          type="number"
-                          v-model.number="item.qty"
-                          @input="onEditQtyChange(index)"
-                          min="1"
-                          required
-                          class="form-control form-control-sm text-center fw-bold font-monospace fs-8"
-                        />
-                        <span v-else class="fw-bold font-monospace">{{ item.qty }}</span>
-                      </td>
-                      <td class="text-end font-monospace pe-2 py-1.5">
-                        <span class="fw-semibold text-body">{{ formatRupiah(item.subtotal) }}</span>
-                      </td>
-                      <td v-if="editOrder.is_editable" class="text-center py-1.5">
-                        <button
-                          type="button"
-                          @click="removeEditItemRow(index)"
-                          :disabled="editOrder.items.length <= 1"
-                          class="btn btn-sm text-danger py-0 px-1"
-                          title="Hapus baris barang"
-                        >
-                          <i class="bi bi-trash fs-8"></i>
-                        </button>
-                      </td>
-                    </tr>
-                    <tr v-if="!editOrder.items || editOrder.items.length === 0">
-                      <td colspan="4" class="text-center py-3 text-secondary">Tidak ada rincian item.</td>
-                    </tr>
+                            <i class="bi bi-trash fs-8"></i>
+                          </button>
+                        </td>
+                      </tr>
+                      <tr v-if="!editOrder.items || editOrder.items.length === 0">
+                        <td colspan="4" class="text-center py-3 text-secondary">Tidak ada rincian item.</td>
+                      </tr>
+                    </template>
                   </tbody>
                 </table>
               </div>
@@ -744,11 +766,12 @@
 
           <!-- Modal Footer (Tombol Batal dan Simpan Rata Kanan) -->
           <div class="modal-footer bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3 border-top">
-            <button type="button" @click="editModal = false" class="btn btn-sm btn-outline-secondary px-3 fs-8">
+            <button type="button" @click="editModal = false" :disabled="savingEdit" class="btn btn-sm btn-outline-secondary px-3 fs-8">
               Batal
             </button>
-            <button type="button" @click="saveEditOrder" class="btn btn-sm btn-primary fw-bold shadow-xs px-3 fs-8">
-              Simpan
+            <button type="button" @click="saveEditOrder" :disabled="savingEdit || editLoading" class="btn btn-sm btn-danger fw-bold shadow-xs px-3 fs-8">
+              <span v-if="savingEdit" class="spinner-border spinner-border-sm me-1" role="status"></span>
+              {{ savingEdit ? 'Menyimpan...' : 'Simpan' }}
             </button>
           </div>
         </div>
@@ -792,11 +815,12 @@
 
           <!-- Modal Footer (Tombol Batal dan Hapus Rata Kanan) -->
           <div class="modal-footer bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3 border-top">
-            <button type="button" @click="deleteModal = false" class="btn btn-sm btn-outline-secondary px-3 fs-8">
+            <button type="button" @click="deleteModal = false" :disabled="deletingOrder" class="btn btn-sm btn-outline-secondary px-3 fs-8">
               Batal
             </button>
-            <button type="button" @click="confirmDeleteOrder" class="btn btn-sm btn-danger fw-bold px-3 fs-8 shadow-xs">
-              Ya, Hapus Order
+            <button type="button" @click="confirmDeleteOrder" :disabled="deletingOrder" class="btn btn-sm btn-danger fw-bold px-3 fs-8 shadow-xs">
+              <span v-if="deletingOrder" class="spinner-border spinner-border-sm me-1" role="status"></span>
+              {{ deletingOrder ? 'Menghapus...' : 'Ya, Hapus Order' }}
             </button>
           </div>
         </div>
@@ -895,25 +919,27 @@ const loadReferences = async () => {
       api.get('/master/items')
     ]);
 
-    if (orgRes.status === 'fulfilled' && Array.isArray(orgRes.value.data) && orgRes.value.data.length > 0) {
-      let rawOrgs = orgRes.value.data;
+    const orgsData = Array.isArray(orgRes.value?.data) ? orgRes.value.data : (Array.isArray(orgRes.value) ? orgRes.value : []);
+    if (orgRes.status === 'fulfilled' && orgsData.length > 0) {
+      let rawOrgs = orgsData;
       if (authStore.isRegionalUser && authStore.regionId) {
         rawOrgs = rawOrgs.filter(org => (org.region?.id === authStore.regionId) || (org.parent?.region?.id === authStore.regionId));
       }
       organizations.value = rawOrgs.map((org) => ({
-        id: org.id,
+        id: Number(org.id),
         name: org.name,
         code: org.code
       }));
     }
 
-    if (itemRes.status === 'fulfilled' && Array.isArray(itemRes.value.data) && itemRes.value.data.length > 0) {
-      itemsCatalog.value = itemRes.value.data.map((item) => ({
-        id: item.id,
+    const itemsData = Array.isArray(itemRes.value?.data) ? itemRes.value.data : (Array.isArray(itemRes.value) ? itemRes.value : []);
+    if (itemRes.status === 'fulfilled' && itemsData.length > 0) {
+      itemsCatalog.value = itemsData.map((item) => ({
+        id: Number(item.id),
         name: item.name,
         sku: item.sku,
         uom: item.uom,
-        estimated_unit_price: Number(item.estimatedUnitPrice || 0)
+        estimated_unit_price: Number(item.estimatedUnitPrice || item.estimated_unit_price || 0)
       }));
     }
   } catch (err) {
@@ -1255,36 +1281,60 @@ const submitCreateOrder = async () => {
 // ==================== MODAL 2: DETAIL ====================
 const viewModal = ref(false);
 const viewOrder = ref(null);
+const viewLoading = ref(false);
 
-const openViewModal = (ord) => {
+const openViewModal = async (ord) => {
   viewOrder.value = ord;
   viewModal.value = true;
+  viewLoading.value = true;
+  try {
+    const res = await api.get(`/orders/${ord.id}`);
+    const full = res?.data || res;
+    if (full) {
+      viewOrder.value = mapOrder(full);
+    }
+  } catch (err) {
+    console.error('Failed to load order detail for view:', err);
+  } finally {
+    viewLoading.value = false;
+  }
 };
 
 // ==================== MODAL 3: EDIT ====================
 const editModal = ref(false);
 const editOrder = ref(null);
+const editLoading = ref(false);
+const savingEdit = ref(false);
 
-const openEditModal = (ord) => {
-  let mappedItems = [];
-  if (ord.items && ord.items.length > 0) {
-    mappedItems = ord.items.map(it => {
-      const unitP = parseFloat(it.unit_price_ref || (it.item ? it.item.estimated_unit_price : 0));
-      const q = parseInt(it.qty_requested || 1, 10);
-      return {
-        item_id: it.item_id,
-        qty: q,
-        price: unitP,
-        subtotal: parseFloat(it.subtotal_ref) || (unitP * q)
-      };
-    });
-  } else {
-    mappedItems = [{ item_id: '', qty: 1, price: 0, subtotal: 0 }];
+const mapItemToEditRow = (it) => {
+  const itemId = it.item_id || it.item?.id || '';
+  const itemInCatalog = itemsCatalog.value.find(c => String(c.id) === String(itemId));
+  const unitP = parseFloat(it.unit_price_ref || it.item?.estimated_unit_price || itemInCatalog?.estimated_unit_price || 0);
+  const q = parseInt(it.qty_requested || it.qty || 1, 10);
+  const subtotal = parseFloat(it.subtotal_ref) || (unitP * q);
+  return {
+    item_id: itemId ? Number(itemId) : '',
+    item_name: it.item?.name || itemInCatalog?.name || '',
+    item_sku: it.item?.sku || itemInCatalog?.sku || '',
+    item_uom: it.item?.uom || itemInCatalog?.uom || 'PCS',
+    qty: q,
+    price: unitP,
+    subtotal: subtotal
+  };
+};
+
+const openEditModal = async (ord) => {
+  if (itemsCatalog.value.length === 0) {
+    await loadReferences();
   }
+
+  editLoading.value = true;
+  editModal.value = true;
 
   editOrder.value = {
     id: ord.id,
     order_number: ord.order_number,
+    organization_id: ord.organization_id || ord.requesting_organization?.id,
     organization_name: ord.requesting_organization?.name || '-',
     requester_name: ord.requester?.name || '-',
     priority: ord.priority || 'NORMAL',
@@ -1293,15 +1343,49 @@ const openEditModal = (ord) => {
     status: ord.status,
     total_estimated_value: parseFloat(ord.total_estimated_value || 0),
     created_at_formatted: formatDate(ord.created_at),
-    items: mappedItems,
+    items: (ord.items && ord.items.length > 0) ? ord.items.map(mapItemToEditRow) : [],
     is_editable: ['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(ord.status)
   };
-  recalculateEditTotal();
-  editModal.value = true;
+
+  try {
+    const res = await api.get(`/orders/${ord.id}`);
+    const full = res?.data || res;
+    if (full) {
+      const detailedOrder = mapOrder(full);
+      let mappedItems = [];
+      if (detailedOrder.items && detailedOrder.items.length > 0) {
+        mappedItems = detailedOrder.items.map(mapItemToEditRow);
+      } else {
+        mappedItems = [{ item_id: '', item_name: '', item_sku: '', item_uom: '', qty: 1, price: 0, subtotal: 0 }];
+      }
+
+      editOrder.value = {
+        id: detailedOrder.id,
+        order_number: detailedOrder.order_number,
+        organization_id: detailedOrder.organization_id || detailedOrder.requesting_organization?.id || ord.organization_id,
+        organization_name: detailedOrder.requesting_organization?.name || ord.requesting_organization?.name || '-',
+        requester_name: detailedOrder.requester?.name || ord.requester?.name || '-',
+        priority: detailedOrder.priority || 'NORMAL',
+        required_date: detailedOrder.required_date ? detailedOrder.required_date.substring(0, 10) : '',
+        notes: detailedOrder.notes || '',
+        status: detailedOrder.status,
+        total_estimated_value: parseFloat(detailedOrder.total_estimated_value || 0),
+        created_at_formatted: formatDate(detailedOrder.created_at),
+        items: mappedItems,
+        is_editable: ['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(detailedOrder.status)
+      };
+      recalculateEditTotal();
+    }
+  } catch (err) {
+    console.error('Failed to load order detail for edit:', err);
+    toast.error('Gagal mengambil rincian data order: ' + (err?.message || err));
+  } finally {
+    editLoading.value = false;
+  }
 };
 
 const addEditItemRow = () => {
-  editOrder.value.items.push({ item_id: '', qty: 1, price: 0, subtotal: 0 });
+  editOrder.value.items.push({ item_id: '', item_name: '', item_sku: '', item_uom: '', qty: 1, price: 0, subtotal: 0 });
   recalculateEditTotal();
 };
 
@@ -1314,9 +1398,12 @@ const removeEditItemRow = (index) => {
 
 const onEditItemChange = (index) => {
   const row = editOrder.value.items[index];
-  const item = itemsCatalog.value.find(i => i.id === row.item_id);
-  const p = item ? item.estimated_unit_price : 0;
+  const item = itemsCatalog.value.find(i => String(i.id) === String(row.item_id));
+  const p = item ? (item.estimated_unit_price || item.estimatedUnitPrice || 0) : 0;
   row.price = p;
+  row.item_name = item?.name || '';
+  row.item_sku = item?.sku || '';
+  row.item_uom = item?.uom || 'PCS';
   row.subtotal = p * (parseInt(row.qty, 10) || 0);
   recalculateEditTotal();
 };
@@ -1330,20 +1417,50 @@ const onEditQtyChange = (index) => {
 
 const recalculateEditTotal = () => {
   let total = 0;
-  editOrder.value.items.forEach(it => {
+  (editOrder.value.items || []).forEach(it => {
     total += (parseFloat(it.subtotal) || 0);
   });
   editOrder.value.total_estimated_value = total;
 };
 
-const saveEditOrder = () => {
-  alert('Perubahan order belum tersedia di backend production.');
-  editModal.value = false;
+const saveEditOrder = async () => {
+  if (!editOrder.value) return;
+
+  const validItems = editOrder.value.items.filter(it => it.item_id && it.qty > 0);
+  if (editOrder.value.is_editable && validItems.length === 0) {
+    toast.warn('Harap pilih minimal 1 item dengan kuantitas lebih dari 0.');
+    return;
+  }
+
+  savingEdit.value = true;
+  try {
+    const payload = {
+      organizationId: editOrder.value.organization_id,
+      priority: editOrder.value.priority,
+      requiredDate: editOrder.value.required_date,
+      notes: editOrder.value.notes,
+      items: validItems.map(it => ({
+        itemId: Number(it.item_id),
+        qty: parseInt(it.qty, 10)
+      }))
+    };
+
+    await api.put(`/orders/${editOrder.value.id}`, payload);
+    toast.success(`Pesanan ${editOrder.value.order_number} berhasil diperbarui.`);
+    editModal.value = false;
+    await loadOrders();
+  } catch (error) {
+    console.error('Gagal menyimpan perubahan order:', error);
+    toast.error('Gagal menyimpan perubahan: ' + (error?.message || error?.error || error || 'Terjadi kesalahan sistem'));
+  } finally {
+    savingEdit.value = false;
+  }
 };
 
 // ==================== MODAL 4: DELETE ====================
 const deleteModal = ref(false);
 const deleteOrder = ref(null);
+const deletingOrder = ref(false);
 
 const openDeleteModal = (ord) => {
   deleteOrder.value = {
@@ -1355,9 +1472,20 @@ const openDeleteModal = (ord) => {
   deleteModal.value = true;
 };
 
-const confirmDeleteOrder = () => {
-  alert('Penghapusan order belum tersedia di backend production.');
-  deleteModal.value = false;
+const confirmDeleteOrder = async () => {
+  if (!deleteOrder.value) return;
+  deletingOrder.value = true;
+  try {
+    await api.delete(`/orders/${deleteOrder.value.id}`);
+    toast.success(`Pesanan ${deleteOrder.value.order_number} berhasil dihapus.`);
+    deleteModal.value = false;
+    await loadOrders();
+  } catch (error) {
+    console.error('Gagal menghapus order:', error);
+    toast.error('Gagal menghapus order: ' + (error?.message || error?.error || error || 'Terjadi kesalahan sistem'));
+  } finally {
+    deletingOrder.value = false;
+  }
 };
 </script>
 

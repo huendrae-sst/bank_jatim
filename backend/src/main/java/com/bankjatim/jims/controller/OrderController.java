@@ -64,6 +64,21 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.ok("Pesanan berhasil dibuat", order));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'REQUESTER_CABANG', 'ORDER_REQUESTER', 'ORDER_APPROVER', 'WAREHOUSE_OFFICER', 'USER_ADMIN', 'MANAGEMENT')")
+    @Operation(summary = "Ubah Pesanan Cabang")
+    public ResponseEntity<ApiResponse<OrderResponse>> updateOrder(
+            @PathVariable Long id,
+            @RequestBody OrderRequest request,
+            @AuthenticationPrincipal UserPrincipal principal) {
+        User user = null;
+        if (principal != null && principal.getId() != null) {
+            user = userRepository.findById(principal.getId()).orElse(null);
+        }
+        OrderResponse order = orderService.updateOrder(id, request, user);
+        return ResponseEntity.ok(ApiResponse.ok("Pesanan berhasil diperbarui", order));
+    }
+
     @GetMapping("/approvals")
     @Operation(summary = "Daftar Antrean Approval Pesanan")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getApprovals() {

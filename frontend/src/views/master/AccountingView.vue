@@ -492,7 +492,7 @@
             </div>
             <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="createCoaModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-danger shadow-xs px-3">
+              <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs px-3">
                 Simpan
               </button>
             </div>
@@ -574,7 +574,7 @@
             </div>
             <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="editCoaModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-primary shadow-xs px-3">
+              <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs px-3">
                 Simpan
               </button>
             </div>
@@ -739,7 +739,7 @@
             </div>
             <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="createCcModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-danger shadow-xs px-3">
+              <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs px-3">
                 Simpan
               </button>
             </div>
@@ -821,7 +821,7 @@
             </div>
             <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="editCcModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-primary shadow-xs px-3">
+              <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs px-3">
                 Simpan
               </button>
             </div>

@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -148,6 +150,76 @@ public class OrderService {
         order.setTotalEstimatedValue(totalEstimatedValue);
         order.setIsOverbudget(remainingBudget.compareTo(BigDecimal.ZERO) > 0
                 && totalEstimatedValue.compareTo(remainingBudget) > 0);
+
+        Order saved = orderRepository.saveAndFlush(order);
+        return OrderResponse.from(orderRepository.findByIdWithDetails(saved.getId()).orElse(saved));
+    }
+
+    @Transactional
+    public OrderResponse updateOrder(Long orderId, OrderRequest request, User updater) {
+        Order order = orderRepository.findByIdWithDetails(orderId)
+                .orElseThrow(() -> new RuntimeException("Order tidak ditemukan: " + orderId));
+
+        if (!List.of("DRAFT", "SUBMITTED", "WAITING_APPROVAL").contains(order.getStatus())) {
+            if (request.notes() != null) {
+                order.setNotes(request.notes());
+            }
+            Order saved = orderRepository.saveAndFlush(order);
+            return OrderResponse.from(orderRepository.findByIdWithDetails(saved.getId()).orElse(saved));
+        }
+
+        if (request.priority() != null) {
+            order.setPriority(request.priority());
+        }
+        if (request.requiredDate() != null) {
+            order.setRequiredDate(request.requiredDate());
+        }
+        if (request.notes() != null) {
+            order.setNotes(request.notes());
+        }
+
+        if (request.items() != null && !request.items().isEmpty()) {
+            Map<Long, OrderItem> existingByItemId = order.getItems().stream()
+                    .collect(Collectors.toMap(oi -> oi.getItem().getId(), oi -> oi, (a, b) -> a));
+
+            List<OrderItem> updatedItems = new ArrayList<>();
+            BigDecimal totalEstimatedValue = BigDecimal.ZERO;
+            int totalItems = 0;
+
+            for (OrderRequest.ItemRequest itemRequest : request.items()) {
+                if (itemRequest.qty() == null || itemRequest.qty() <= 0) {
+                    throw new BadRequestException("Kuantitas order harus lebih dari 0");
+                }
+
+                Item item = itemRepository.findById(itemRequest.itemId())
+                        .orElseThrow(() -> new BadRequestException("Barang tidak ditemukan: " + itemRequest.itemId()));
+                BigDecimal unitPrice = item.getEstimatedUnitPrice() != null ? item.getEstimatedUnitPrice() : BigDecimal.ZERO;
+                BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.qty()));
+
+                OrderItem orderItem = existingByItemId.get(itemRequest.itemId());
+                if (orderItem != null) {
+                    orderItem.setQtyRequested(itemRequest.qty());
+                    orderItem.setUnitPriceRef(unitPrice);
+                    orderItem.setSubtotalRef(subtotal);
+                } else {
+                    orderItem = OrderItem.builder()
+                            .order(order)
+                            .item(item)
+                            .qtyRequested(itemRequest.qty())
+                            .unitPriceRef(unitPrice)
+                            .subtotalRef(subtotal)
+                            .build();
+                }
+                updatedItems.add(orderItem);
+                totalItems += itemRequest.qty();
+                totalEstimatedValue = totalEstimatedValue.add(subtotal);
+            }
+
+            order.getItems().clear();
+            order.getItems().addAll(updatedItems);
+            order.setTotalItems(totalItems);
+            order.setTotalEstimatedValue(totalEstimatedValue);
+        }
 
         Order saved = orderRepository.saveAndFlush(order);
         return OrderResponse.from(orderRepository.findByIdWithDetails(saved.getId()).orElse(saved));

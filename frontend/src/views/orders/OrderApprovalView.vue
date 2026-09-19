@@ -559,10 +559,7 @@
     <div v-if="orderToReject" class="modal-backdrop-custom" @click.self="orderToReject = null">
       <div class="modal-dialog-custom modal-sm card shadow-lg">
         <div class="card-header bg-danger-subtle d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom border-danger-subtle">
-          <div>
-            <h6 class="modal-title fw-bold text-danger mb-0">Konfirmasi Penolakan Order</h6>
-            <span class="fs-8 text-secondary">Tindakan ini membatalkan pengajuan pesanan</span>
-          </div>
+          <h6 class="modal-title fw-bold text-danger mb-0">Konfirmasi Penolakan Order</h6>
           <button type="button" class="btn-close-modal" @click="orderToReject = null">
             <i class="bi bi-x-lg"></i>
           </button>
@@ -602,10 +599,7 @@
     <div v-if="showSwitchingModal" class="modal-backdrop-custom" @click.self="showSwitchingModal = false">
       <div class="modal-dialog-custom card shadow-lg">
         <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-          <div>
-            <h6 class="modal-title fw-bold mb-0 text-body">Form Pengajuan Switching Stock</h6>
-            <span class="fs-8 text-secondary">Alihkan stok antar cabang regional</span>
-          </div>
+          <h6 class="modal-title fw-bold mb-0 text-body">Form Pengajuan Switching Stock</h6>
           <button type="button" class="btn-close-modal" @click="showSwitchingModal = false">
             <i class="bi bi-x-lg"></i>
           </button>

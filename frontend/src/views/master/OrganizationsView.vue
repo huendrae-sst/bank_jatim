@@ -454,12 +454,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">
-                Detail Unit Kerja: <span class="font-monospace text-danger">{{ viewOrgData?.code }}</span>
-              </h6>
-              <span class="fs-8 text-secondary">Informasi identitas unit dan hierarki organisasi</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">
+              Detail Unit Kerja: <span class="font-monospace text-danger">{{ viewOrgData?.code }}</span>
+            </h6>
             <button type="button" @click="viewOrgModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
 
@@ -528,10 +525,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">Tambah Unit Kerja Baru</h6>
-              <span class="fs-8 text-secondary">Registrasi Kantor Pusat, Cabang Utama, atau Capem Bank Jatim</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">Tambah Unit Kerja Baru</h6>
             <button type="button" @click="createOrgModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
 
@@ -618,12 +612,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">
-                Edit Unit Kerja: <span class="font-monospace text-danger">{{ editOrgForm.code }}</span>
-              </h6>
-              <span class="fs-8 text-secondary">Perbarui profil atau struktur hierarki</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">
+              Edit Unit Kerja: <span class="font-monospace text-danger">{{ editOrgForm.code }}</span>
+            </h6>
             <button type="button" @click="editOrgModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
 
@@ -708,10 +699,7 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-danger-subtle d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
-            <div>
-              <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Unit Kerja</h6>
-              <span class="fs-8 text-secondary">Tindakan ini memerlukan verifikasi</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Unit Kerja</h6>
             <button type="button" @click="deleteOrgModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
 
@@ -750,12 +738,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">
-                Detail Lokasi Gudang: <span class="font-monospace text-danger">{{ viewWhData?.code }}</span>
-              </h6>
-              <span class="fs-8 text-secondary">Informasi spesifikasi dan kapasitas gudang</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">
+              Detail Lokasi Gudang: <span class="font-monospace text-danger">{{ viewWhData?.code }}</span>
+            </h6>
             <button type="button" @click="viewWhModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
 
@@ -804,10 +789,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">Tambah Lokasi Gudang Baru</h6>
-              <span class="fs-8 text-secondary">Registrasi fisik lokasi penyimpanan persediaan</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">Tambah Lokasi Gudang Baru</h6>
             <button type="button" @click="createWhModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
 
@@ -853,7 +835,7 @@
               <button type="button" @click="createWhModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">
                 Batal
               </button>
-              <button type="submit" class="btn btn-sm btn-warning text-white fw-bold px-4 shadow-xs">
+              <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
                 Simpan
               </button>
             </div>
@@ -867,12 +849,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">
-                Edit Gudang: <span class="font-monospace text-danger">{{ editWhForm.code }}</span>
-              </h6>
-              <span class="fs-8 text-secondary">Perbarui identitas fisik atau kepemilikan unit kerja</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">
+              Edit Gudang: <span class="font-monospace text-danger">{{ editWhForm.code }}</span>
+            </h6>
             <button type="button" @click="editWhModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
 
@@ -939,10 +918,7 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-danger-subtle d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
-            <div>
-              <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Gudang</h6>
-              <span class="fs-8 text-secondary">Tindakan ini memerlukan verifikasi</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Gudang</h6>
             <button type="button" @click="deleteWhModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
 

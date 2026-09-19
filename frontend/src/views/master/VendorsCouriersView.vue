@@ -429,10 +429,9 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">Profil Rekanan Pengadaan</h6>
-              <span class="fs-8 text-secondary font-monospace">{{ selectedVendor ? selectedVendor.code : '' }}</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">
+              Profil Rekanan Pengadaan: <span class="font-monospace text-danger">{{ selectedVendor ? selectedVendor.code : '' }}</span>
+            </h6>
             <button type="button" class="btn-close" @click="viewVendorModalOpen = false" aria-label="Close"></button>
           </div>
 
@@ -509,10 +508,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">Tambah Vendor Rekanan Baru</h6>
-              <span class="fs-8 text-secondary">Registrasi mitra penyedia barang persediaan</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">Tambah Vendor Rekanan Baru</h6>
             <button type="button" class="btn-close" @click="createVendorModalOpen = false" aria-label="Close"></button>
           </div>
 
@@ -662,7 +658,7 @@
               <button type="button" @click="editVendorModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">
                 Batal
               </button>
-              <button type="submit" class="btn btn-sm btn-primary fw-bold px-4 shadow-xs">
+              <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
                 Simpan
               </button>
             </div>
@@ -705,10 +701,9 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">Profil Mitra Ekspedisi</h6>
-              <span class="fs-8 text-secondary font-monospace">{{ selectedCourier ? selectedCourier.code : '' }}</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">
+              Profil Mitra Ekspedisi: <span class="font-monospace text-danger">{{ selectedCourier ? selectedCourier.code : '' }}</span>
+            </h6>
             <button type="button" class="btn-close" @click="viewCourierModalOpen = false" aria-label="Close"></button>
           </div>
 
@@ -777,10 +772,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div>
-              <h6 class="mb-0 fw-bold text-body">Tambah Mitra Ekspedisi Baru</h6>
-              <span class="fs-8 text-secondary">Registrasi jasa pengiriman logistik & distribusi</span>
-            </div>
+            <h6 class="mb-0 fw-bold text-body">Tambah Mitra Ekspedisi Baru</h6>
             <button type="button" class="btn-close" @click="createCourierModalOpen = false" aria-label="Close"></button>
           </div>
 
@@ -916,7 +908,7 @@
               <button type="button" @click="editCourierModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">
                 Batal
               </button>
-              <button type="submit" class="btn btn-sm btn-primary fw-bold px-4 shadow-xs">
+              <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
                 Simpan
               </button>
             </div>

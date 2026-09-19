@@ -223,7 +223,7 @@
           </div>
           <div class="modal-footer d-flex justify-content-end align-items-center gap-2 py-2 px-3">
             <button type="button" class="btn btn-secondary btn-sm" @click="showReceiveModal = false">Batal</button>
-            <button type="button" class="btn btn-success btn-sm" @click="confirmReceive">Simpan Penerimaan Retur</button>
+            <button type="button" class="btn btn-danger btn-sm fw-bold shadow-xs px-3" @click="confirmReceive">Simpan Penerimaan Retur</button>
           </div>
         </div>
       </div>
