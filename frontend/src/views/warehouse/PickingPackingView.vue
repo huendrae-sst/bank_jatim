@@ -122,12 +122,6 @@
       </div>
     </div>
 
-    <div v-if="alertMessage" :class="`alert alert-${alertType} alert-dismissible fade show fs-8 py-2 px-3 shadow-xs`">
-      <i :class="alertType === 'success' ? 'bi bi-check-circle-fill me-2' : 'bi bi-exclamation-triangle-fill me-2'"></i>
-      <span>{{ alertMessage }}</span>
-      <button type="button" class="btn-close py-2" @click="alertMessage = ''"></button>
-    </div>
-
     <!-- Dual Column Kanban Board -->
     <div class="row g-3">
       <!-- Col 1: Picking Queue -->
@@ -319,10 +313,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const selectedType = ref('ALL');
-const alertMessage = ref('');
-const alertType = ref('success');
 
 const pickingQueueAll = ref([]);
 const packingQueueAll = ref([]);
@@ -404,12 +397,10 @@ const toggleSelectAllPacking = () => {
 const processPicking = async (order) => {
   try {
     await api.post(`/warehouse/picking/${order.id}/process`);
-    alertType.value = 'success';
-    alertMessage.value = `Order ${order.orderNumber} berhasil di-picking dan berpindah ke antrean Packing.`;
+    toast.success(`Order ${order.orderNumber} berhasil di-picking dan berpindah ke antrean Packing.`);
     await loadQueues();
   } catch (err) {
-    alertType.value = 'danger';
-    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal memproses picking';
+    toast.error(err?.response?.data?.message || err?.message || 'Gagal memproses picking');
   }
 };
 
@@ -417,13 +408,11 @@ const processBatchPicking = async () => {
   if (selectedPickingIds.value.length === 0) return;
   try {
     await api.post('/warehouse/picking/batch-process', { orderIds: selectedPickingIds.value });
-    alertType.value = 'success';
-    alertMessage.value = `Berhasil menyelesaikan Picking secara massal untuk ${selectedPickingIds.value.length} order!`;
+    toast.success(`Berhasil menyelesaikan Picking secara massal untuk ${selectedPickingIds.value.length} order!`);
     selectedPickingIds.value = [];
     await loadQueues();
   } catch (err) {
-    alertType.value = 'danger';
-    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal memproses batch picking';
+    toast.error(err?.response?.data?.message || err?.message || 'Gagal memproses batch picking');
   }
 };
 
@@ -434,12 +423,10 @@ const processPacking = async (order) => {
       totalWeightKg: order.weight,
       dimensionsCm: '30x20x15'
     });
-    alertType.value = 'success';
-    alertMessage.value = `Order ${order.orderNumber} selesai dikemas (${order.koli} Koli, ${order.weight} Kg) dan siap diterbitkan Manifest Ekspedisi.`;
+    toast.success(`Order ${order.orderNumber} selesai dikemas (${order.koli} Koli, ${order.weight} Kg) dan siap diterbitkan Manifest Ekspedisi.`);
     await loadQueues();
   } catch (err) {
-    alertType.value = 'danger';
-    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal memproses packing';
+    toast.error(err?.response?.data?.message || err?.message || 'Gagal memproses packing');
   }
 };
 
@@ -456,13 +443,11 @@ const processBatchPacking = async () => {
 
   try {
     await api.post('/warehouse/packing/batch-process', { items: itemsToPack });
-    alertType.value = 'success';
-    alertMessage.value = `Berhasil menyelesaikan Packing massal untuk ${itemsToPack.length} order! Siap terbit Manifest.`;
+    toast.success(`Berhasil menyelesaikan Packing massal untuk ${itemsToPack.length} order! Siap terbit Manifest.`);
     selectedPackingIds.value = [];
     await loadQueues();
   } catch (err) {
-    alertType.value = 'danger';
-    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal memproses batch packing';
+    toast.error(err?.response?.data?.message || err?.message || 'Gagal memproses batch packing');
   }
 };
 

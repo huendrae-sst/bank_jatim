@@ -18,8 +18,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
 
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
@@ -137,12 +135,12 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterBranch = ref('');
-const errorMessage = ref('');
 
 const firstItem = (switching) => switching.items?.[0] || {};
 
@@ -161,7 +159,6 @@ const approvedCount = ref(0);
 const rejectedCount = ref(0);
 
 const loadApprovals = async () => {
-  errorMessage.value = '';
   try {
     const [pendingResponse, approvedResponse, rejectedResponse] = await Promise.allSettled([
       api.get('/inventory/switching', { params: { status: 'PROPOSED' } }),
@@ -215,24 +212,24 @@ const sourceBranches = computed(() => {
 const totalQty = computed(() => pendingApprovals.value.reduce((sum, item) => sum + (item.qty || 0), 0));
 
 const approveSwitch = async (item) => {
-  errorMessage.value = '';
   try {
     await api.post(`/inventory/switching/${item.id}/approve`);
     await loadApprovals();
+    toast.success(`Pengajuan switching ${item.switchNo} berhasil disetujui.`);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || `Gagal menyetujui ${item.switchNo}.`;
+    toast.error(error?.message || error?.error || `Gagal menyetujui ${item.switchNo}.`);
   }
 };
 
 const rejectSwitch = async (item) => {
   const reason = window.prompt(`Alasan penolakan ${item.switchNo}:`);
   if (reason === null) return;
-  errorMessage.value = '';
   try {
     await api.post(`/inventory/switching/${item.id}/reject`, { reason });
     await loadApprovals();
+    toast.warn(`Pengajuan switching ${item.switchNo} ditolak.`);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || `Gagal menolak ${item.switchNo}.`;
+    toast.error(error?.message || error?.error || `Gagal menolak ${item.switchNo}.`);
   }
 };
 

@@ -154,6 +154,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const selectedWarehouse = ref('all');
 const search = ref('');
@@ -203,6 +204,7 @@ const fetchHistory = async () => {
     }));
   } catch (err) {
     console.error('Failed to fetch initial stock history', err);
+    toast.error('Gagal memuat riwayat saldo awal.');
   } finally {
     isLoading.value = false;
   }

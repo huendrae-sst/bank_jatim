@@ -24,13 +24,6 @@
       </div>
     </div>
 
-    <!-- Feedback Notification Banner -->
-    <div v-if="alertMessage" :class="`alert alert-${alertType} alert-dismissible fade show fs-8 py-2 px-3 shadow-xs`" role="alert">
-      <i :class="alertType === 'success' ? 'bi bi-check-circle-fill me-2' : 'bi bi-exclamation-triangle-fill me-2'"></i>
-      <span>{{ alertMessage }}</span>
-      <button type="button" class="btn-close py-2" @click="alertMessage = ''" aria-label="Close"></button>
-    </div>
-
     <!-- 2. Warehouse & Cut-off Date Selector Header Bar -->
     <div class="card shadow-xs border-0 rounded-3 p-3 bg-body">
       <div class="d-flex flex-column flex-lg-row lg-align-items-center justify-content-between gap-3">
@@ -544,6 +537,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
 import { exportToCsv } from '@/utils/exportHelper';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 
@@ -563,9 +557,6 @@ const searchQuery = ref('');
 const categoryFilter = ref('all');
 const statusFilter = ref('all');
 const notes = ref('');
-
-const alertMessage = ref('');
-const alertType = ref('success');
 
 // Import modal state
 const importModalOpen = ref(false);
@@ -840,7 +831,7 @@ const parseCsvText = (text) => {
 
 const handleImportSubmit = async () => {
   if (!importFile.value) {
-    alert('Pilih file CSV terlebih dahulu.');
+    toast.warn('Pilih file CSV terlebih dahulu.');
     return;
   }
 
@@ -850,7 +841,7 @@ const handleImportSubmit = async () => {
     const parsed = parseCsvText(text);
 
     if (parsed.length < 2) {
-      alert('File CSV kosong atau tidak memiliki baris data.');
+      toast.warn('File CSV kosong atau tidak memiliki baris data.');
       return;
     }
 
@@ -862,7 +853,7 @@ const handleImportSubmit = async () => {
     const priceIdx = header.findIndex(h => h.includes('harga') || h.includes('cost') || h.includes('satuan'));
 
     if (skuIdx === -1) {
-      alert('Kolom SKU tidak ditemukan pada file CSV. Pastikan header CSV memiliki kolom SKU.');
+      toast.warn('Kolom SKU tidak ditemukan pada file CSV. Pastikan header CSV memiliki kolom SKU.');
       return;
     }
 
@@ -903,16 +894,22 @@ const handleImportSubmit = async () => {
     }
   } catch (err) {
     console.error('Import CSV error', err);
-    alert('Gagal memproses file CSV: ' + err.message);
+    toast.error('Gagal memproses file CSV: ' + err.message);
   } finally {
     isImporting.value = false;
   }
 };
 
 const showAlert = (msg, type = 'success') => {
-  alertMessage.value = msg;
-  alertType.value = type;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (type === 'danger' || type === 'error') {
+    toast.error(msg);
+  } else if (type === 'warning' || type === 'warn') {
+    toast.warn(msg);
+  } else if (type === 'info') {
+    toast.info(msg);
+  } else {
+    toast.success(msg);
+  }
 };
 
 // Close dropdown on outside click

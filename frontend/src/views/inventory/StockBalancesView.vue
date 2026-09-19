@@ -90,10 +90,6 @@
         </div>
       </div>
 
-      <div v-if="loadError" class="alert alert-danger m-3 mb-0 fs-8">
-        <i class="bi bi-exclamation-octagon-fill me-1"></i> {{ loadError }}
-      </div>
-
       <!-- Table Content -->
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 fs-8">
@@ -165,13 +161,13 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import { exportToCsv } from '@/utils/exportHelper';
+import { toast } from '@/utils/toast';
 
 const selectedWarehouse = ref('ALL');
 const categoryFilter = ref('ALL');
 const stockFilter = ref('ALL');
 const searchQuery = ref('');
 const loading = ref(false);
-const loadError = ref('');
 
 const resetFilters = () => {
   searchQuery.value = '';
@@ -189,7 +185,6 @@ onMounted(() => {
 
 const loadStockBalances = async () => {
   loading.value = true;
-  loadError.value = '';
   try {
     const response = await api.get('/inventory/stock-balances', {
       params: {
@@ -223,7 +218,7 @@ const loadStockBalances = async () => {
       };
     });
   } catch (err) {
-    loadError.value = err?.message || err?.error || 'Gagal memuat saldo stok dari backend.';
+    toast.error(err?.message || err?.error || 'Gagal memuat saldo stok dari backend.');
   } finally {
     loading.value = false;
   }

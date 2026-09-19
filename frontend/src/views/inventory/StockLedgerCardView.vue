@@ -42,8 +42,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Immutable Mutation Records Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
@@ -136,6 +134,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import api from '@/api/client';
 import { exportToCsv } from '@/utils/exportHelper';
+import { toast } from '@/utils/toast';
 
 const selectedItem = ref('1');
 const selectedWarehouse = ref('WH-CEN-01');
@@ -143,7 +142,6 @@ const selectedMonth = ref('2026-09');
 const searchQuery = ref('');
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 const itemOptions = ref([]);
 const warehouseOptions = ref([]);
 
@@ -174,14 +172,13 @@ const loadOptions = async () => {
 
 const loadLedger = async () => {
   if (!selectedItem.value) return;
-  errorMessage.value = '';
   try {
     const response = await api.get(`/inventory/stock-card/${selectedItem.value}`, {
       params: { page: 0, size: 200, sort: 'createdAt,desc' }
     });
     ledgerLogs.value = (response.data?.content || []).map(mapLedger);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat kartu stok dari server.';
+    toast.error(error?.message || error?.error || 'Gagal memuat kartu stok dari server.');
     ledgerLogs.value = [];
   }
 };
@@ -227,7 +224,7 @@ onMounted(async () => {
     await loadOptions();
     await loadLedger();
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat opsi kartu stok.';
+    toast.error(error?.message || error?.error || 'Gagal memuat opsi kartu stok.');
   }
 });
 

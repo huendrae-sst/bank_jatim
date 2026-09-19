@@ -174,6 +174,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
@@ -267,9 +268,10 @@ const saveOpname = async () => {
     await api.post('/inventory/stock-opname', payload);
     savedDocNo.value = docNo;
     showSuccessModal.value = true;
+    toast.success(`Hasil stock opname berhasil disimpan: ${docNo}`);
   } catch (err) {
     console.error('Failed to save stock opname', err);
-    alert('Gagal menyimpan hasil stock opname: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menyimpan hasil stock opname: ' + (err.response?.data?.message || err.message));
   } finally {
     isSaving.value = false;
   }

@@ -19,12 +19,6 @@
     </div>
 
 
-    <!-- Feedback Banner -->
-    <div v-if="reconSuccessMessage" class="alert alert-success d-flex align-items-center p-3 rounded-3 shadow-xs mb-3">
-      <i class="bi bi-check-circle-fill fs-4 me-2"></i>
-      <div class="fs-8 fw-semibold">{{ reconSuccessMessage }}</div>
-    </div>
-
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
@@ -139,6 +133,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
@@ -146,7 +141,6 @@ const searchQuery = ref('');
 const filterWarehouse = ref('');
 const isProcessing = ref(false);
 const isLoading = ref(true);
-const reconSuccessMessage = ref('');
 
 const reconList = ref([]);
 
@@ -163,17 +157,23 @@ const fetchReconBalances = async () => {
   try {
     const res = await api.get('/inventory/stock-balances', { params: { size: 100 } });
     const content = res.data?.data?.content || res.data?.content || [];
-    reconList.value = content.map(b => ({
+    reconList.value = content.map((b) => ({
+      id: b.id,
       sku: b.item?.sku || b.itemCode || `SKU-${b.id}`,
       name: b.item?.name || b.itemName || 'Barang Persediaan',
-      warehouse: b.warehouse?.name || b.warehouseName || 'Gudang Pusat',
+      category: b.item?.categoryName || 'Kartu & Perlengkapan',
+      warehouse: b.warehouse?.name || b.warehouseName || 'Gudang Pusat Margomulyo',
       physical: b.onHand || 0,
       ledger: b.onHand || 0,
       reserved: b.reserved || 0,
-      diff: 0
+      allocated: b.allocated || 0,
+      available: (b.onHand || 0) - (b.reserved || 0) - (b.allocated || 0),
+      diff: 0,
+      status: 'MATCHED'
     }));
   } catch (err) {
     console.error('Failed to fetch reconciliation balances', err);
+    toast.error('Gagal memuat saldo rekonsiliasi stok.');
   } finally {
     isLoading.value = false;
   }
@@ -206,13 +206,10 @@ const runRecon = async () => {
     const res = await api.post('/inventory/reconciliation');
     const data = res.data?.data || res.data;
     await fetchReconBalances();
-    reconSuccessMessage.value = 'Engine Rekonsiliasi selesai dijalankan pada ' + new Date().toLocaleTimeString('id-ID') + ` WIB. ${data.skuCount || reconList.value.length} SKU persediaan balance 100%.`;
-    setTimeout(() => {
-      reconSuccessMessage.value = '';
-    }, 6000);
+    toast.success(`Engine Rekonsiliasi selesai dijalankan pada ${new Date().toLocaleTimeString('id-ID')} WIB. ${data.skuCount || reconList.value.length} SKU persediaan balance 100%.`);
   } catch (err) {
     console.error('Failed to run reconciliation', err);
-    alert('Gagal menjalankan engine rekonsiliasi: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menjalankan engine rekonsiliasi: ' + (err.response?.data?.message || err.message));
   } finally {
     isProcessing.value = false;
   }

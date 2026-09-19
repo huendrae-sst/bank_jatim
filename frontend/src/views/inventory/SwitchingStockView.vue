@@ -18,8 +18,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
 
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -260,6 +258,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const showModal = ref(false);
 const showDetailModal = ref(false);
@@ -270,7 +269,6 @@ const searchQuery = ref('');
 const activeTab = ref('all');
 const filterFrom = ref('ALL');
 const filterTo = ref('ALL');
-const errorMessage = ref('');
 const organizations = ref([]);
 const warehouses = ref([]);
 const items = ref([]);
@@ -375,11 +373,10 @@ const saveSwitching = async () => {
   const sourceWarehouse = warehouseForOrg(switchForm.sourceOrganizationId);
   const destinationWarehouse = warehouseForOrg(switchForm.destinationOrganizationId);
   if (!sourceWarehouse || !destinationWarehouse) {
-    errorMessage.value = 'Gudang asal/tujuan belum tersedia untuk cabang yang dipilih.';
+    toast.warn('Gudang asal/tujuan belum tersedia untuk cabang yang dipilih.');
     return;
   }
 
-  errorMessage.value = '';
   try {
     await api.post('/inventory/switching', {
       sourceOrganizationId: switchForm.sourceOrganizationId,
@@ -395,9 +392,10 @@ const saveSwitching = async () => {
       ]
     });
     await loadSwitching();
+    toast.success('Pengajuan switching antar-cabang berhasil dikirim.');
     showModal.value = false;
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal mengirim pengajuan switching.';
+    toast.error(error?.message || error?.error || 'Gagal mengirim pengajuan switching.');
   }
 };
 

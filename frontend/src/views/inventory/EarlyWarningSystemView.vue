@@ -15,12 +15,6 @@
       </div>
     </div>
 
-    <!-- EWS Notification Banner -->
-    <div v-if="scanMessage" class="alert alert-success d-flex align-items-center p-3 rounded-3 shadow-xs mb-3">
-      <i class="bi bi-check-circle-fill fs-4 me-2"></i>
-      <div class="fs-8 fw-semibold">{{ scanMessage }}</div>
-    </div>
-
     <!-- 4 KPI Info Boxes -->
     <div class="row g-2 g-md-3 mb-3">
       <div class="col-12 col-sm-6 col-xl-3">
@@ -133,10 +127,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const isScanning = ref(false);
 const isLoading = ref(true);
-const scanMessage = ref('');
 const criticalCount = ref(0);
 const reorderCount = ref(0);
 const lowStockItems = ref([]);
@@ -153,13 +147,11 @@ const fetchEwsData = async (manualScan = false) => {
     reorderCount.value = lowStockItems.value.filter(i => i.onHand <= i.reorderPoint).length;
 
     if (manualScan) {
-      scanMessage.value = 'Pemindaian algoritma EWS selesai pada ' + new Date().toLocaleTimeString('id-ID') + ' WIB! Data telah diperbarui dari server persediaan.';
-      setTimeout(() => {
-        scanMessage.value = '';
-      }, 5000);
+      toast.success('Pemindaian algoritma EWS selesai pada ' + new Date().toLocaleTimeString('id-ID') + ' WIB! Data telah diperbarui dari server persediaan.');
     }
   } catch (err) {
     console.error('Failed to fetch EWS data', err);
+    toast.error('Gagal memuat data Early Warning System persediaan.');
   } finally {
     isScanning.value = false;
     isLoading.value = false;

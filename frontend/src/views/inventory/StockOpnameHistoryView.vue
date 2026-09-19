@@ -131,6 +131,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
@@ -200,6 +201,7 @@ const fetchOpnameHistory = async () => {
     }));
   } catch (err) {
     console.error('Failed to fetch opname history', err);
+    toast.error('Gagal memuat riwayat stock opname.');
   } finally {
     isLoading.value = false;
   }

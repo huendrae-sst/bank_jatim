@@ -18,20 +18,6 @@
       </div>
     </div>
 
-    <!-- Success Banner -->
-    <div v-if="packingSuccessMessage" class="alert alert-success d-flex align-items-center justify-content-between p-3 rounded-3 shadow-xs mb-3">
-      <div class="d-flex align-items-center">
-        <i class="bi bi-check-circle-fill fs-4 me-2"></i>
-        <div class="fs-8 fw-semibold">{{ packingSuccessMessage }}</div>
-      </div>
-      <router-link to="/distribution/shipments" class="btn btn-sm btn-success fw-bold text-nowrap ms-2">
-        Lihat Pengiriman
-      </router-link>
-    </div>
-
-
-    <!-- Packing Table Card -->
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
     <!-- Packing Table Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -217,6 +203,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
@@ -225,7 +212,6 @@ const activeTab = ref('queue');
 const filterDestination = ref('ALL');
 const filterStatus = ref('ALL');
 const filterOrderType = ref('ALL');
-const errorMessage = ref('');
 
 const selectedOrderIds = ref([]);
 const isBatchProcessing = ref(false);
@@ -333,10 +319,7 @@ const paginatedQueue = computed(() => {
   return filteredQueue.value.slice(start, start + perPage.value);
 });
 
-const packingSuccessMessage = ref('');
-
 const completePacking = async (item) => {
-  errorMessage.value = '';
   try {
     const response = await api.post(`/warehouse/packing/${item.id}/process`, {
       koliCount: item.koli,
@@ -344,13 +327,10 @@ const completePacking = async (item) => {
       dimensionsCm: '30x20x15'
     });
     const packingNumber = response.data?.packingNumber || item.packNo;
-    packingSuccessMessage.value = `Label barcode koli dan Surat Jalan untuk ${packingNumber} (${item.destination}) berhasil dicetak. Paket siap diserahkan ke Ekspedisi.`;
+    toast.success(`Label barcode koli dan Surat Jalan untuk ${packingNumber} (${item.destination}) berhasil dicetak. Paket siap diserahkan ke Ekspedisi.`);
     await loadPackingQueue();
-    setTimeout(() => {
-      packingSuccessMessage.value = '';
-    }, 6000);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memproses packing ke backend.';
+    toast.error(error?.message || error?.error || 'Gagal memproses packing ke backend.');
   }
 };
 
@@ -363,14 +343,11 @@ const processBatchPacking = async () => {
     const res = await api.post('/warehouse/packing/batch-process', {
       orderIds: selectedOrderIds.value
     });
-    packingSuccessMessage.value = res.data?.message || `${selectedOrderIds.value.length} order berhasil dikemas dan siap dibuatkan manifest pengiriman!`;
+    toast.success(res.data?.message || `${selectedOrderIds.value.length} order berhasil dikemas dan siap dibuatkan manifest pengiriman!`);
     selectedOrderIds.value = [];
     await loadPackingQueue();
-    setTimeout(() => {
-      packingSuccessMessage.value = '';
-    }, 6000);
   } catch (error) {
-    alert('Gagal memproses batch packing: ' + (error?.response?.data?.message || error.message));
+    toast.error('Gagal memproses batch packing: ' + (error?.response?.data?.message || error.message));
   } finally {
     isBatchProcessing.value = false;
   }

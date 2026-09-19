@@ -20,9 +20,6 @@
 
 
     <!-- Picking Table Card -->
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
-    <!-- Picking Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- Card Header with Navigation Tabs & Action Button -->
       <div class="card-header border-bottom p-2 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
@@ -257,6 +254,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const scanBarcodeModal = ref(false);
 const scannedBarcode = ref('');
@@ -268,7 +266,6 @@ const activeTab = ref('queue');
 const filterBranch = ref('ALL');
 const filterPriority = ref('ALL');
 const filterOrderType = ref('ALL');
-const errorMessage = ref('');
 
 const selectedOrderIds = ref([]);
 const isBatchProcessing = ref(false);
@@ -394,9 +391,9 @@ const processPicking = async (item) => {
     try {
       await api.post(`/warehouse/picking/${item.id}/process`);
       await loadPickingQueue();
-      alert(`Batch ${item.batchNo} sukses diambil dan dialihkan ke Antrean Packing.`);
+      toast.success(`Batch ${item.batchNo} sukses diambil dan dialihkan ke Antrean Packing.`);
     } catch (error) {
-      errorMessage.value = error?.message || error?.error || 'Gagal memproses picking ke backend.';
+      toast.error(error?.message || error?.error || 'Gagal memproses picking ke backend.');
     }
   }
 };
@@ -410,11 +407,11 @@ const processBatchPicking = async () => {
     const res = await api.post('/warehouse/picking/batch-process', {
       orderIds: selectedOrderIds.value
     });
-    alert(res.data?.message || `${selectedOrderIds.value.length} order berhasil di-picking dan diteruskan ke packing!`);
+    toast.success(res.data?.message || `${selectedOrderIds.value.length} order berhasil di-picking dan diteruskan ke packing!`);
     selectedOrderIds.value = [];
     await loadPickingQueue();
   } catch (error) {
-    alert('Gagal memproses batch picking: ' + (error?.response?.data?.message || error.message));
+    toast.error('Gagal memproses batch picking: ' + (error?.response?.data?.message || error.message));
   } finally {
     isBatchProcessing.value = false;
   }
