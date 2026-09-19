@@ -195,17 +195,20 @@
     </div>
 
     <!-- Modal Form (Tambah / Edit Wilayah) -->
-    <div v-if="showFormModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div v-if="showFormModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;" @click.self="showFormModal = false">
       <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0">
-          <div class="modal-header bg-danger text-white py-2 px-3">
-            <h5 class="modal-title fs-7 fw-bold">
+        <div class="modal-content border-0 shadow-lg">
+          <!-- Modal Header -->
+          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="modal-title fw-bold text-body fs-6 mb-0">
               {{ isEditMode ? 'Ubah Data Wilayah' : 'Tambah Wilayah Baru' }}
-            </h5>
-            <button type="button" class="btn-close btn-close-white" @click="showFormModal = false"></button>
+            </h6>
+            <button type="button" class="btn-close-modal" @click="showFormModal = false" aria-label="Tutup">
+              <i class="bi bi-x-lg"></i>
+            </button>
           </div>
           <form @submit.prevent="saveRegion">
-            <div class="modal-body p-3">
+            <div class="modal-body p-3 fs-8 space-y-3">
               <div class="row g-3">
                 <div class="col-12 col-md-4">
                   <label class="form-label fw-bold fs-8 mb-1">Kode Wilayah <span class="text-danger">*</span></label>
@@ -258,7 +261,7 @@
                   <div class="border rounded p-2 bg-body-tertiary">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                       <label class="form-label fw-bold fs-8 mb-0">
-                        <i class="bi bi-building me-1"></i> Pilih Kantor Cabang Anggota
+                        Pilih Kantor Cabang Anggota
                       </label>
                       <div class="d-flex gap-2">
                         <button type="button" class="btn btn-xs btn-outline-secondary" @click="selectAllFormBranches">
@@ -312,13 +315,14 @@
                 </div>
               </div>
             </div>
-            <div class="modal-footer d-flex justify-content-end align-items-center gap-2 py-2 px-3">
-              <button type="button" class="btn btn-sm btn-secondary" @click="showFormModal = false" :disabled="submitting">
+            <!-- Modal Footer (Tombol Batal dan Simpan Rata Kanan) -->
+            <div class="modal-footer bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3 border-top">
+              <button type="button" class="btn btn-sm btn-outline-secondary px-3 fs-8" @click="showFormModal = false" :disabled="submitting">
                 Batal
               </button>
-              <button type="submit" class="btn btn-sm btn-danger fw-bold px-3" :disabled="submitting">
-                <span v-if="submitting" class="spinner-border spinner-border-sm me-1"></span>
-                <span v-else>Simpan</span>
+              <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs px-3 fs-8" :disabled="submitting">
+                <span v-if="submitting" class="spinner-border spinner-border-sm me-1" role="status"></span>
+                {{ submitting ? 'Menyimpan...' : 'Simpan' }}
               </button>
             </div>
           </form>
@@ -327,16 +331,19 @@
     </div>
 
     <!-- Modal Form (Quick Branch Mapping) -->
-    <div v-if="showMappingModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);">
+    <div v-if="showMappingModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;" @click.self="showMappingModal = false">
       <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content shadow-lg border-0">
-          <div class="modal-header bg-primary text-white py-2 px-3">
-            <h5 class="modal-title fs-7 fw-bold">
-              Petakan Cabang: {{ selectedRegion?.name }}
-            </h5>
-            <button type="button" class="btn-close btn-close-white" @click="showMappingModal = false"></button>
+        <div class="modal-content border-0 shadow-lg">
+          <!-- Modal Header -->
+          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+            <h6 class="modal-title fw-bold text-body fs-6 mb-0">
+              Petakan Cabang: <span class="font-monospace text-danger">{{ selectedRegion?.name }}</span>
+            </h6>
+            <button type="button" class="btn-close-modal" @click="showMappingModal = false" aria-label="Tutup">
+              <i class="bi bi-x-lg"></i>
+            </button>
           </div>
-          <div class="modal-body p-3">
+          <div class="modal-body p-3 fs-8 space-y-3">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <div class="input-group input-group-sm w-50">
                 <span class="input-group-text bg-body text-secondary border-end-0 fs-9"><i class="bi bi-search"></i></span>
@@ -400,13 +407,14 @@
               <div>Sub-cabang (Capem) akan otomatis mengikuti cabang induknya.</div>
             </div>
           </div>
-          <div class="modal-footer d-flex justify-content-end align-items-center gap-2 py-2 px-3">
-            <button type="button" class="btn btn-sm btn-secondary" @click="showMappingModal = false" :disabled="submitting">
+          <!-- Modal Footer (Tombol Batal dan Simpan Rata Kanan) -->
+          <div class="modal-footer bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3 border-top">
+            <button type="button" class="btn btn-sm btn-outline-secondary px-3 fs-8" @click="showMappingModal = false" :disabled="submitting">
               Batal
             </button>
-            <button type="button" class="btn btn-sm btn-primary fw-bold" @click="saveBranchMapping" :disabled="submitting">
-              <span v-if="submitting" class="spinner-border spinner-border-sm me-1"></span>
-              Terapkan Pemetaan
+            <button type="button" class="btn btn-sm btn-danger fw-bold shadow-xs px-3 fs-8" @click="saveBranchMapping" :disabled="submitting">
+              <span v-if="submitting" class="spinner-border spinner-border-sm me-1" role="status"></span>
+              {{ submitting ? 'Menyimpan...' : 'Terapkan Pemetaan' }}
             </button>
           </div>
         </div>
