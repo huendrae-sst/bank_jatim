@@ -24,15 +24,7 @@
       </div>
     </div>
 
-    <!-- Alert Banner -->
-    <div v-if="alertMessage" class="alert alert-dismissible fade show shadow-xs fs-8 py-2 px-3 mb-3" :class="alertClass" role="alert">
-      <i :class="alertIcon" class="me-2 fs-7"></i>
-      <span>{{ alertMessage }}</span>
-      <button type="button" class="btn-close py-2" @click="alertMessage = ''" aria-label="Close"></button>
-    </div>
-
-    <!-- 3. Split 2-Column Layout (Role Selector on Left, Menu Tree on Right) -->
-    <!-- 3. Split 2-Column Layout (Role Selector on Left, Menu Tree on Right) -->
+    <!-- 2. Split 2-Column Layout (Role Selector on Left, Menu Tree on Right) -->
     <div class="row g-3">
       <!-- KOLOM KIRI: DAFTAR PERAN PENGGUNA (ROLE SELECTOR) -->
       <div class="col-12 col-md-5 col-lg-4 col-xl-4 col-xxl-3">
@@ -384,27 +376,22 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useMenuStore } from '@/stores/menu';
 import { useRoleStore } from '@/stores/role';
+import { toast } from '@/utils/toast';
 
 const menuStore = useMenuStore();
 const roleStore = useRoleStore();
 
-// Alert state
-const alertMessage = ref('');
-const alertClass = ref('alert-success');
-const alertIcon = ref('bi-check-circle');
-
+// Toast notification helper
 const showAlert = (msg, type = 'success') => {
-  alertMessage.value = msg;
   if (type === 'success') {
-    alertClass.value = 'alert-success';
-    alertIcon.value = 'bi-check-circle';
+    toast.success(msg, 'Berhasil');
+  } else if (type === 'error') {
+    toast.error(msg, 'Gagal');
+  } else if (type === 'warn' || type === 'warning') {
+    toast.warn(msg, 'Peringatan');
   } else {
-    alertClass.value = 'alert-danger';
-    alertIcon.value = 'bi-exclamation-triangle';
+    toast.info(msg, 'Informasi');
   }
-  setTimeout(() => {
-    if (alertMessage.value === msg) alertMessage.value = '';
-  }, 4000);
 };
 
 // Left Column: Role Search & Filtering
@@ -515,7 +502,7 @@ const selectRole = async (roleCode) => {
 // Reset to initial selection
 const resetToInitialSelection = () => {
   selectedMenuCodes.value = new Set(initialSelectedMenuCodes.value);
-  showAlert('Perubahan hak akses dibatalkan.');
+  showAlert('Perubahan hak akses dibatalkan.', 'info');
 };
 
 // Save Role Permissions
