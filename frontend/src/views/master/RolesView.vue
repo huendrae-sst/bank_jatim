@@ -78,9 +78,6 @@
       </div>
 
       <!-- 6. Table -->
-      <div v-if="errorMessage" class="alert alert-danger rounded-0 border-start-0 border-end-0 mb-0 fs-8">
-        {{ errorMessage }}
-      </div>
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 fs-8">
           <thead class="bg-body-secondary text-secondary border-bottom">
@@ -218,6 +215,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoleStore } from '@/stores/role';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const roleStore = useRoleStore();
 
@@ -319,12 +317,16 @@ const saveRole = async () => {
   try {
     if (isEditMode.value) {
       await roleStore.updateRole(editingRoleCode.value, roleForm);
+      toast.success(`Peran ${roleForm.name} berhasil diperbarui.`, 'Berhasil');
     } else {
       await roleStore.addRole(roleForm);
+      toast.success(`Peran ${roleForm.name} berhasil ditambahkan.`, 'Berhasil');
     }
     showModal.value = false;
   } catch (err) {
-    formError.value = err?.message || 'Gagal menyimpan data peran.';
+    const msg = err?.message || 'Gagal menyimpan data peran.';
+    formError.value = msg;
+    toast.error(msg, 'Gagal');
   } finally {
     saving.value = false;
   }
@@ -334,8 +336,9 @@ const deleteRoleItem = async (r) => {
   if (r.systemRole) return;
   const userCount = getUserCount(r.code);
   if (userCount > 0) {
-    alert(
-      `Peran "${r.name}" (${r.code}) saat ini digunakan oleh ${userCount} pengguna. Harap pindahkan peran pengguna terkait terlebih dahulu.`
+    toast.warn(
+      `Peran "${r.name}" (${r.code}) saat ini digunakan oleh ${userCount} pengguna. Harap pindahkan peran pengguna terkait terlebih dahulu.`,
+      'Peringatan'
     );
     return;
   }
@@ -343,8 +346,11 @@ const deleteRoleItem = async (r) => {
   if (confirm(`Yakin ingin menghapus peran "${r.name}" (${r.code})?`)) {
     try {
       await roleStore.deleteRole(r.code);
+      toast.success(`Peran "${r.name}" berhasil dihapus.`, 'Berhasil');
     } catch (err) {
-      errorMessage.value = err?.message || 'Gagal menghapus peran.';
+      const msg = err?.message || 'Gagal menghapus peran.';
+      errorMessage.value = msg;
+      toast.error(msg, 'Gagal');
     }
   }
 };

@@ -22,13 +22,6 @@
       </div>
     </div>
 
-    <!-- Alert Feedback Message -->
-    <div v-if="alertMessage" class="alert alert-dismissible fade show fs-8 py-2 px-3 mb-3" :class="alertClass" role="alert">
-      <i :class="alertIcon" class="me-1"></i>
-      <span>{{ alertMessage }}</span>
-      <button type="button" class="btn-close py-2" @click="alertMessage = ''" aria-label="Close"></button>
-    </div>
-
     <!-- 2. Main Card Container -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- Card Header with Navigation Tabs (Hanya Label Tanpa Icon dan Tanpa Jumlah Record) -->
@@ -1620,6 +1613,7 @@ import { useRoute, useRouter } from 'vue-router';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 import api from '@/api/client';
 import { extractList } from '@/utils/responseParser';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const router = useRouter();
@@ -1646,22 +1640,16 @@ watch(() => route.query.tab, (newTab) => {
   }
 });
 
-// Alerts
-const alertMessage = ref('');
-const alertClass = ref('alert-success');
-const alertIcon = ref('bi bi-check-circle-fill');
-
+// Toast notification helper
 const showAlert = (message, type = 'success') => {
-  alertMessage.value = message;
   if (type === 'success') {
-    alertClass.value = 'alert-success border-success-subtle text-success-emphasis';
-    alertIcon.value = 'bi bi-check-circle-fill';
-  } else if (type === 'danger') {
-    alertClass.value = 'alert-danger border-danger-subtle text-danger-emphasis';
-    alertIcon.value = 'bi bi-exclamation-triangle-fill';
+    toast.success(message, 'Berhasil');
+  } else if (type === 'danger' || type === 'error') {
+    toast.error(message, 'Gagal');
+  } else if (type === 'warning' || type === 'warn') {
+    toast.warn(message, 'Peringatan');
   } else {
-    alertClass.value = 'alert-info border-info-subtle text-info-emphasis';
-    alertIcon.value = 'bi bi-info-circle-fill';
+    toast.info(message, 'Informasi');
   }
 };
 

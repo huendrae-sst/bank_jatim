@@ -22,14 +22,7 @@
       </div>
     </div>
 
-    <!-- Alert Feedback Message -->
-    <div v-if="alertMessage" class="alert alert-dismissible fade show fs-8 py-2 px-3 mb-3" :class="alertClass" role="alert">
-      <i :class="alertIcon" class="me-1"></i>
-      <span>{{ alertMessage }}</span>
-      <button type="button" class="btn-close py-2" @click="alertMessage = ''" aria-label="Close"></button>
-    </div>
-
-    <!-- 2. Main Card Container -->
+    <!-- 2. Main Tabbed Card Container -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- Card Header with Navigation Tabs (Hanya Label Tanpa Icon dan Tanpa Jumlah Record) -->
       <div class="card-header bg-body p-2 px-3 border-bottom d-flex flex-column flex-md-row align-items-stretch align-items-md-center justify-content-between gap-2">
@@ -950,6 +943,7 @@ import { useRoute, useRouter } from 'vue-router';
 import api from '@/api/client';
 import { extractList } from '@/utils/responseParser';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const router = useRouter();
@@ -975,29 +969,16 @@ const switchTab = (tab) => {
 };
 
 // ==========================================
-// 2. Alert Feedback System
+// 2. Toast Alert System
 // ==========================================
-const alertMessage = ref('');
-const alertClass = ref('alert-success');
-const alertIcon = ref('bi bi-check-circle-fill');
-
 const showAlert = (message, type = 'success') => {
-  alertMessage.value = message;
   if (type === 'success') {
-    alertClass.value = 'alert-success text-success-emphasis border-success-subtle bg-success-subtle';
-    alertIcon.value = 'bi bi-check-circle-fill';
-  } else if (type === 'warning') {
-    alertClass.value = 'alert-warning text-warning-emphasis border-warning-subtle bg-warning-subtle';
-    alertIcon.value = 'bi bi-exclamation-triangle-fill';
+    toast.success(message, 'Berhasil');
+  } else if (type === 'warning' || type === 'warn') {
+    toast.warn(message, 'Peringatan');
   } else {
-    alertClass.value = 'alert-danger text-danger-emphasis border-danger-subtle bg-danger-subtle';
-    alertIcon.value = 'bi bi-x-circle-fill';
+    toast.error(message, 'Gagal');
   }
-  setTimeout(() => {
-    if (alertMessage.value === message) {
-      alertMessage.value = '';
-    }
-  }, 4000);
 };
 
 // ==========================================

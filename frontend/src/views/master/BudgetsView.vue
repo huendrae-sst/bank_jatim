@@ -153,6 +153,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const showModal = ref(false);
 const showDetailModal = ref(false);
@@ -232,7 +233,7 @@ const openDetailModal = (b) => {
 };
 
 const saveBudget = () => {
-  alert('Penyimpanan pagu anggaran belum tersedia di backend production.');
+  toast.info('Penyimpanan pagu anggaran belum tersedia di backend production.', 'Informasi');
   showModal.value = false;
 };
 

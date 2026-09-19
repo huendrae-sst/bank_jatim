@@ -11,8 +11,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="table-responsive">
@@ -114,13 +112,13 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const showModal = ref(false);
 const isEditMode = ref(false);
 const editingId = ref(null);
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const mapMapping = (mapping) => ({
   id: mapping.id,
@@ -216,28 +214,29 @@ const buildPayload = () => ({
 });
 
 const saveMapping = async () => {
-  errorMessage.value = '';
   try {
     if (isEditMode.value) {
       await api.put(`/master/expedition-mappings/${editingId.value}`, buildPayload());
+      toast.success('Pemetaan rute ekspedisi berhasil diperbarui.', 'Berhasil');
     } else {
       await api.post('/master/expedition-mappings', buildPayload());
+      toast.success('Pemetaan rute ekspedisi berhasil ditambahkan.', 'Berhasil');
     }
     await loadMappings();
     showModal.value = false;
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menyimpan pemetaan ekspedisi.';
+    toast.error(error?.message || error?.error || 'Gagal menyimpan pemetaan ekspedisi.', 'Gagal');
   }
 };
 
 const deleteMapping = async (m) => {
   if (confirm(`Yakin ingin menghapus rute ke "${m.branch}"?`)) {
-    errorMessage.value = '';
     try {
       await api.delete(`/master/expedition-mappings/${m.id}`);
+      toast.success(`Pemetaan rute ke "${m.branch}" berhasil dihapus.`, 'Berhasil');
       await loadMappings();
     } catch (error) {
-      errorMessage.value = error?.message || error?.error || 'Gagal menghapus pemetaan ekspedisi.';
+      toast.error(error?.message || error?.error || 'Gagal menghapus pemetaan ekspedisi.', 'Gagal');
     }
   }
 };

@@ -11,12 +11,6 @@
       </div>
     </div>
 
-    <!-- Success Notification Toast -->
-    <div v-if="alertMessage" class="alert alert-success d-flex align-items-center p-3 rounded-3 shadow-xs mb-3">
-      <i class="bi bi-check-circle-fill fs-4 me-2"></i>
-      <div class="fs-8 fw-semibold">{{ alertMessage }}</div>
-    </div>
-
     <!-- Alert Summary -->
     <div v-if="highRiskBranches.length > 0" class="alert alert-warning d-flex align-items-center justify-content-between p-3 rounded-3 shadow-xs mb-3 flex-wrap gap-2">
       <div class="d-flex align-items-center gap-3">
@@ -82,12 +76,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const isLoading = ref(true);
 const ewsList = ref([]);
-const alertMessage = ref('');
 
 const fetchBudgets = async () => {
   isLoading.value = true;
@@ -108,6 +102,7 @@ const fetchBudgets = async () => {
     }).sort((a, b) => b.ratio - a.ratio);
   } catch (err) {
     console.error('Failed to load budgets for EWS', err);
+    toast.error('Gagal memuat data anggaran untuk EWS.', 'Gagal');
   } finally {
     isLoading.value = false;
   }
@@ -118,10 +113,7 @@ const highRiskBranches = computed(() => {
 });
 
 const sendAlert = (b) => {
-  alertMessage.value = `Notifikasi peringatan dini (EWS) telah berhasil dikirimkan ke Pemimpin ${b.branch} dan Divisi Perencanaan & Keuangan.`;
-  setTimeout(() => {
-    alertMessage.value = '';
-  }, 4000);
+  toast.success(`Notifikasi peringatan dini (EWS) telah berhasil dikirimkan ke Pemimpin ${b.branch} dan Divisi Perencanaan & Keuangan.`, 'Berhasil');
 };
 
 const paginatedEwsList = computed(() => {

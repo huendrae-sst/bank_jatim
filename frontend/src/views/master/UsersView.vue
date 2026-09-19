@@ -83,9 +83,6 @@
       </div>
 
       <!-- 6. Table -->
-      <div v-if="errorMessage" class="alert alert-danger rounded-0 border-start-0 border-end-0 mb-0 fs-8">
-        {{ errorMessage }}
-      </div>
       <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 fs-8">
           <thead class="bg-body-secondary text-secondary border-bottom">
@@ -246,6 +243,7 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import { useRoleStore } from '@/stores/role';
 import api from '@/api/client';
 import { extractList } from '@/utils/responseParser';
+import { toast } from '@/utils/toast';
 
 const roleStore = useRoleStore();
 
@@ -450,13 +448,17 @@ const saveUser = async () => {
     if (isEditMode.value) {
       const user = userList.value.find(u => u.username === editingUsername.value);
       await api.put(`/master/users/${user.id}`, payload);
+      toast.success(`Pengguna ${payload.name || payload.username} berhasil diperbarui.`, 'Berhasil');
     } else {
       await api.post('/master/users', payload);
+      toast.success(`Pengguna ${payload.name || payload.username} berhasil ditambahkan.`, 'Berhasil');
     }
     await loadUsers();
     showModal.value = false;
   } catch (error) {
-    formError.value = error?.message || error?.error || 'Gagal menyimpan pengguna.';
+    const msg = error?.message || error?.error || 'Gagal menyimpan pengguna.';
+    formError.value = msg;
+    toast.error(msg, 'Gagal');
   } finally {
     saving.value = false;
   }
@@ -466,9 +468,12 @@ const deleteUser = async (u) => {
   if (confirm(`Yakin ingin menghapus pengguna "${u.name}"?`)) {
     try {
       await api.delete(`/master/users/${u.id}`);
+      toast.success(`Pengguna "${u.name}" berhasil dihapus.`, 'Berhasil');
       await loadUsers();
     } catch (error) {
-      errorMessage.value = error?.message || error?.error || 'Gagal menghapus pengguna.';
+      const msg = error?.message || error?.error || 'Gagal menghapus pengguna.';
+      errorMessage.value = msg;
+      toast.error(msg, 'Gagal');
     }
   }
 };
