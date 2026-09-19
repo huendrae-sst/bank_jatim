@@ -1,10 +1,12 @@
+import { toast } from '@/utils/toast';
+
 /**
  * Utility untuk ekspor data tabel menjadi file CSV yang diunduh langsung di browser
  * Mendukung UTF-8 BOM agar terbaca sempurna di Microsoft Excel
  */
 export function exportToCsv(filename, headers, rows) {
   if (!rows || !rows.length) {
-    alert('Tidak ada data untuk diekspor.');
+    toast.warn('Tidak ada data untuk diekspor.');
     return;
   }
 
