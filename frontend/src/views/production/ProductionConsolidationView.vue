@@ -243,6 +243,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const router = useRouter();
 const consolidationList = ref([]);
@@ -345,14 +346,14 @@ const submitGenerateSpk = async () => {
     const res = await api.post('/production-orders', payload);
     const created = res.data?.data || res.data;
     showModal.value = false;
-    alert(`SPK Produksi ${created.productionNumber || ''} berhasil diterbitkan.`);
+    toast.success(`SPK Produksi ${created.productionNumber || ''} berhasil diterbitkan.`);
     if (created.id) {
       router.push(`/production/${created.id}`);
     } else {
       router.push('/production');
     }
   } catch (err) {
-    alert('Gagal menerbitkan SPK: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menerbitkan SPK: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }

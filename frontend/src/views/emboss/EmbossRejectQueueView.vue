@@ -66,15 +66,14 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const rejectList = ref([]);
 
 const loadRejectQueue = async () => {
-  errorMessage.value = '';
   try {
     const res = await api.get('/emboss/reject-queue');
     const data = res.data?.content || res.data || [];
@@ -90,7 +89,7 @@ const loadRejectQueue = async () => {
     }
   } catch (err) {
     rejectList.value = [];
-    errorMessage.value = err?.message || 'Gagal memuat antrean reject emboss dari backend.';
+    toast.error(err?.message || 'Gagal memuat antrean reject emboss dari backend.');
     console.warn('Failed loading reject queue from backend:', err);
   }
 };
@@ -105,19 +104,19 @@ const reprocess = async (r) => {
   if (newName !== null) {
     const trimmed = newName.trim();
     if (!trimmed) {
-      alert('Nama tidak boleh kosong.');
+      toast.warn('Nama tidak boleh kosong.');
       return;
     }
     if (trimmed.length > 26) {
-      alert('Nama tidak boleh melebihi 26 karakter.');
+      toast.warn('Nama tidak boleh melebihi 26 karakter.');
       return;
     }
     try {
       await api.put(`/emboss/records/${r.id}/reprocess`, { customerName: trimmed });
-      alert(`Rekaman ${r.accountNo} berhasil diperbaiki dan dimasukkan kembali ke antrean cetak valid.`);
+      toast.success(`Rekaman ${r.accountNo} berhasil diperbaiki dan dimasukkan kembali ke antrean cetak valid.`);
       await loadRejectQueue();
     } catch (err) {
-      alert('Gagal memproses ulang rekaman: ' + (err?.message || err?.error || 'Server error'));
+      toast.error('Gagal memproses ulang rekaman: ' + (err?.message || err?.error || 'Server error'));
     }
   }
 };

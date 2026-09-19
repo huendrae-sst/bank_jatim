@@ -402,6 +402,7 @@
 import { ref, reactive, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
@@ -548,10 +549,10 @@ const actionRequestMaterial = async () => {
   isSubmitting.value = true;
   try {
     await api.post(`/production-orders/${route.params.id}/request-material`);
-    alert('Permintaan pengeluaran kartu blank berhasil diajukan.');
+    toast.success('Permintaan pengeluaran kartu blank berhasil diajukan.');
     await fetchDetail();
   } catch (err) {
-    alert('Gagal mengajukan pengeluaran bahan: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal mengajukan pengeluaran bahan: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }
@@ -562,10 +563,10 @@ const actionApproveMaterial = async () => {
   isSubmitting.value = true;
   try {
     await api.post(`/production-orders/${route.params.id}/approve-material`);
-    alert('Pengeluaran bahan baku berhasil disetujui.');
+    toast.success('Pengeluaran bahan baku berhasil disetujui.');
     await fetchDetail();
   } catch (err) {
-    alert('Gagal menyetujui pengeluaran: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menyetujui pengeluaran: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }
@@ -576,10 +577,10 @@ const actionIssueMaterial = async () => {
   isSubmitting.value = true;
   try {
     await api.post(`/production-orders/${route.params.id}/issue-material`);
-    alert('Kartu blank berhasil dikeluarkan dari gudang. Proses cetak mesin dapat dimulai.');
+    toast.success('Kartu blank berhasil dikeluarkan dari gudang. Proses cetak mesin dapat dimulai.');
     await fetchDetail();
   } catch (err) {
-    alert('Gagal mengeluarkan bahan: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal mengeluarkan bahan: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }
@@ -608,10 +609,10 @@ const submitResult = async () => {
 
     await api.post(`/production-orders/${route.params.id}/record-result`, payload);
     showResultModal.value = false;
-    alert('Hasil cetak dan status kartu nasabah berhasil dicatat.');
+    toast.success('Hasil cetak dan status kartu nasabah berhasil dicatat.');
     await fetchDetail();
   } catch (err) {
-    alert('Gagal mencatat hasil: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal mencatat hasil: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }
@@ -622,10 +623,10 @@ const actionCompleteProduction = async () => {
   isSubmitting.value = true;
   try {
     await api.post(`/production-orders/${route.params.id}/complete`);
-    alert('Produksi selesai! Kartu emboss telah masuk ke stok gudang.');
+    toast.success('Produksi selesai! Kartu emboss telah masuk ke stok gudang.');
     await fetchDetail();
   } catch (err) {
-    alert('Gagal menyelesaikan produksi: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menyelesaikan produksi: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }
@@ -636,10 +637,10 @@ const actionFulfillOrders = async () => {
   isSubmitting.value = true;
   try {
     await api.post(`/production-orders/${route.params.id}/fulfill-orders`);
-    alert('Order cabang berhasil dipenuhi dan siap diproses di picking gudang.');
+    toast.success('Order cabang berhasil dipenuhi dan siap diproses di picking gudang.');
     await fetchDetail();
   } catch (err) {
-    alert('Gagal memenuhi order cabang: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal memenuhi order cabang: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }

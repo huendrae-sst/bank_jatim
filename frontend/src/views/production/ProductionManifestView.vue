@@ -115,6 +115,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
@@ -156,6 +157,7 @@ const fetchManifest = async () => {
     prodOrder.value = res.data?.data || res.data;
   } catch (err) {
     console.error('Failed to load production manifest data:', err);
+    toast.error('Gagal memuat data manifes produksi.');
   } finally {
     isLoading.value = false;
   }

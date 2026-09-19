@@ -35,11 +35,6 @@
       </div>
     </div>
 
-    <!-- Feedback / Error Alerts -->
-    <div v-if="errorMessage" class="alert alert-danger fs-8 py-2 px-3 mb-3 shadow-xs">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
-    </div>
-
     <!-- Main Card Container (UI seperti orders/emboss) -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- Card Header with Title & Action Buttons -->
@@ -431,6 +426,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
@@ -448,7 +444,6 @@ const showGenerateModal = ref(false);
 const deliveryMethod = ref('COURIER');
 const pickupNip = ref('');
 const pickupName = ref('');
-const errorMessage = ref('');
 const isGenerating = ref(false);
 
 // ATM Card View Modal State
@@ -596,7 +591,7 @@ const loadFile = async () => {
       };
     }
   } catch (err) {
-    errorMessage.value = err?.message || err?.error || 'Gagal memuat detail berkas emboss.';
+    toast.error(err?.message || err?.error || 'Gagal memuat detail berkas emboss.');
   }
 };
 
@@ -606,13 +601,12 @@ const loadRecords = async () => {
     const res = await api.get(`/emboss/${route.params.id}/records${statusParam}`);
     records.value = (res.data || []).map(mapRecord);
   } catch (err) {
-    errorMessage.value = err?.message || err?.error || 'Gagal memuat daftar rekaman berkas emboss.';
+    toast.error(err?.message || err?.error || 'Gagal memuat daftar rekaman berkas emboss.');
   }
 };
 
 const loadAllData = async () => {
   isLoading.value = true;
-  errorMessage.value = '';
   try {
     await Promise.allSettled([
       loadFile(),
@@ -630,10 +624,10 @@ const confirmGenerateOrders = async () => {
   try {
     await api.post(`/emboss/${route.params.id}/generate-orders`);
     showGenerateModal.value = false;
-    alert('Order persediaan cabang berhasil dibuat dari berkas emboss.');
+    toast.success('Order persediaan cabang berhasil dibuat dari berkas emboss.');
     await loadAllData();
   } catch (err) {
-    alert('Gagal membuat order: ' + (err?.message || err?.error || 'Terjadi kesalahan sistem'));
+    toast.error('Gagal membuat order: ' + (err?.message || err?.error || 'Terjadi kesalahan sistem'));
   } finally {
     isGenerating.value = false;
   }

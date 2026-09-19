@@ -22,8 +22,6 @@
     <!-- Hidden File Input -->
     <input type="file" ref="fileInputRef" accept=".csv,.txt" class="d-none" @change="handleFileInputChange" />
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8 py-2 px-3 mb-3">{{ errorMessage }}</div>
-
     <!-- Main Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
@@ -175,6 +173,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const router = useRouter();
 const searchQuery = ref('');
@@ -182,7 +181,6 @@ const filterStatus = ref('ALL');
 const sortBy = ref('id');
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const isFiltered = computed(() => {
   return searchQuery.value.trim() !== '' || filterStatus.value !== 'ALL' || sortBy.value !== 'id';
@@ -209,7 +207,6 @@ const embossFiles = ref([]);
 
 const loadEmbossFiles = async () => {
   isLoading.value = true;
-  errorMessage.value = '';
   try {
     const response = await api.get('/emboss');
     const data = response.data?.content || response.data || [];
@@ -302,10 +299,10 @@ const handleFileInputChange = async (event) => {
       router.push(`/emboss/${newFile.id}`);
     } else {
       await loadEmbossFiles();
-      alert(`Berkas ${file.name} berhasil diproses.`);
+      toast.success(`Berkas ${file.name} berhasil diproses.`);
     }
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal mengunggah berkas emboss.';
+    toast.error(error?.message || error?.error || 'Gagal mengunggah berkas emboss.');
   } finally {
     event.target.value = '';
   }
@@ -320,7 +317,7 @@ const generateOrders = async (file) => {
     await api.post(`/emboss/${file.id}/generate-orders`);
     router.push(`/emboss/${file.id}`);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menerbitkan order dari berkas emboss.';
+    toast.error(error?.message || error?.error || 'Gagal menerbitkan order dari berkas emboss.');
   }
 };
 

@@ -281,6 +281,7 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const showModal = ref(false);
 const currentPage = ref(1);
@@ -391,10 +392,10 @@ const saveProduction = async () => {
     const res = await api.post('/production-orders', payload);
     const created = res.data?.data || res.data;
     showModal.value = false;
-    alert(`SPK Produksi ${created.productionNumber || ''} berhasil diterbitkan.`);
+    toast.success(`SPK Produksi ${created.productionNumber || ''} berhasil diterbitkan.`);
     await fetchProductionList();
   } catch (err) {
-    alert('Gagal menerbitkan SPK: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menerbitkan SPK: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }
