@@ -16,8 +16,6 @@
       <span>Menampilkan data pemantauan sebaran stok untuk <strong>{{ authStore.regionName || 'Wilayah Kerja Anda' }}</strong>.</span>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="table-responsive">
@@ -58,6 +56,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 import { useAuthStore } from '@/stores/auth';
 
@@ -65,7 +64,6 @@ const authStore = useAuthStore();
 
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const handleExport = () => {
   const headers = [
@@ -77,6 +75,7 @@ const handleExport = () => {
     { key: 'totalValuation', label: 'Total Valuasi Cabang (Rp)' }
   ];
   exportToCsv('sebaran_stok_wilayah', headers, distributionData.value);
+  toast.success('Laporan sebaran stok wilayah berhasil diekspor ke CSV.');
 };
 
 const classifyItem = (itemName = '', sku = '') => {
@@ -112,7 +111,6 @@ const computeDistribution = (balances) => {
 const distributionData = ref([]);
 
 const loadDistribution = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/inventory/stock-balances', {
       params: { page: 0, size: 500 }
@@ -124,6 +122,7 @@ const loadDistribution = async () => {
   } catch (error) {
     distributionData.value = [];
     console.warn('Backend /inventory/stock-balances unavailable:', error);
+    toast.error('Gagal memuat laporan sebaran stok.');
   }
 };
 

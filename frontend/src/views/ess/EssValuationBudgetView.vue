@@ -100,6 +100,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
@@ -201,6 +202,7 @@ const exportCsv = () => {
     { key: 'share', label: 'Porsi Bobot (%)' }
   ];
   exportToCsv('ess_valuasi_persediaan_anggaran', headers, categories.value);
+  toast.success('Laporan valuasi persediaan vs anggaran berhasil diekspor ke CSV.');
 };
 
 onMounted(() => {

@@ -19,14 +19,6 @@
             Lupa kata sandi Anda? Masukkan alamat email terdaftar untuk menerima tautan reset kata sandi.
           </p>
 
-          <div v-if="successMessage" class="alert alert-success py-2 px-3 fs-7 mb-3" role="alert">
-            <i class="bi bi-check-circle-fill me-1"></i> {{ successMessage }}
-          </div>
-
-          <div v-if="errorMessage" class="alert alert-danger py-2 px-3 fs-7 mb-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage }}
-          </div>
-
           <form @submit.prevent="handleForgotPassword">
             <div class="input-group mb-3">
               <input 
@@ -66,21 +58,18 @@
 
 <script setup>
 import { ref } from 'vue';
+import { toast } from '@/utils/toast';
 
 const email = ref('');
 const loading = ref(false);
-const successMessage = ref('');
-const errorMessage = ref('');
 
 const handleForgotPassword = () => {
   if (!email.value) return;
   loading.value = true;
-  errorMessage.value = '';
-  successMessage.value = '';
 
   setTimeout(() => {
     loading.value = false;
-    successMessage.value = `Instruksi pemulihan kata sandi telah dikirim ke ${email.value}. Silakan periksa inbox email Anda.`;
+    toast.success(`Instruksi pemulihan kata sandi telah dikirim ke ${email.value}. Silakan periksa inbox email Anda.`);
   }, 800);
 };
 </script>

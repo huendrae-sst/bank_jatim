@@ -11,8 +11,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="table-responsive">
@@ -55,11 +53,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const handleExport = () => {
   const headers = [
@@ -71,6 +69,7 @@ const handleExport = () => {
     { key: 'postedDate', label: 'Tgl Posting Jurnal' }
   ];
   exportToCsv('laporan_settlement', headers, settlements.value);
+  toast.success('Rekapitulasi settlement berhasil diekspor ke CSV.');
 };
 
 
@@ -86,7 +85,6 @@ const mapSettlement = (settlement) => ({
 const settlements = ref([]);
 
 const loadSettlements = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/finance/settlements');
     const list = response.data?.data || response.data || [];
@@ -96,6 +94,7 @@ const loadSettlements = async () => {
   } catch (error) {
     settlements.value = [];
     console.warn('Backend /finance/settlements unavailable:', error);
+    toast.error('Gagal memuat data settlement.');
   }
 };
 

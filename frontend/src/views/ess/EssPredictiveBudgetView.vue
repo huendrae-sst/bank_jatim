@@ -58,6 +58,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
@@ -114,6 +115,7 @@ const handleExport = () => {
     { key: 'drivers', label: 'Faktor Pendorong (Drivers)' }
   ];
   exportToCsv('proyeksi_anggaran_logistik', headers, budgetProjections.value);
+  toast.success('Proyeksi usulan anggaran berhasil diekspor ke CSV.');
 };
 
 const paginatedBudgetProjections = computed(() => {

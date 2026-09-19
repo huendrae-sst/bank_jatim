@@ -236,6 +236,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const searchQuery = ref('');
@@ -243,7 +244,6 @@ const activeTab = ref('all');
 const selectedJournal = ref(null);
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const mapSettlement = (settlement) => ({
   id: settlement.id,
@@ -288,7 +288,6 @@ const paginatedSettlements = computed(() => {
 });
 
 const loadSettlements = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/finance/settlements');
     const data = response.data?.content || response.data || [];
@@ -306,9 +305,9 @@ const approveAndPost = async (settle) => {
     const response = await api.post(`/finance/settlements/${settle.id}/approve-post`);
     selectedJournal.value = mapSettlement(response.data);
     await loadSettlements();
-    alert('Settlement ' + settle.number + ' berhasil disetujui! Entri jurnal debit/kredit otomatis diposting ke General Ledger Bank Jatim.');
+    toast.success('Settlement ' + settle.number + ' berhasil disetujui! Entri jurnal debit/kredit otomatis diposting ke General Ledger Bank Jatim.');
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal mem-posting settlement.';
+    toast.error(error?.message || error?.error || 'Gagal mem-posting settlement.');
   }
 };
 

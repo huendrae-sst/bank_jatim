@@ -62,6 +62,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
@@ -146,6 +147,7 @@ const handleExport = () => {
     { key: 'mitigation', label: 'Aksi Mitigasi' }
   ];
   exportToCsv('peta_risiko_ketahanan_cabang', headers, branches.value);
+  toast.success('Peta risiko ketahanan cabang berhasil diekspor ke CSV.');
 };
 
 const paginatedBranches = computed(() => {

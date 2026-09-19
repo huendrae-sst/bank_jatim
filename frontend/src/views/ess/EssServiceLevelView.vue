@@ -99,6 +99,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
@@ -169,6 +170,7 @@ const handleExport = () => {
     { key: 'otif', label: 'Skor OTIF (%)' }
   ];
   exportToCsv('kinerja_layanan_sla', headers, slaData.value);
+  toast.success('Laporan kinerja layanan (SLA) berhasil diekspor ke CSV.');
 };
 
 const paginatedSlaData = computed(() => {

@@ -81,8 +81,6 @@
         </div>
       </div>
 
-      <div v-if="errorMessage" class="alert alert-danger m-3 mb-0 fs-8">{{ errorMessage }}</div>
-
       <!-- 5. Filter Toolbar -->
       <div class="card-body p-3 bg-body-tertiary border-bottom">
         <div class="row g-2 align-items-center">
@@ -178,13 +176,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterModule = ref('');
-const errorMessage = ref('');
 
 const formatTimestamp = (value) => {
   if (!value) return '-';
@@ -261,6 +259,7 @@ const handleExport = () => {
     { key: 'details', label: 'Detail Perubahan' }
   ];
   exportToCsv('audit_trail_logs', headers, filteredLogs.value);
+  toast.success('Log CSV audit trail berhasil diekspor.');
 };
 
 onMounted(loadLogs);

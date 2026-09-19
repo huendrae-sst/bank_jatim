@@ -82,6 +82,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
@@ -144,6 +145,7 @@ const handleExport = () => {
     { key: 'status', label: 'Status PO' }
   ];
   exportToCsv('matriks_keterlacakan_pengadaan', headers, matrixData.value);
+  toast.success('Matriks keterlacakan pengadaan berhasil diekspor ke CSV.');
 };
 
 const paginatedMatrixData = computed(() => {

@@ -52,6 +52,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
@@ -125,6 +126,7 @@ const handleExport = () => {
     { key: 'status', label: 'Status Evaluasi' }
   ];
   exportToCsv('kepatuhan_audit_persediaan', headers, complianceList.value);
+  toast.success('Laporan kepatuhan audit persediaan berhasil diekspor ke CSV.');
 };
 
 const paginatedComplianceList = computed(() => {

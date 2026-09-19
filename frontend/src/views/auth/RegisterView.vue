@@ -17,10 +17,6 @@
         <div class="card-body register-card-body p-4">
           <p class="register-box-msg text-body-secondary text-center mb-3">Registrasi Akun Pegawai Baru</p>
 
-          <div v-if="errorMessage" class="alert alert-danger py-2 px-3 fs-7 mb-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage }}
-          </div>
-
           <form @submit.prevent="handleRegister">
             <!-- Full Name -->
             <div class="input-group mb-3">
@@ -130,10 +126,10 @@
 <script setup>
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { toast } from '@/utils/toast';
 
 const router = useRouter();
 const loading = ref(false);
-const errorMessage = ref('');
 const showTermsModal = ref(false);
 
 const form = reactive({
@@ -148,14 +144,14 @@ const form = reactive({
 
 const handleRegister = () => {
   if (form.password !== form.password_confirmation) {
-    errorMessage.value = 'Konfirmasi kata sandi tidak cocok dengan kata sandi.';
+    toast.warn('Konfirmasi kata sandi tidak cocok dengan kata sandi.');
     return;
   }
   loading.value = true;
-  errorMessage.value = '';
 
   setTimeout(() => {
     loading.value = false;
+    toast.success('Pendaftaran berhasil! Silakan masuk dengan akun baru Anda.');
     router.push('/login');
   }, 1000);
 };

@@ -28,10 +28,6 @@
         <div class="card-body login-card-body">
           <p class="login-box-msg">Login</p>
 
-          <div v-if="errorMessage" class="alert alert-danger py-2 px-3 fs-7 mb-3" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage }}
-          </div>
-
           <form @submit.prevent="handleLogin">
             <div class="input-group mb-3">
               <input
@@ -88,13 +84,10 @@
           </form>
 
           <p class="mb-0 text-center">
-            <a href="#" @click.prevent="showForgotMsg = true" class="forgot-link fs-7">
+            <a href="#" @click.prevent="notifyForgot" class="forgot-link fs-7">
               I forgot my password
             </a>
           </p>
-          <div v-if="showForgotMsg" class="alert alert-info py-1.5 px-2.5 fs-8 mt-2 mb-0">
-            Silakan hubungi administrator IT Kantor Pusat (ext. 4421).
-          </div>
         </div>
       </div>
 
@@ -109,6 +102,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { toast } from '@/utils/toast';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -117,8 +111,6 @@ const email = ref('admin@bankjatim.co.id');
 const password = ref('');
 const rememberMe = ref(true);
 const loading = ref(false);
-const errorMessage = ref('');
-const showForgotMsg = ref(false);
 const currentTheme = ref('light');
 
 onMounted(() => {
@@ -126,23 +118,26 @@ onMounted(() => {
   currentTheme.value = resolved;
 });
 
+const notifyForgot = () => {
+  toast.info('Silakan hubungi administrator IT Kantor Pusat (ext. 4421).');
+};
+
 const handleLogin = async () => {
   loading.value = true;
-  errorMessage.value = '';
   try {
     const res = await authStore.login(email.value, password.value);
     if (res.success) {
+      toast.success('Login berhasil. Selamat datang kembali!');
       router.push('/');
     } else {
-      errorMessage.value = res.message || res.error || 'Email atau kata sandi tidak valid.';
+      toast.error(res.message || res.error || 'Email atau kata sandi tidak valid.');
     }
   } catch (err) {
-    errorMessage.value = 'Gagal menghubungi server API Gateway.';
+    toast.error('Gagal menghubungi server API Gateway.');
   } finally {
     loading.value = false;
   }
 };
-
 </script>
 
 <style scoped>

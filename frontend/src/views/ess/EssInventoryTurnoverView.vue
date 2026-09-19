@@ -60,6 +60,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
@@ -144,6 +145,7 @@ const handleExport = () => {
     { key: 'classification', label: 'Klasifikasi' }
   ];
   exportToCsv('perputaran_stok_ito', headers, itoList.value);
+  toast.success('Laporan perputaran stok (ITO) berhasil diekspor ke CSV.');
 };
 
 const paginatedItoList = computed(() => {

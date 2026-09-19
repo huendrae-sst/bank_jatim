@@ -129,6 +129,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const activeReportId = ref(1);
@@ -230,6 +231,7 @@ const exportData = async (type) => {
     { key: 'efficiency', label: 'Efisiensi' }
   ];
   exportToCsv(`laporan_${currentReport.value.code.toLowerCase()}`, headers, reportData.value);
+  toast.success(`Laporan ${currentReport.value.title} berhasil diekspor ke CSV.`);
 };
 
 onMounted(() => {

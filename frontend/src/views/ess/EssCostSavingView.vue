@@ -103,6 +103,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
@@ -177,6 +178,7 @@ const exportCsv = () => {
     { key: 'netSaving', label: 'Net Penghematan (Rp)' }
   ];
   exportToCsv('ess_cost_saving', headers, savingsList.value);
+  toast.success('Laporan penghematan biaya (Cost Saving) berhasil diekspor ke CSV.');
 };
 
 onMounted(() => {

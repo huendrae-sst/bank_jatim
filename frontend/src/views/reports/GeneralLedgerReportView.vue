@@ -11,8 +11,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="table-responsive">
@@ -56,11 +54,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const handleExport = () => {
   const headers = [
@@ -73,6 +71,7 @@ const handleExport = () => {
     { key: 'refDoc', label: 'Referensi Dokumen' }
   ];
   exportToCsv('jurnal_buku_besar', headers, journals.value);
+  toast.success('Jurnal buku besar berhasil diekspor ke CSV.');
 };
 
 const mapSettlementToJournalRows = (settlement) => {
@@ -107,7 +106,6 @@ const mapSettlementToJournalRows = (settlement) => {
 const journals = ref([]);
 
 const loadJournals = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/finance/settlements');
     const list = response.data?.data || response.data || [];
@@ -118,6 +116,7 @@ const loadJournals = async () => {
   } catch (error) {
     journals.value = [];
     console.warn('Backend /finance/settlements unavailable:', error);
+    toast.error('Gagal memuat jurnal buku besar.');
   }
 };
 

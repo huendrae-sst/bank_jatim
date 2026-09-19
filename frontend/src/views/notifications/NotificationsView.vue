@@ -11,7 +11,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
 
     <!-- Notification List Card -->
     <div class="card card-outline card-danger shadow-xs">
@@ -59,10 +58,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const iconByType = (type) => {
   switch (type) {
@@ -135,12 +134,12 @@ const paginatedNotifs = computed(() => {
 });
 
 const markAllRead = async () => {
-  errorMessage.value = '';
   try {
     await api.post('/notifications/mark-all-read');
     await loadNotifications();
+    toast.success('Semua notifikasi telah ditandai dibaca.');
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menandai notifikasi dibaca.';
+    toast.error(error?.message || error?.error || 'Gagal menandai notifikasi dibaca.');
   }
 };
 

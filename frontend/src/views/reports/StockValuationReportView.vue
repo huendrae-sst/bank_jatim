@@ -38,8 +38,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="table-responsive">
@@ -86,13 +84,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import { exportToCsv } from '@/utils/exportHelper';
 
 const selectedWarehouse = ref('ALL');
 const selectedCategory = ref('ALL');
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const mapStockBalance = (balance) => {
   const avgCost = Number(balance.item?.estimatedUnitPrice || 0);
@@ -111,7 +109,6 @@ const mapStockBalance = (balance) => {
 const items = ref([]);
 
 const loadValuation = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/inventory/stock-balances', {
       params: { page: 0, size: 500 }
@@ -123,6 +120,7 @@ const loadValuation = async () => {
   } catch (error) {
     items.value = [];
     console.warn('Backend /inventory/stock-balances unavailable:', error);
+    toast.error('Gagal memuat data valuasi persediaan.');
   }
 };
 
@@ -150,6 +148,7 @@ const exportCsv = () => {
     { key: 'avgCost', label: 'Harga Pokok Rata-Rata (Rp)' }
   ];
   exportToCsv('laporan_valuasi_persediaan', headers, filteredItems.value);
+  toast.success('Laporan valuasi persediaan berhasil diekspor ke CSV.');
 };
 
 const printReport = () => {
