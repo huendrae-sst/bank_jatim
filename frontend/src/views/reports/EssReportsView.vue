@@ -7,13 +7,13 @@
       </div>
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <button class="btn btn-sm btn-success fw-bold shadow-xs" @click="exportData('EXCEL')">
-          <i class="bi bi-file-earmark-excel me-1"></i> Unduh Excel (XLSX)
+          Unduh Excel (XLSX)
         </button>
         <button class="btn btn-sm btn-danger fw-bold shadow-xs" @click="exportData('PDF')">
-          <i class="bi bi-file-earmark-pdf me-1"></i> Unduh PDF Resmi
+          Unduh PDF Resmi
         </button>
         <button class="btn btn-sm btn-outline-secondary" @click="exportData('CSV')">
-          <i class="bi bi-download me-1"></i> Ekspor CSV
+          Ekspor CSV
         </button>
       </div>
     </div>
@@ -140,7 +140,7 @@ const reports = ref([
   { id: 1, code: 'ESS-01', title: 'Valuasi Persediaan vs Anggaran', icon: 'bi-wallet2', route: '/ess/valuation-budget', desc: 'Perbandingan nilai fisik stok terhadap penyerapan anggaran unit kerja.' },
   { id: 2, code: 'ESS-02', title: 'Cost Saving Konsolidasi PR', icon: 'bi-percent', route: '/ess/cost-saving', desc: 'Penghematan biaya riil melalui penggabungan volume PO vendor.' },
   { id: 3, code: 'ESS-03', title: 'Inventory Turnover Ratio (ITR)', icon: 'bi-arrow-repeat', route: '/ess/inventory-turnover', desc: 'Tingkat perputaran barang logistik dan deteksi stok mengendap.' },
-  { id: 4, code: 'ESS-04', title: 'Risk Heatmap Stockout & EWS', icon: 'bi-exclamation-triangle', route: '/ess/risk-heatmap', desc: 'Peta risiko kehabisan warkat kritis dan barang mendekati kedaluwarsa.' },
+  { id: 4, code: 'ESS-04', title: 'Risk Heatmap Stockout & EWS', icon: 'bi-exclamation-triangle', route: '/ess/risk-heatmap', desc: 'Peta risiko kehabisan produk kritis dan barang mendekati kedaluwarsa.' },
   { id: 5, code: 'ESS-05', title: 'Service Level & OTIF SLA', icon: 'bi-clock-history', route: '/ess/service-level', desc: 'Ketepatan waktu pemenuhan pesanan dari gudang ke cabang.' },
   { id: 6, code: 'ESS-06', title: 'Kepatuhan Audit & SoD', icon: 'bi-shield-check', route: '/ess/audit-compliance', desc: 'Integritas maker-checker dan penelusuran audit trail transaksi.' },
   { id: 7, code: 'ESS-07', title: 'Proyeksi Anggaran Belanja', icon: 'bi-graph-up-arrow', route: '/ess/predictive-budget', desc: 'Proyeksi kebutuhan anggaran periode berikutnya berbasis tren konsumsi.' }

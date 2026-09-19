@@ -7,10 +7,10 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <router-link to="/inventory/balances" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-boxes me-1"></i> Stock Balances
+          Stock Balances
         </router-link>
         <button class="btn btn-sm btn-danger fw-bold shadow-xs" @click="exportExcel">
-          <i class="bi bi-file-earmark-excel me-1"></i> Ekspor Kartu Stok
+          Ekspor Kartu Stok
         </button>
       </div>
     </div>
@@ -48,7 +48,7 @@
     <div class="card card-outline card-danger shadow-xs">
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
         <h3 class="card-title fw-semibold mb-0 fs-6 text-body">
-          <i class="bi bi-clock-history text-danger me-1"></i> Riwayat Mutasi Buku Besar (Double-Entry Ledger)
+          Riwayat Mutasi Buku Besar (Double-Entry Ledger)
         </h3>
         <div class="d-flex gap-2">
           <div class="input-group input-group-sm" style="min-width: 280px;">

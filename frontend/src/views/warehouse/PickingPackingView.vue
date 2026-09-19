@@ -3,17 +3,14 @@
     <!-- Breadcrumb & Header -->
     <div class="app-content-header py-2 px-3 mb-3 border-bottom bg-body rounded-3 shadow-xs d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
       <div>
-        <h3 class="mb-0 text-body fw-bold">Operasional Gudang: Picking & Packing</h3>
+        <h3 class="mb-0 text-body fw-bold">Operasional Gudang: Picking &amp; Packing</h3>
       </div>
       <div class="d-flex align-items-center gap-2">
-        <router-link to="/warehouse/picking" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-box-seam me-1"></i> Mode Picking
-        </router-link>
-        <router-link to="/warehouse/packing" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-boxes me-1"></i> Mode Packing
+        <router-link to="/distribution/routine" class="btn btn-sm btn-outline-danger">
+          Distribusi Rutin
         </router-link>
         <router-link to="/distribution/shipments" class="btn btn-sm btn-danger fw-bold shadow-xs">
-          <i class="bi bi-truck me-1"></i> Manifest Pengiriman
+          Manifest Pengiriman
         </router-link>
       </div>
     </div>
@@ -52,9 +49,9 @@
             <i class="bi bi-check2-circle fs-4"></i>
           </div>
           <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">Selesai Dikemas</div>
-            <div class="fs-4 fw-bold font-monospace text-success">8 Order</div>
-            <div class="fs-9 text-secondary">Hari Ini (Margomulyo)</div>
+            <div class="fs-8 text-secondary fw-bold text-uppercase">Tipe Order Terlayani</div>
+            <div class="fs-4 fw-bold font-monospace text-success">4 Jalur</div>
+            <div class="fs-9 text-secondary">Permintaan, PR, Emboss, Rutin</div>
           </div>
         </div>
       </div>
@@ -65,58 +62,149 @@
             <i class="bi bi-speedometer fs-4"></i>
           </div>
           <div>
-            <div class="fs-8 text-secondary fw-bold text-uppercase">SLA Fulfillment</div>
-            <div class="fs-4 fw-bold font-monospace text-body">99.2%</div>
-            <div class="fs-9 text-secondary">Standar &lt; 24 Jam Kerja</div>
+            <div class="fs-8 text-secondary fw-bold text-uppercase">Mode Operasional</div>
+            <div class="fs-4 fw-bold font-monospace text-body">Bulk Ready</div>
+            <div class="fs-9 text-secondary">Batch Wave Picking &amp; Packing</div>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
+    <!-- Category Filter Tabs Bar -->
+    <div class="card shadow-xs border-0 p-2 mb-3 bg-body">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+        <div class="d-flex flex-wrap align-items-center gap-1">
+          <span class="fs-8 fw-bold text-secondary me-2 text-uppercase">Filter Kategori:</span>
+          <button
+            type="button"
+            class="btn btn-sm py-1 px-3 fw-semibold rounded-pill"
+            :class="selectedType === 'ALL' ? 'btn-danger text-white' : 'btn-outline-secondary'"
+            @click="setTypeFilter('ALL')"
+          >
+            Semua ({{ pickingQueueAll.length + packingQueueAll.length }})
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm py-1 px-3 fw-semibold rounded-pill"
+            :class="selectedType === 'INTERNAL_REQUEST' ? 'btn-danger text-white' : 'btn-outline-secondary'"
+            @click="setTypeFilter('INTERNAL_REQUEST')"
+          >
+            Order Permintaan
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm py-1 px-3 fw-semibold rounded-pill"
+            :class="selectedType === 'PURCHASE_REQUEST' ? 'btn-danger text-white' : 'btn-outline-secondary'"
+            @click="setTypeFilter('PURCHASE_REQUEST')"
+          >
+            Order Pembelian (PR)
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm py-1 px-3 fw-semibold rounded-pill"
+            :class="selectedType === 'EMBOSS_ORDER' ? 'btn-danger text-white' : 'btn-outline-secondary'"
+            @click="setTypeFilter('EMBOSS_ORDER')"
+          >
+            Order Emboss Kartu
+          </button>
+          <button
+            type="button"
+            class="btn btn-sm py-1 px-3 fw-semibold rounded-pill"
+            :class="selectedType === 'ROUTINE_PUSH' ? 'btn-danger text-white' : 'btn-outline-secondary'"
+            @click="setTypeFilter('ROUTINE_PUSH')"
+          >
+            Distribusi Rutin
+          </button>
+        </div>
+        <div class="text-secondary fs-8">
+          <i class="bi bi-info-circle me-1"></i> Mendukung pemrosesan per order atau massal (bulk)
+        </div>
+      </div>
+    </div>
+
+    <div v-if="alertMessage" :class="`alert alert-${alertType} alert-dismissible fade show fs-8 py-2 px-3 shadow-xs`">
+      <i :class="alertType === 'success' ? 'bi bi-check-circle-fill me-2' : 'bi bi-exclamation-triangle-fill me-2'"></i>
+      <span>{{ alertMessage }}</span>
+      <button type="button" class="btn-close py-2" @click="alertMessage = ''"></button>
+    </div>
 
     <!-- Dual Column Kanban Board -->
     <div class="row g-3">
       <!-- Col 1: Picking Queue -->
       <div class="col-12 col-lg-6">
         <div class="card card-outline card-warning shadow-xs h-100">
-          <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
-            <h3 class="card-title fs-6 fw-bold mb-0 text-body">
-              Antrean Picking (Ambil Barang di Rak)
-            </h3>
+          <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <h3 class="card-title fs-6 fw-bold mb-0 text-body">
+                Antrean Picking (Ambil Barang di Rak)
+              </h3>
+              <div class="fs-9 text-secondary">{{ pickingQueue.length }} order siap diambil</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button
+                v-if="pickingQueue.length > 0"
+                type="button"
+                class="btn btn-xs btn-outline-secondary"
+                @click="toggleSelectAllPicking"
+              >
+                {{ selectedPickingIds.length === pickingQueue.length ? 'Batal Pilih' : 'Pilih Semua' }}
+              </button>
+              <button
+                v-if="selectedPickingIds.length > 0"
+                type="button"
+                class="btn btn-xs btn-warning fw-bold text-dark shadow-xs"
+                @click="processBatchPicking"
+              >
+                Batch Picking ({{ selectedPickingIds.length }})
+              </button>
+            </div>
           </div>
           <div class="card-body p-3 space-y-3">
             <div
               v-for="order in pickingQueue"
               :key="order.id"
               class="card border shadow-xs p-3 bg-body"
+              :class="{ 'border-warning bg-warning-subtle': selectedPickingIds.includes(order.id) }"
             >
               <div class="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                  <router-link :to="`/orders/${order.id}`" class="font-monospace fw-bold text-danger fs-7 text-decoration-none">
-                    {{ order.orderNumber }}
-                  </router-link>
-                  <div class="fs-9 text-secondary">Tujuan: <strong class="text-body">{{ order.branch }}</strong></div>
+                <div class="d-flex align-items-center gap-2">
+                  <input
+                    type="checkbox"
+                    class="form-check-input mt-0"
+                    :value="order.id"
+                    v-model="selectedPickingIds"
+                  />
+                  <div>
+                    <router-link :to="`/orders/${order.id}`" class="font-monospace fw-bold text-danger fs-7 text-decoration-none">
+                      {{ order.orderNumber }}
+                    </router-link>
+                    <div class="fs-9 text-secondary">Tujuan: <strong class="text-body">{{ order.branch }}</strong></div>
+                  </div>
                 </div>
-                <span class="badge text-bg-secondary fs-9">Menunggu Rak</span>
+                <div class="d-flex flex-column align-items-end gap-1">
+                  <span class="badge fs-9" :class="orderTypeBadgeClass(order.orderType)">
+                    {{ orderTypeLabel(order.orderType) }}
+                  </span>
+                  <span class="badge text-bg-secondary fs-9">Menunggu Rak</span>
+                </div>
               </div>
               <p class="fs-8 text-secondary mb-3">
                 <i class="bi bi-list-check me-1"></i> {{ order.itemsSummary }}
               </p>
               <div class="d-flex justify-content-between align-items-center pt-2 border-top">
-                <span class="fs-9 text-secondary font-monospace">Lokasi: RAK-A01 s/d A04</span>
+                <span class="fs-9 text-secondary font-monospace">Lokasi: RAK-LOGISTIK-PUSAT</span>
                 <button
                   class="btn btn-sm btn-warning fw-bold shadow-xs py-1 px-2.5 text-dark"
                   @click="processPicking(order)"
                 >
-                  <i class="bi bi-check2-circle me-1"></i> Selesaikan Picking
+                  Selesaikan Picking
                 </button>
               </div>
             </div>
 
             <div v-if="pickingQueue.length === 0" class="text-center py-5 text-secondary">
               <i class="bi bi-check-circle fs-1 d-block mb-2 text-success"></i>
-              Tidak ada antrean picking tersisa. Semua barang sudah berhasil diambil dari rak.
+              Tidak ada antrean picking tersisa untuk kategori ini.
             </div>
           </div>
         </div>
@@ -125,25 +213,60 @@
       <!-- Col 2: Packing Queue -->
       <div class="col-12 col-lg-6">
         <div class="card card-outline card-success shadow-xs h-100">
-          <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
-            <h3 class="card-title fs-6 fw-bold mb-0 text-body">
-              Antrean Packing (Pengemasan Koli)
-            </h3>
+          <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+              <h3 class="card-title fs-6 fw-bold mb-0 text-body">
+                Antrean Packing (Pengemasan Koli)
+              </h3>
+              <div class="fs-9 text-secondary">{{ packingQueue.length }} order siap dikemas</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <button
+                v-if="packingQueue.length > 0"
+                type="button"
+                class="btn btn-xs btn-outline-secondary"
+                @click="toggleSelectAllPacking"
+              >
+                {{ selectedPackingIds.length === packingQueue.length ? 'Batal Pilih' : 'Pilih Semua' }}
+              </button>
+              <button
+                v-if="selectedPackingIds.length > 0"
+                type="button"
+                class="btn btn-xs btn-success fw-bold text-white shadow-xs"
+                @click="processBatchPacking"
+              >
+                Batch Packing ({{ selectedPackingIds.length }})
+              </button>
+            </div>
           </div>
           <div class="card-body p-3 space-y-3">
             <div
               v-for="order in packingQueue"
               :key="order.id"
               class="card border shadow-xs p-3 bg-body"
+              :class="{ 'border-success bg-success-subtle': selectedPackingIds.includes(order.id) }"
             >
               <div class="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                  <router-link :to="`/orders/${order.id}`" class="font-monospace fw-bold text-danger fs-7 text-decoration-none">
-                    {{ order.orderNumber }}
-                  </router-link>
-                  <div class="fs-9 text-secondary">Tujuan: <strong class="text-body">{{ order.branch }}</strong></div>
+                <div class="d-flex align-items-center gap-2">
+                  <input
+                    type="checkbox"
+                    class="form-check-input mt-0"
+                    :value="order.id"
+                    v-model="selectedPackingIds"
+                  />
+                  <div>
+                    <router-link :to="`/orders/${order.id}`" class="font-monospace fw-bold text-danger fs-7 text-decoration-none">
+                      {{ order.orderNumber }}
+                    </router-link>
+                    <div class="fs-9 text-secondary">Tujuan: <strong class="text-body">{{ order.branch }}</strong></div>
+                  </div>
                 </div>
-                <span class="badge text-bg-success fs-9">Picked</span>
+                <div class="d-flex flex-column align-items-end gap-1">
+                  <span class="badge fs-9" :class="orderTypeBadgeClass(order.orderType)">
+                    {{ orderTypeLabel(order.orderType) }}
+                  </span>
+                  <span class="badge text-bg-success fs-9">Picked</span>
+                </div>
               </div>
               <p class="fs-8 text-secondary mb-2">
                 <i class="bi bi-list-check me-1"></i> {{ order.itemsSummary }}
@@ -177,14 +300,14 @@
                   class="btn btn-sm btn-danger fw-bold shadow-xs py-1 px-2.5"
                   @click="processPacking(order)"
                 >
-                  <i class="bi bi-upc-scan me-1"></i> Selesaikan Packing & Label Barcode
+                  Selesaikan Packing &amp; Label Barcode
                 </button>
               </div>
             </div>
 
             <div v-if="packingQueue.length === 0" class="text-center py-5 text-secondary">
               <i class="bi bi-box2-heart fs-1 d-block mb-2 text-muted"></i>
-              Tidak ada antrean packing saat ini.
+              Tidak ada antrean packing saat ini untuk kategori ini.
             </div>
           </div>
         </div>
@@ -194,10 +317,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 
-const errorMessage = ref('');
+const selectedType = ref('ALL');
+const alertMessage = ref('');
+const alertType = ref('success');
+
+const pickingQueueAll = ref([]);
+const packingQueueAll = ref([]);
+const selectedPickingIds = ref([]);
+const selectedPackingIds = ref([]);
 
 const describeItems = (items = []) => items
   .map(line => {
@@ -211,48 +341,89 @@ const describeItems = (items = []) => items
 const mapQueue = (order) => ({
   id: order.orderId || order.id,
   orderNumber: order.orderNumber || '-',
+  orderType: order.orderType || 'INTERNAL_REQUEST',
+  fulfillmentStatus: order.fulfillmentStatus || 'UNFULFILLED',
   branch: order.branch || order.destination || order.requestingOrganization?.name || '-',
   itemsSummary: typeof order.items === 'string' ? order.items : (order.itemDescription || describeItems(order.items || [])),
   koli: order.koli || 1,
   weight: order.weight ? Number(order.weight) : 2.5
 });
 
-const pickingQueue = ref([]);
-const packingQueue = ref([]);
-
 const loadQueues = async () => {
-  errorMessage.value = '';
   try {
-    const [pickingResponse, packingResponse] = await Promise.allSettled([
+    const [pickingRes, packingRes] = await Promise.allSettled([
       api.get('/warehouse/picking'),
       api.get('/warehouse/packing')
     ]);
-    if (pickingResponse.status === 'fulfilled') {
-      const pickingList = pickingResponse.value.data?.data ?? pickingResponse.value.data ?? [];
-      if (Array.isArray(pickingList) && pickingList.length > 0) {
-        pickingQueue.value = pickingList.map(mapQueue);
-      }
+
+    if (pickingRes.status === 'fulfilled') {
+      const list = pickingRes.value.data?.data || pickingRes.value.data || [];
+      pickingQueueAll.value = Array.isArray(list) ? list.map(mapQueue) : [];
     }
-    if (packingResponse.status === 'fulfilled') {
-      const packingList = packingResponse.value.data?.data ?? packingResponse.value.data ?? [];
-      if (Array.isArray(packingList) && packingList.length > 0) {
-        packingQueue.value = packingList.map(mapQueue);
-      }
+    if (packingRes.status === 'fulfilled') {
+      const list = packingRes.value.data?.data || packingRes.value.data || [];
+      packingQueueAll.value = Array.isArray(list) ? list.map(mapQueue) : [];
     }
-  } catch (error) {
-    pickingQueue.value = [];
-    packingQueue.value = [];
-    console.warn('Failed loading queues from backend:', error);
+  } catch (err) {
+    console.error('Failed to load queues:', err);
+  }
+};
+
+const setTypeFilter = (type) => {
+  selectedType.value = type;
+  selectedPickingIds.value = [];
+  selectedPackingIds.value = [];
+};
+
+const pickingQueue = computed(() => {
+  if (selectedType.value === 'ALL') return pickingQueueAll.value;
+  return pickingQueueAll.value.filter(o => o.orderType === selectedType.value);
+});
+
+const packingQueue = computed(() => {
+  if (selectedType.value === 'ALL') return packingQueueAll.value;
+  return packingQueueAll.value.filter(o => o.orderType === selectedType.value);
+});
+
+const toggleSelectAllPicking = () => {
+  if (selectedPickingIds.value.length === pickingQueue.value.length) {
+    selectedPickingIds.value = [];
+  } else {
+    selectedPickingIds.value = pickingQueue.value.map(o => o.id);
+  }
+};
+
+const toggleSelectAllPacking = () => {
+  if (selectedPackingIds.value.length === packingQueue.value.length) {
+    selectedPackingIds.value = [];
+  } else {
+    selectedPackingIds.value = packingQueue.value.map(o => o.id);
   }
 };
 
 const processPicking = async (order) => {
   try {
     await api.post(`/warehouse/picking/${order.id}/process`);
+    alertType.value = 'success';
+    alertMessage.value = `Order ${order.orderNumber} berhasil di-picking dan berpindah ke antrean Packing.`;
     await loadQueues();
-    alert('Barang untuk order ' + order.orderNumber + ' berhasil diambil dan dialihkan ke antrean Packing.');
-  } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memproses picking.';
+  } catch (err) {
+    alertType.value = 'danger';
+    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal memproses picking';
+  }
+};
+
+const processBatchPicking = async () => {
+  if (selectedPickingIds.value.length === 0) return;
+  try {
+    await api.post('/warehouse/picking/batch-process', { orderIds: selectedPickingIds.value });
+    alertType.value = 'success';
+    alertMessage.value = `Berhasil menyelesaikan Picking secara massal untuk ${selectedPickingIds.value.length} order!`;
+    selectedPickingIds.value = [];
+    await loadQueues();
+  } catch (err) {
+    alertType.value = 'danger';
+    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal memproses batch picking';
   }
 };
 
@@ -263,10 +434,53 @@ const processPacking = async (order) => {
       totalWeightKg: order.weight,
       dimensionsCm: '30x20x15'
     });
+    alertType.value = 'success';
+    alertMessage.value = `Order ${order.orderNumber} selesai dikemas (${order.koli} Koli, ${order.weight} Kg) dan siap diterbitkan Manifest Ekspedisi.`;
     await loadQueues();
-    alert('Order ' + order.orderNumber + ' selesai dikemas (' + order.koli + ' Koli, ' + order.weight + ' Kg) dan siap diterbitkan Manifest Ekspedisi.');
-  } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memproses packing.';
+  } catch (err) {
+    alertType.value = 'danger';
+    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal memproses packing';
+  }
+};
+
+const processBatchPacking = async () => {
+  if (selectedPackingIds.value.length === 0) return;
+  const itemsToPack = packingQueue.value
+    .filter(o => selectedPackingIds.value.includes(o.id))
+    .map(o => ({
+      orderId: o.id,
+      koliCount: o.koli || 1,
+      totalWeightKg: o.weight || 2.5,
+      dimensionsCm: '30x20x15'
+    }));
+
+  try {
+    await api.post('/warehouse/packing/batch-process', { items: itemsToPack });
+    alertType.value = 'success';
+    alertMessage.value = `Berhasil menyelesaikan Packing massal untuk ${itemsToPack.length} order! Siap terbit Manifest.`;
+    selectedPackingIds.value = [];
+    await loadQueues();
+  } catch (err) {
+    alertType.value = 'danger';
+    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal memproses batch packing';
+  }
+};
+
+const orderTypeLabel = (type) => {
+  switch (type) {
+    case 'PURCHASE_REQUEST': return 'Pembelian PR';
+    case 'EMBOSS_ORDER': return 'Order Emboss';
+    case 'ROUTINE_PUSH': return 'Distribusi Rutin';
+    default: return 'Permintaan';
+  }
+};
+
+const orderTypeBadgeClass = (type) => {
+  switch (type) {
+    case 'PURCHASE_REQUEST': return 'bg-primary text-white';
+    case 'EMBOSS_ORDER': return 'bg-info text-dark';
+    case 'ROUTINE_PUSH': return 'bg-danger text-white';
+    default: return 'bg-secondary text-white';
   }
 };
 

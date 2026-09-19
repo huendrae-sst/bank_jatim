@@ -15,6 +15,10 @@ public record EmbossRecordResponse(
         ItemSummary item,
         ItemSummary pinEnvelopeItem,
         OrderSummary order,
+        Long productionOrderId,
+        String productionNumber,
+        String productionStatus,
+        ItemSummary producedItem,
         String status,
         String rejectionReason
 ) {
@@ -30,6 +34,10 @@ public record EmbossRecordResponse(
                 ItemSummary.from(record.getItem()),
                 ItemSummary.from(record.getPinEnvelopeItem()),
                 OrderSummary.from(record.getOrder()),
+                record.getProductionOrder() != null ? record.getProductionOrder().getId() : null,
+                record.getProductionOrder() != null ? record.getProductionOrder().getProductionNumber() : null,
+                record.getProductionStatus(),
+                ItemSummary.from(record.getProducedItem()),
                 record.getStatus(),
                 record.getRejectionReason()
         );

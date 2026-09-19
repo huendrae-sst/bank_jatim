@@ -6,7 +6,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" @click="markAllRead">
-          <i class="bi bi-check2-all me-1"></i> Tandai Semua Dibaca
+          Tandai Semua Dibaca
         </button>
       </div>
     </div>
@@ -15,9 +15,8 @@
 
     <!-- Notification List Card -->
     <div class="card card-outline card-danger shadow-xs">
-      <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
+      <div class="card-header border-bottom p-3">
         <h3 class="card-title fw-semibold mb-0 fs-6">Daftar Notifikasi Terbaru</h3>
-        <span class="badge text-bg-danger fs-8">{{ notifs.filter(n => !n.isRead).length }} Belum Dibaca</span>
       </div>
 
       <div class="list-group list-group-flush">
@@ -37,7 +36,7 @@
             </div>
             <p class="fs-8 text-secondary mb-1 mt-0.5">{{ n.message }}</p>
             <router-link :to="n.link" class="btn btn-sm btn-outline-danger fs-9 fw-bold">
-              <i class="bi bi-box-arrow-up-right me-1"></i> Buka Transaksi
+              Buka Transaksi
             </router-link>
           </div>
         </div>

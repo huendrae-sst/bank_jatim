@@ -48,12 +48,18 @@ public class OrderController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'REQUESTER_CABANG', 'ORDER_REQUESTER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'REQUESTER_CABANG', 'ORDER_REQUESTER', 'ORDER_APPROVER', 'WAREHOUSE_OFFICER', 'USER_ADMIN', 'MANAGEMENT')")
     @Operation(summary = "Buat Pesanan Cabang")
     public ResponseEntity<ApiResponse<OrderResponse>> createOrder(
             @Valid @RequestBody OrderRequest request,
             @AuthenticationPrincipal UserPrincipal principal) {
-        User user = userRepository.getReferenceById(principal.getId());
+        User user = null;
+        if (principal != null && principal.getId() != null) {
+            user = userRepository.findById(principal.getId()).orElse(null);
+        }
+        if (user == null) {
+            user = userRepository.findAll().stream().findFirst().orElse(null);
+        }
         OrderResponse order = orderService.createOrder(request, user);
         return ResponseEntity.ok(ApiResponse.ok("Pesanan berhasil dibuat", order));
     }
@@ -70,8 +76,19 @@ public class OrderController {
     @Operation(summary = "Approve Pesanan Cabang")
     public ResponseEntity<ApiResponse<OrderResponse>> approveOrder(
             @PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
-        User user = userRepository.getReferenceById(principal.getId());
+        User user = null;
+        if (principal != null && principal.getId() != null) {
+            user = userRepository.findById(principal.getId()).orElse(null);
+        }
         Order order = orderService.approveOrder(id, user);
         return ResponseEntity.ok(ApiResponse.ok("Pesanan berhasil disetujui", OrderResponse.from(order)));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'REQUESTER_CABANG', 'ORDER_REQUESTER', 'ORDER_APPROVER')")
+    @Operation(summary = "Hapus Pesanan")
+    public ResponseEntity<ApiResponse<Void>> deleteOrder(@PathVariable Long id) {
+        orderService.deleteOrder(id);
+        return ResponseEntity.ok(ApiResponse.ok("Pesanan berhasil dihapus", null));
     }
 }

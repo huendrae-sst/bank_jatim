@@ -164,6 +164,29 @@ export const useMenuStore = defineStore('menu', {
       }
     },
 
+    async reorderModules(moduleListInNewOrder) {
+      this.loading = true;
+      try {
+        for (let mIdx = 0; mIdx < moduleListInNewOrder.length; mIdx++) {
+          const modGroup = moduleListInNewOrder[mIdx];
+          const baseOrder = (mIdx + 1) * 10;
+          for (let iIdx = 0; iIdx < modGroup.items.length; iIdx++) {
+            const item = modGroup.items[iIdx];
+            const newOrder = baseOrder + iIdx;
+            if (Number(item.order) !== newOrder) {
+              await this.updateMenu(item.id || item.code, {
+                ...item,
+                order: newOrder
+              });
+            }
+          }
+        }
+      } finally {
+        await this.fetchMenus();
+        this.loading = false;
+      }
+    },
+
     async updateRoleMenus(roleCode, selectedMenuCodes) {
       this.assignmentLoading = true;
       try {

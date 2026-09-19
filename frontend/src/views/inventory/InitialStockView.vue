@@ -80,7 +80,6 @@
               @click="warehouseDropdownOpen = !warehouseDropdownOpen"
             >
               <span>Ganti Lokasi Gudang</span>
-              <i class="bi bi-chevron-down fs-9" :class="{ 'rotate-180': warehouseDropdownOpen }"></i>
             </button>
 
             <!-- Searchable Dropdown Popup -->
@@ -133,7 +132,6 @@
             class="btn btn-sm btn-outline-secondary fw-semibold fs-8 d-inline-flex align-items-center gap-1 shadow-2xs"
             title="Download Template Format Excel/CSV"
           >
-            <i class="bi bi-download"></i>
             <span>Download Template</span>
           </button>
 
@@ -143,7 +141,6 @@
             @click="importModalOpen = true"
             class="btn btn-sm btn-success text-white fw-semibold fs-8 d-inline-flex align-items-center gap-1 shadow-2xs"
           >
-            <i class="bi bi-upload"></i>
             <span>Import Saldo Awal</span>
           </button>
 
@@ -152,7 +149,6 @@
             to="/inventory/ledgers"
             class="btn btn-sm btn-outline-danger fw-semibold fs-8 d-inline-flex align-items-center gap-1 shadow-2xs"
           >
-            <i class="bi bi-clock-history"></i>
             <span>Riwayat Transaksi</span>
           </router-link>
         </div>
@@ -253,7 +249,7 @@
                 class="btn btn-sm btn-outline-danger fs-8"
                 title="Reset Filter"
               >
-                <i class="bi bi-x-circle me-1"></i> Reset Filter
+                Reset Filter
               </button>
             </div>
 
@@ -288,7 +284,7 @@
                 class="btn btn-sm btn-outline-secondary fs-8"
                 title="Kosongkan Semua Nilai Kuantitas"
               >
-                <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Input
+                Reset Input
               </button>
             </div>
           </div>
@@ -310,17 +306,8 @@
                 </tr>
               </thead>
               <tbody>
-                <!-- Loading Skeleton -->
-                <tr v-if="isLoading">
-                  <td colspan="7" class="text-center py-5 text-secondary">
-                    <div class="spinner-border spinner-border-sm text-danger me-2" role="status"></div>
-                    <span>Memuat lembar kerja saldo awal gudang...</span>
-                  </td>
-                </tr>
-
                 <!-- Table Rows -->
                 <tr
-                  v-else
                   v-for="row in filteredRows"
                   :key="row.itemId"
                   :class="{ 'table-success': (Number(row.qtyGood) || 0) > 0 || (Number(row.qtyDamaged) || 0) > 0 }"
@@ -443,7 +430,6 @@
                 class="btn btn-danger fw-bold shadow-xs px-4 py-2 w-100 w-lg-auto fs-8"
               >
                 <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-1" role="status"></span>
-                <i v-else class="bi bi-check2-circle me-1"></i>
                 <span>Simpan & Posting Saldo Awal</span>
               </button>
             </div>

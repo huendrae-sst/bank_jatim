@@ -20,6 +20,9 @@ public class ReceivingService {
     private final OrderRepository orderRepository;
     private final DiscrepancyRepository discrepancyRepository;
     private final InventoryService inventoryService;
+    private final PurchaseRequestRepository purchaseRequestRepository;
+    private final EmbossFileRepository embossFileRepository;
+    private final ShipmentItemRepository shipmentItemRepository;
 
     @Transactional(readOnly = true)
     public List<ReceivingResponse> getReceivings(Long organizationId) {
@@ -82,10 +85,38 @@ public class ReceivingService {
                 }
             }
             order.setStatus(hasDiscrepancy ? "DISCREPANCY" : "COMPLETED");
+            order.setFulfillmentStatus(hasDiscrepancy ? "PARTIALLY_FULFILLED" : "RECEIVED");
             orderRepository.save(order);
+
+            // Update linked Purchase Request
+            if (order.getPurchaseRequest() != null) {
+                PurchaseRequest pr = order.getPurchaseRequest();
+                for (PurchaseRequestItem pri : pr.getItems()) {
+                    pri.setQtyReceived(pri.getQtyFulfilled());
+                }
+                pr.setStatus(hasDiscrepancy ? "DISCREPANCY" : "COMPLETED");
+                pr.setFulfillmentStatus(order.getFulfillmentStatus());
+                purchaseRequestRepository.save(pr);
+            }
+
+            // Update linked Emboss File
+            if (order.getEmbossFile() != null) {
+                EmbossFile ef = order.getEmbossFile();
+                ef.setStatus(hasDiscrepancy ? "DISCREPANCY" : "COMPLETED");
+                ef.setFulfillmentStatus(order.getFulfillmentStatus());
+                embossFileRepository.save(ef);
+            }
+        }
+
+        // Update shipment items qty_received
+        List<ShipmentItem> sItems = shipmentItemRepository.findByShipmentId(shipment.getId());
+        for (ShipmentItem si : sItems) {
+            si.setQtyReceived(si.getQtyShipped());
+            shipmentItemRepository.save(si);
         }
 
         shipment.setStatus("DELIVERED");
+        shipment.setDeliveredAt(java.time.LocalDateTime.now());
         shipmentRepository.save(shipment);
 
         return ReceivingResponse.from(savedReceiving);

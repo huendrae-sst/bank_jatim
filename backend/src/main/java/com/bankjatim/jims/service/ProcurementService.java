@@ -26,6 +26,7 @@ public class ProcurementService {
     private final VendorRepository vendorRepository;
     private final WarehouseRepository warehouseRepository;
     private final InventoryService inventoryService;
+    private final OrderRepository orderRepository;
 
     @Transactional(readOnly = true)
     public Page<PurchaseRequestResponse> getPurchaseRequests(Long organizationId, Pageable pageable) {
@@ -214,5 +215,75 @@ public class ProcurementService {
         po.setStatus("RECEIVED");
         purchaseOrderRepository.save(po);
         return GoodsReceiptResponse.from(goodsReceiptRepository.save(grn));
+    }
+
+    @Transactional
+    public com.bankjatim.jims.dto.OrderResponse dispatchPrToBranchDistribution(Long prId, User dispatcher) {
+        PurchaseRequest pr = purchaseRequestRepository.findById(prId)
+                .orElseThrow(() -> new RuntimeException("PR tidak ditemukan: " + prId));
+
+        Order order = Order.builder()
+                .orderNumber("ORD-PR-" + pr.getOrganization().getCode() + "-" + System.currentTimeMillis())
+                .orderType("PURCHASE_REQUEST")
+                .fulfillmentStatus("UNFULFILLED")
+                .purchaseRequest(pr)
+                .requestingWarehouse(warehouseRepository.findByOrganizationId(pr.getOrganization().getId()).stream().findFirst().orElse(null))
+                .createdByUser(dispatcher)
+                .approvedByUser(dispatcher)
+                .approvedAt(LocalDateTime.now())
+                .submittedAt(LocalDateTime.now())
+                .priority("HIGH")
+                .requiredDate(LocalDate.now().plusDays(2))
+                .status("APPROVED") // Siap di antrean picking gudang
+                .notes("Pemenuhan Pengadaan PR: " + pr.getPrNumber() + " (" + pr.getPurpose() + ")")
+                .totalItems(0)
+                .totalEstimatedValue(BigDecimal.ZERO)
+                .build();
+
+        int totalItems = 0;
+        BigDecimal totalValue = BigDecimal.ZERO;
+
+        for (PurchaseRequestItem pri : pr.getItems()) {
+            int qtyToFulfill = pri.getQtyApproved() > 0 ? pri.getQtyApproved() : pri.getQtyRequested();
+            BigDecimal price = pri.getEstimatedUnitPrice() != null ? pri.getEstimatedUnitPrice() : BigDecimal.ZERO;
+            BigDecimal subtotal = price.multiply(BigDecimal.valueOf(qtyToFulfill));
+
+            OrderItem oi = OrderItem.builder()
+                    .order(order)
+                    .item(pri.getItem())
+                    .qtyRequested(qtyToFulfill)
+                    .qtyApproved(qtyToFulfill)
+                    .qtyAllocated(qtyToFulfill)
+                    .qtyPicked(0)
+                    .qtyPacked(0)
+                    .qtyShipped(0)
+                    .qtyReceived(0)
+                    .unitPriceRef(price)
+                    .subtotalRef(subtotal)
+                    .notes("Pemenuhan PR Item " + pri.getItem().getName())
+                    .build();
+
+            order.getItems().add(oi);
+            totalItems += qtyToFulfill;
+            totalValue = totalValue.add(subtotal);
+        }
+
+        order.setTotalItems(totalItems);
+        order.setTotalEstimatedValue(totalValue);
+
+        Order saved = orderRepository.save(order);
+
+        pr.setStatus("IN_FULFILLMENT");
+        pr.setFulfillmentStatus("UNFULFILLED");
+        purchaseRequestRepository.save(pr);
+
+        return com.bankjatim.jims.dto.OrderResponse.from(orderRepository.findByIdWithDetails(saved.getId()).orElse(saved));
+    }
+
+    @Transactional(readOnly = true)
+    public List<com.bankjatim.jims.dto.OrderResponse> getPrFulfillmentOrders() {
+        return orderRepository.findByOrderTypeOrderByCreatedAtDesc("PURCHASE_REQUEST").stream()
+                .map(com.bankjatim.jims.dto.OrderResponse::from)
+                .toList();
     }
 }

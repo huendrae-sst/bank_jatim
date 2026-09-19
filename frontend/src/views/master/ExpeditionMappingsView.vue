@@ -6,7 +6,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-danger fw-bold shadow-xs" @click="openCreateModal">
-          <i class="bi bi-plus-lg me-1"></i> Tambah Pemetaan Rute
+            Tambah
         </button>
       </div>
     </div>
@@ -100,8 +100,8 @@
             </div>
             <div class="modal-footer d-flex justify-content-end align-items-center gap-2 py-2 px-3">
               <button type="button" class="btn btn-sm btn-secondary" @click="showModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-danger fw-bold">
-                <i class="bi bi-check2-circle me-1"></i> Simpan Pemetaan
+              <button type="submit" class="btn btn-sm btn-danger fw-bold px-3">
+                Simpan
               </button>
             </div>
           </form>

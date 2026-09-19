@@ -32,10 +32,10 @@
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/receiving" class="btn btn-sm btn-outline-secondary fs-8">
-            <i class="bi bi-arrow-left me-1"></i> Penerimaan Cabang
+            Penerimaan Cabang
           </router-link>
           <router-link to="/receiving/discrepancies" class="btn btn-sm btn-outline-danger fs-8">
-            <i class="bi bi-exclamation-triangle me-1"></i> Berita Acara Selisih (BAP)
+            Berita Acara Selisih (BAP)
           </router-link>
         </div>
       </div>
@@ -50,7 +50,7 @@
               class="btn btn-sm btn-outline-danger fs-8"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md-5 ms-md-auto">
@@ -67,7 +67,7 @@
                 type="button"
                 @click="currentPage = 1"
               >
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -187,7 +187,7 @@
               Batal
             </button>
             <button type="button" class="btn btn-sm btn-danger fw-bold shadow-xs px-3 fs-8" @click="submitReceipt">
-              <i class="bi bi-check2-circle me-1"></i> Simpan Tanda Terima & Validasi Stok
+              Simpan Tanda Terima & Validasi Stok
             </button>
           </div>
         </div>

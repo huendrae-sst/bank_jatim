@@ -57,6 +57,28 @@ public class Order extends BaseEntity {
     @Builder.Default
     private String status = "DRAFT";
 
+    @Column(name = "order_type", nullable = false, length = 50)
+    @Builder.Default
+    private String orderType = "INTERNAL_REQUEST"; // INTERNAL_REQUEST, PURCHASE_REQUEST, EMBOSS_ORDER, ROUTINE_PUSH
+
+    @Column(name = "fulfillment_status", nullable = false, length = 50)
+    @Builder.Default
+    private String fulfillmentStatus = "UNFULFILLED"; // UNFULFILLED, PARTIALLY_FULFILLED, FULLY_FULFILLED, RECEIVED
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "purchase_request_id")
+    private PurchaseRequest purchaseRequest;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "emboss_file_id")
+    private EmbossFile embossFile;
+
+    @Column(name = "batch_manifest_number", length = 100)
+    private String batchManifestNumber;
+
+    @Column(name = "routine_period", length = 100)
+    private String routinePeriod;
+
     @Column(name = "is_overbudget", nullable = false)
     @Builder.Default
     private Boolean isOverbudget = false;

@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 
 public record EmbossFileResponse(
         Long id,
+        String fileId,
         String filename,
         String filePath,
         Integer totalRecords,
@@ -20,6 +21,7 @@ public record EmbossFileResponse(
     public static EmbossFileResponse from(EmbossFile file) {
         return new EmbossFileResponse(
                 file.getId(),
+                file.getFileId() != null ? file.getFileId() : ("#EB-" + file.getId()),
                 file.getFilename(),
                 file.getFilePath(),
                 file.getTotalRecords(),

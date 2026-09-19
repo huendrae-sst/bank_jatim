@@ -2,10 +2,10 @@
   <div class="print-page bg-slate-100 min-vh-100 p-3 p-md-5 d-flex flex-column align-items-center">
     <div class="no-print mb-3 d-flex gap-2">
       <router-link to="/distribution/shipments" class="btn btn-outline-secondary btn-sm">
-        <i class="bi bi-arrow-left me-1"></i> Kembali
+        Kembali
       </router-link>
       <button @click="triggerPrint" class="btn btn-danger btn-sm fw-bold shadow-xs">
-        <i class="bi bi-printer me-1"></i> Cetak Label (Print)
+        Cetak Label (Print)
       </button>
     </div>
 

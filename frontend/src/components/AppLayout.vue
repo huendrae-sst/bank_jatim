@@ -162,7 +162,7 @@
               </div>
               <div class="user-footer d-flex justify-content-end p-2 bg-body">
                 <button type="button" class="btn btn-sm btn-danger" @click="handleLogout">
-                  <i class="bi bi-box-arrow-right me-1"></i> Sign out
+                  Sign out
                 </button>
               </div>
             </div>

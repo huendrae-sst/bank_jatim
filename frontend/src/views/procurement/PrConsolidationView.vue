@@ -34,7 +34,7 @@
         </div>
         <div class="d-flex gap-2">
           <router-link to="/procurement/po" class="btn btn-sm btn-light fw-bold text-success shadow-xs">
-            <i class="bi bi-file-earmark-ruled me-1"></i> Buka Daftar PO
+            Buka Daftar PO
           </router-link>
           <button type="button" class="btn btn-sm btn-outline-light" @click="generatedPo = null">
             Tutup
@@ -51,10 +51,10 @@
       <div class="card-header border-bottom p-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <router-link to="/procurement/pr" class="btn btn-sm btn-outline-secondary fs-8">
-            <i class="bi bi-arrow-left me-1"></i> Kembali ke PR
+            Kembali ke PR
           </router-link>
           <span class="fw-bold text-body fs-7">
-            <i class="bi bi-inboxes text-danger me-1"></i> Item Siap Konsolidasi (Pool PR Approved)
+            Item Siap Konsolidasi (Pool PR Approved)
           </span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
@@ -77,7 +77,7 @@
             :disabled="selectedItems.length === 0 || !selectedVendorId || !selectedWarehouseId"
             @click="consolidateToPo"
           >
-            <i class="bi bi-check2-square me-1"></i> Terbitkan PO ({{ selectedItems.length }} Item)
+            Terbitkan PO ({{ selectedItems.length }} Item)
           </button>
         </div>
       </div>
@@ -118,7 +118,7 @@
               @click="resetFilters"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -133,7 +133,7 @@
                 placeholder="Cari No PR, Unit Pemohon, atau Nama Barang..."
               />
               <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -182,7 +182,7 @@
               </td>
               <td>
                 <span class="badge text-bg-light border fs-9">
-                  <i class="bi bi-building me-1 text-primary"></i> {{ item.vendor }}
+                  {{ item.vendor }}
                 </span>
               </td>
             </tr>
@@ -212,7 +212,7 @@
           :disabled="selectedItems.length === 0"
           @click="consolidateToPo"
         >
-          <i class="bi bi-file-earmark-plus me-1"></i> Terbitkan Purchase Order
+          Terbitkan Purchase Order
         </button>
       </div>
     </div>

@@ -24,11 +24,11 @@
       <!-- 4. Card Header with Tabs & Tools -->
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <h3 class="card-title fw-bold mb-0 fs-6 text-body">
-          <i class="bi bi-list-columns-reverse text-danger me-2"></i>Daftar Arsip Berita Acara Stock Opname
+          Daftar Arsip Berita Acara Stock Opname
         </h3>
         <div class="card-tools d-flex align-items-center gap-2">
           <router-link to="/inventory/stock-opname" class="btn btn-sm btn-danger fw-bold shadow-xs fs-8">
-            <i class="bi bi-plus-lg me-1"></i> Stock Opname Baru
+            Tambah
           </router-link>
         </div>
       </div>
@@ -53,7 +53,7 @@
               class="btn btn-sm btn-outline-danger fs-8"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -70,7 +70,7 @@
                 type="button"
                 @click="currentPage = 1"
               >
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>

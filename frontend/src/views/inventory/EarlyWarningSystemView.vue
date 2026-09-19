@@ -7,10 +7,9 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <router-link to="/inventory/switching" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-arrow-left-right me-1"></i> Switching Stock
+          Switching Stock
         </router-link>
         <button class="btn btn-sm btn-danger fw-bold shadow-xs" :disabled="isScanning" @click="fetchEwsData(true)">
-          <i :class="isScanning ? 'spinner-border spinner-border-sm me-1' : 'bi bi-lightning-charge me-1'"></i>
           {{ isScanning ? 'Memindai Algoritma...' : 'Jalankan Pemindaian Algoritma EWS' }}
         </button>
       </div>
@@ -105,10 +104,10 @@
             </div>
             <div class="d-flex gap-2">
               <router-link to="/procurement/pr" class="btn btn-sm btn-danger fw-bold shadow-xs flex-fill">
-                <i class="bi bi-file-earmark-plus me-1"></i> Terbitkan PR Darurat
+                Terbitkan PR Darurat
               </router-link>
               <router-link to="/inventory/switching" class="btn btn-sm btn-outline-secondary fw-bold shadow-xs flex-fill">
-                <i class="bi bi-arrow-left-right me-1"></i> Switching Stok
+                Switching Stok
               </router-link>
             </div>
           </div>

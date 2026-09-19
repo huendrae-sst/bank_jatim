@@ -1,60 +1,91 @@
 <template>
   <div class="card-personalization-page">
-    <!-- Breadcrumb & Header -->
-    <div class="app-content-header py-2 px-3 mb-3 border-bottom bg-body rounded-3 shadow-xs d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-      <div>
-        <h3 class="mb-0 text-body fw-bold">Personalisasi Kartu ATM (Emboss Operations)</h3>
-      </div>
-      <div class="d-flex align-items-center gap-2">
-        <router-link to="/emboss/reject-queue" class="btn btn-sm btn-outline-danger fw-bold">
-          <i class="bi bi-exclamation-octagon me-1"></i> Antrean Reject ({{ totalRejectedRecords }})
-        </router-link>
-        <button class="btn btn-sm btn-danger fw-bold shadow-xs" @click="simulateFileUpload">
-          <i class="bi bi-cloud-arrow-up me-1"></i> Unggah Berkas Emboss
-        </button>
-      </div>
-    </div>
-
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
-    <!-- Upload Dropzone Card -->
-    <div class="card border-2 border-dashed shadow-xs mb-3 text-center py-4 px-3" style="border-color: rgba(217, 37, 42, 0.4) !important; background-color: rgba(217, 37, 42, 0.02);">
-      <div class="d-flex flex-column align-items-center justify-content-center cursor-pointer" @click="simulateFileUpload">
-        <div class="rounded-circle p-3 mb-2 d-inline-flex align-items-center justify-content-center" style="background-color: rgba(217, 37, 42, 0.1); color: var(--jatim-red); width: 64px; height: 64px;">
-          <i class="bi bi-cloud-arrow-up fs-2"></i>
+    <!-- 1. Judul Halaman & Breadcrumb -->
+    <div class="app-content-header mb-3">
+      <div class="container-fluid px-0">
+        <div class="row align-items-center">
+          <div class="col-sm-6">
+            <h3 class="mb-0 text-body fw-bold">Personalisasi Kartu ATM (Emboss Operations)</h3>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-end mb-0 fs-8">
+              <li class="breadcrumb-item">
+                <router-link to="/dashboard" class="text-decoration-none text-danger">Overview</router-link>
+              </li>
+              <li class="breadcrumb-item active text-secondary" aria-current="page">Personalisasi Kartu</li>
+            </ol>
+          </div>
         </div>
-        <h5 class="fw-bold mb-1 text-body">Tarik & Letakkan Berkas Ekstraksi Kartu (.CSV / .TXT) ke Sini</h5>
-        <p class="text-secondary fs-8 mb-3" style="max-width: 620px;">
-          Format standar Core Banking Bank Jatim: Nomor Rekening, Nama Nasabah (Max 26 Karakter), Masked Card Number, Tipe Kartu (GPN/Mastercard), dan Kode KC Pengelola.
-        </p>
-        <input type="file" ref="fileInputRef" accept=".csv,.txt" class="d-none" @change="handleFileInputChange" />
-        <button type="button" class="btn btn-sm btn-outline-danger fw-bold px-3 shadow-xs" @click.stop="triggerFileInput">
-          <i class="bi bi-file-earmark-arrow-up me-1"></i> Pilih Berkas dari Komputer
-        </button>
       </div>
     </div>
+
+    <!-- Hidden File Input -->
+    <input type="file" ref="fileInputRef" accept=".csv,.txt" class="d-none" @change="handleFileInputChange" />
+
+    <div v-if="errorMessage" class="alert alert-danger fs-8 py-2 px-3 mb-3">{{ errorMessage }}</div>
 
     <!-- Main Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
         <h3 class="card-title fw-semibold mb-0 fs-6 text-body">
-          <i class="bi bi-journal-text text-danger me-1"></i> Riwayat Berkas Personalisasi Kartu Diproses
+          Riwayat Berkas Personalisasi Kartu Diproses
         </h3>
-        <div class="d-flex gap-2">
-          <div class="input-group input-group-sm" style="min-width: 280px;">
-            <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-search"></i></span>
-            <input
-              type="text"
-              v-model="searchQuery"
-              class="form-control form-control-sm border-start-0 border-end-0 fs-8"
-              placeholder="Cari Nama Berkas..."
-            />
-            <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">
-              Cari
+      </div>
+
+      <!-- Filter & Search Toolbar (UI seperti orders/emboss) -->
+      <div class="card-body p-3 bg-body-tertiary border-bottom">
+        <div class="row g-2 align-items-center">
+          <!-- Status Filter -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-toggle-on"></i></span>
+              <select v-model="filterStatus" class="form-select form-select-sm border-start-0 fs-8" @change="currentPage = 1">
+                <option value="ALL">Semua Status</option>
+                <option value="VALIDATED">VALIDATED</option>
+                <option value="ORDERS_GENERATED">ORDER TERBIT</option>
+                <option value="PROCESSING">PROCESSING</option>
+                <option value="COMPLETED">COMPLETED</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Sort Field Filter -->
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-sort-down"></i></span>
+              <select v-model="sortBy" class="form-select form-select-sm border-start-0 fs-8">
+                <option value="id">ID Berkas (Terbaru)</option>
+                <option value="filename">Nama Berkas</option>
+                <option value="total">Total Kartu</option>
+                <option value="valid">Kartu Valid</option>
+                <option value="rejected">Kartu Reject</option>
+                <option value="status">Status Pemrosesan</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Reset Button -->
+          <div class="col-auto" v-if="isFiltered">
+            <button type="button" @click="resetFilters" class="btn btn-sm btn-outline-danger fs-8" title="Reset Filter">
+              Reset
             </button>
-            <button v-if="searchQuery" type="button" class="btn btn-sm btn-outline-danger fs-8" @click="searchQuery = ''" title="Reset Filter">
-              <i class="bi bi-arrow-counterclockwise"></i>
-            </button>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="col-12 col-md ms-md-auto">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-search"></i></span>
+              <input
+                type="text"
+                v-model="searchQuery"
+                class="form-control form-control-sm border-start-0 border-end-0 fs-8"
+                placeholder="Cari Nama Berkas, Batch ID..."
+                @input="currentPage = 1"
+              />
+              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button" @click="currentPage = 1">
+                Cari
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -73,60 +104,64 @@
             </tr>
           </thead>
           <tbody class="fs-7">
-            <tr v-for="file in paginatedFiles" :key="file.id">
-              <td>
-                <router-link :to="`/emboss/${file.id}`" class="font-monospace fw-bold text-danger text-decoration-none">
-                  {{ file.filename }}
-                </router-link>
-                <div class="fs-9 text-secondary">Batch ID: #EB-202609-00{{ file.id }}</div>
-              </td>
-              <td class="text-center font-monospace fw-bold text-body">
-                {{ file.total }} Kartu
-              </td>
-              <td class="text-center font-monospace">
-                <span class="badge text-bg-success fs-9">{{ file.valid }} Kartu</span>
-              </td>
-              <td class="text-center font-monospace">
-                <span v-if="file.rejected > 0" class="badge text-bg-danger fs-9">{{ file.rejected }} Kartu</span>
-                <span v-else class="text-secondary fs-9">-</span>
-              </td>
-              <td class="text-center">
-                <span class="badge fs-9 text-uppercase" :class="badgeClass(file.status)">
-                  {{ file.status }}
-                </span>
-              </td>
-              <td class="text-center">
-                <div class="d-inline-flex align-items-center gap-1">
-                  <button
-                    v-if="file.status === 'VALIDATED'"
-                    class="btn-action-icon text-danger"
-                    @click="generateOrders(file)"
-                    title="Terbitkan Pesanan Cabang Otomatis"
-                  >
-                    <i class="bi bi-send-plus"></i>
-                  </button>
-                  <router-link
-                    :to="`/emboss/${file.id}`"
-                    class="btn-action-icon text-secondary"
-                    title="Buka Record Explorer"
-                  >
-                    <i class="bi bi-eye"></i>
-                  </router-link>
-                </div>
-              </td>
-            </tr>
-            <tr v-if="filteredFiles.length === 0">
-              <td colspan="6" class="text-center py-5 text-secondary">
-                <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
-                Tidak ada riwayat berkas emboss yang sesuai.
-              </td>
-            </tr>
+            <template v-if="!isLoading || paginatedFiles.length > 0">
+              <tr v-for="file in paginatedFiles" :key="file.id">
+                <td>
+                  <span class="font-monospace fw-bold text-dark">
+                    {{ file.filename }}
+                  </span>
+                  <div class="fs-9 text-secondary">Batch ID: #EB-202609-00{{ file.id }}</div>
+                </td>
+                <td class="text-center font-monospace fw-bold text-body">
+                  {{ file.total }} Kartu
+                </td>
+                <td class="text-center font-monospace">
+                  <span class="badge text-bg-success fs-9">{{ file.valid }} Kartu</span>
+                </td>
+                <td class="text-center font-monospace">
+                  <span v-if="file.rejected > 0" class="badge text-bg-danger fs-9">{{ file.rejected }} Kartu</span>
+                  <span v-else class="text-secondary fs-9">-</span>
+                </td>
+                <td class="text-center">
+                  <span class="badge fs-9 text-uppercase" :class="badgeClass(file.status)">
+                    {{ file.status }}
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="d-inline-flex align-items-center gap-1.5">
+                    <router-link
+                      :to="`/emboss/${file.id}`"
+                      class="btn btn-sm btn-outline-danger py-1 px-2.5 fs-8 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs"
+                      title="Buka Detail Berkas & Order"
+                    >
+                      <span>Buka Detail</span>
+                    </router-link>
+                    <button
+                      v-if="file.status === 'VALIDATED'"
+                      type="button"
+                      class="btn btn-sm btn-danger py-1 px-2 fs-8 fw-bold d-inline-flex align-items-center gap-1 shadow-xs"
+                      @click="generateOrders(file)"
+                      title="Terbitkan Pesanan Cabang Otomatis"
+                    >
+                      <span>Order</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <tr v-if="!isLoading && filteredFiles.length === 0">
+                <td colspan="6" class="text-center py-5 text-secondary">
+                  <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
+                  Tidak ada riwayat berkas emboss yang sesuai.
+                </td>
+              </tr>
+            </template>
           </tbody>
         </table>
       </div>
 
       <!-- Standardized Pagination Footer -->
       <PaginationFooter
+        v-if="!isLoading && filteredFiles.length > 0"
         :total="filteredFiles.length"
         v-model:currentPage="currentPage"
         v-model:perPage="perPage"
@@ -137,13 +172,28 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 
+const router = useRouter();
 const searchQuery = ref('');
+const filterStatus = ref('ALL');
+const sortBy = ref('id');
 const currentPage = ref(1);
 const perPage = ref(10);
 const errorMessage = ref('');
+
+const isFiltered = computed(() => {
+  return searchQuery.value.trim() !== '' || filterStatus.value !== 'ALL' || sortBy.value !== 'id';
+});
+
+const resetFilters = () => {
+  searchQuery.value = '';
+  filterStatus.value = 'ALL';
+  sortBy.value = 'id';
+  currentPage.value = 1;
+};
 
 const mapEmbossFile = (file) => ({
   id: file.id,
@@ -154,26 +204,59 @@ const mapEmbossFile = (file) => ({
   status: file.status || 'VALIDATED'
 });
 
+const isLoading = ref(true);
 const embossFiles = ref([]);
 
 const loadEmbossFiles = async () => {
+  isLoading.value = true;
   errorMessage.value = '';
   try {
     const response = await api.get('/emboss');
     const data = response.data?.content || response.data || [];
     if (Array.isArray(data) && data.length > 0) {
       embossFiles.value = data.map(mapEmbossFile);
+    } else {
+      embossFiles.value = [];
     }
   } catch (error) {
     embossFiles.value = [];
     console.warn('Failed loading emboss files from backend:', error);
+  } finally {
+    isLoading.value = false;
   }
 };
 
 const filteredFiles = computed(() => {
-  if (!searchQuery.value) return embossFiles.value;
-  const q = searchQuery.value.toLowerCase();
-  return embossFiles.value.filter(f => f.filename.toLowerCase().includes(q));
+  let list = [...embossFiles.value];
+
+  // 1. Status Filter
+  if (filterStatus.value !== 'ALL') {
+    list = list.filter(f => f.status === filterStatus.value);
+  }
+
+  // 2. Search
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase();
+    list = list.filter(f =>
+      (f.filename && f.filename.toLowerCase().includes(q)) ||
+      String(f.id).includes(q)
+    );
+  }
+
+  // 3. Sort
+  const key = sortBy.value;
+  list.sort((a, b) => {
+    let valA = a[key] ?? '';
+    let valB = b[key] ?? '';
+    if (key === 'id' || key === 'total' || key === 'valid' || key === 'rejected') {
+      return (Number(valB) || 0) - (Number(valA) || 0);
+    }
+    if (typeof valA === 'string') valA = valA.toLowerCase();
+    if (typeof valB === 'string') valB = valB.toLowerCase();
+    return valA > valB ? 1 : valA < valB ? -1 : 0;
+  });
+
+  return list;
 });
 
 const paginatedFiles = computed(() => {
@@ -189,6 +272,7 @@ const readyToGenerateCount = computed(() => embossFiles.value
 
 const badgeClass = (status) => {
   switch (status) {
+    case 'ORDERS_GENERATED': return 'text-bg-success';
     case 'COMPLETED': return 'text-bg-success';
     case 'VALIDATED': return 'text-bg-primary';
     case 'PROCESSING': return 'text-bg-warning';
@@ -210,11 +294,16 @@ const handleFileInputChange = async (event) => {
   const formData = new FormData();
   formData.append('file', file);
   try {
-    await api.post('/emboss', formData, {
+    const res = await api.post('/emboss', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    await loadEmbossFiles();
-    alert(`Berkas ${file.name} berhasil diproses.`);
+    const newFile = res.data?.data || res.data;
+    if (newFile && newFile.id) {
+      router.push(`/emboss/${newFile.id}`);
+    } else {
+      await loadEmbossFiles();
+      alert(`Berkas ${file.name} berhasil diproses.`);
+    }
   } catch (error) {
     errorMessage.value = error?.message || error?.error || 'Gagal mengunggah berkas emboss.';
   } finally {
@@ -229,8 +318,7 @@ const simulateFileUpload = () => {
 const generateOrders = async (file) => {
   try {
     await api.post(`/emboss/${file.id}/generate-orders`);
-    await loadEmbossFiles();
-    alert('Berhasil menerbitkan Branch Orders untuk ' + file.valid + ' kartu ATM! Pesanan langsung diteruskan ke antrean Gudang & Pengiriman.');
+    router.push(`/emboss/${file.id}`);
   } catch (error) {
     errorMessage.value = error?.message || error?.error || 'Gagal menerbitkan order dari berkas emboss.';
   }
@@ -238,3 +326,13 @@ const generateOrders = async (file) => {
 
 onMounted(loadEmbossFiles);
 </script>
+
+<style scoped>
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>

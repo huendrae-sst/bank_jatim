@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { globalLoading } from '../stores/loading.js';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -9,22 +10,40 @@ const api = axios.create({
   }
 });
 
-// Request Interceptor: Attach JWT Token
+// Request Interceptor: Attach JWT Token & Start Loading
 api.interceptors.request.use(
   (config) => {
+    if (!config.skipLoading && !config.silent) {
+      globalLoading.start(config.loadingMessage);
+    }
+
     const token = localStorage.getItem('jims_jwt_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    if (!error?.config?.skipLoading && !error?.config?.silent) {
+      globalLoading.stop();
+    }
+    return Promise.reject(error);
+  }
 );
 
-// Response Interceptor: Handle Global Errors
+// Response Interceptor: Handle Global Errors & Stop Loading
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    if (!response?.config?.skipLoading && !response?.config?.silent) {
+      globalLoading.stop();
+    }
+    return response.data;
+  },
   (error) => {
+    if (!error?.config?.skipLoading && !error?.config?.silent) {
+      globalLoading.stop();
+    }
+
     if (error.response && error.response.status === 401) {
       localStorage.removeItem('jims_jwt_token');
       localStorage.removeItem('jims_user');

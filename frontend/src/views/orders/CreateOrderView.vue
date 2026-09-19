@@ -33,7 +33,6 @@
           </h3>
           <div class="card-tools w-100 w-sm-auto">
             <router-link to="/orders" class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center justify-content-center gap-1 w-100 w-sm-auto">
-              <i class="bi bi-arrow-left"></i>
               <span>Kembali ke Daftar</span>
             </router-link>
           </div>
@@ -84,7 +83,7 @@
                 <span class="fs-9 text-muted">Pastikan jumlah dan estimasi nilai tidak melebihi sisa anggaran cabang</span>
               </div>
               <button type="button" @click="addRow" class="btn btn-sm btn-outline-danger fw-semibold">
-                <i class="bi bi-plus-circle me-1"></i> Tambah Item
+                Tambah
               </button>
             </div>
 
@@ -206,13 +205,10 @@
         <!-- Card Footer Submit -->
         <div class="card-footer bg-body border-top d-flex flex-column-reverse flex-sm-row justify-content-end align-items-stretch align-items-sm-center gap-2 py-3 px-3 px-md-4">
           <button type="button" @click="resetForm" class="btn btn-sm btn-outline-secondary px-3 fw-semibold d-inline-flex align-items-center justify-content-center gap-1">
-            <i class="bi bi-x-circle"></i>
             <span>Batal</span>
           </button>
           <button type="submit" :disabled="submitting" class="btn btn-sm btn-danger px-4 fw-bold shadow-xs d-inline-flex align-items-center justify-content-center gap-1">
-            <i class="bi bi-send"></i>
-            <span v-if="submitting" class="spinner-border spinner-border-sm me-1"></span>
-            <span>Submit Order Permintaan</span>
+            Simpan
           </button>
         </div>
       </form>

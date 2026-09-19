@@ -24,20 +24,15 @@
       <!-- Card Header with Navigation / Actions -->
       <div class="card-header border-bottom p-2 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2">
         <div class="d-flex align-items-center gap-2">
-          <span class="fw-bold text-body fs-7">
-            <i class="bi bi-boxes text-danger me-1"></i> Data Saldo Stok Barang
-          </span>
-          <span class="badge text-bg-secondary fs-9">
-            {{ selectedWarehouseLabel }}
-          </span>
+          <span class="fw-bold text-body fs-7">Data Saldo Stok Barang</span>
         </div>
 
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <button class="btn btn-sm btn-outline-secondary fs-8" @click="exportExcel" title="Ekspor ke Excel">
-            <i class="bi bi-file-earmark-excel text-success me-1"></i> Ekspor Excel
+            Ekspor Excel
           </button>
           <router-link to="/inventory/ledger" class="btn btn-sm btn-danger fw-bold shadow-xs fs-8">
-            <i class="bi bi-journal-text me-1"></i> Histori Mutasi
+            Histori Mutasi
           </router-link>
         </div>
       </div>
@@ -73,7 +68,7 @@
           </div>
           <div class="col-auto" v-if="searchQuery || selectedWarehouse !== 'ALL' || categoryFilter !== 'ALL'">
             <button type="button" class="btn btn-sm btn-outline-danger fs-8" @click="resetFilters" title="Reset Filter">
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -88,7 +83,7 @@
                 placeholder="Cari SKU atau nama barang..."
               />
               <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -99,13 +94,8 @@
         <i class="bi bi-exclamation-octagon-fill me-1"></i> {{ loadError }}
       </div>
 
-      <div v-if="loading" class="p-4 text-center text-secondary fs-8">
-        <span class="spinner-border spinner-border-sm me-1"></span>
-        Memuat saldo stok dari backend...
-      </div>
-
       <!-- Table Content -->
-      <div v-if="!loading" class="table-responsive">
+      <div class="table-responsive">
         <table class="table table-hover align-middle mb-0 fs-8">
           <thead class="table-light text-secondary fs-8 fw-bold text-uppercase">
             <tr>

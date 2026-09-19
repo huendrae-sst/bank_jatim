@@ -49,10 +49,10 @@
         </ul>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/receiving/discrepancies" class="btn btn-sm btn-outline-danger fs-8">
-            <i class="bi bi-exclamation-triangle me-1"></i> Berita Acara Selisih
+            Berita Acara Selisih
           </router-link>
           <router-link to="/receiving/confirmation" class="btn btn-sm btn-danger fw-bold shadow-xs fs-8">
-            <i class="bi bi-check2-circle me-1"></i> Form Konfirmasi BAP
+            Form Konfirmasi BAP
           </router-link>
         </div>
       </div>
@@ -78,7 +78,7 @@
               class="btn btn-sm btn-outline-danger fs-8"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -95,7 +95,7 @@
                 type="button"
                 @click="currentPage = 1"
               >
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -128,7 +128,7 @@
                 <button v-if="item.status !== 'DELIVERED'" class="btn-action-icon text-success" @click="confirmReceipt(item)" title="Konfirmasi Terima (BAP)">
                   <i class="bi bi-box-arrow-in-down"></i>
                 </button>
-                <span v-else class="text-success fs-8"><i class="bi bi-check2-circle me-1"></i> Diterima</span>
+                <span v-else class="text-success fs-8">Diterima</span>
               </td>
             </tr>
             <tr v-if="filteredList.length === 0">

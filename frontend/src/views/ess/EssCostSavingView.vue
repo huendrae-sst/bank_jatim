@@ -6,7 +6,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" @click="exportCsv">
-          <i class="bi bi-download me-1"></i> Ekspor CSV
+          Ekspor CSV
         </button>
       </div>
     </div>

@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 public record ShipmentResponse(
         Long id,
         String manifestNumber,
+        String distributionType,
+        String batchManifestNumber,
         OrderResponse order,
         PurchaseOrderResponse.WarehouseSummary originWarehouse,
         OrderResponse.OrganizationSummary destinationOrganization,
@@ -29,6 +31,8 @@ public record ShipmentResponse(
         return new ShipmentResponse(
                 shipment.getId(),
                 shipment.getManifestNumber(),
+                shipment.getDistributionType(),
+                shipment.getBatchManifestNumber(),
                 shipment.getOrder() != null ? OrderResponse.from(shipment.getOrder()) : null,
                 PurchaseOrderResponse.WarehouseSummary.from(shipment.getOriginWarehouse()),
                 OrderResponse.OrganizationSummary.from(shipment.getDestinationOrganization()),

@@ -14,7 +14,7 @@
             </nav>
           </div>
           <router-link to="/destructions" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Batal
+            Batal
           </router-link>
         </div>
 
@@ -55,7 +55,7 @@
               <hr class="my-4">
 
               <!-- Data Saksi Pemusnahan (Wajib 2 Pejabat/Petugas) -->
-              <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-people me-2"></i>Data Saksi Pemusnahan (Wajib 2 Pejabat/Petugas)</h6>
+              <h6 class="fw-bold mb-3 text-dark">Data Saksi Pemusnahan (Wajib 2 Pejabat/Petugas)</h6>
               <div class="row g-3">
                 <div class="col-12 col-md-6">
                   <div class="card p-3 bg-light border-0">
@@ -89,9 +89,9 @@
 
               <!-- Item Barang yang Dimusnahkan -->
               <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2"></i>Item Barang yang Dimusnahkan</h6>
+                <h6 class="fw-bold mb-0 text-dark">Item Barang yang Dimusnahkan</h6>
                 <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 fs-8 fw-semibold" @click="addItem">
-                  <i class="bi bi-plus-circle me-1"></i> Tambah Item
+                  Tambah
                 </button>
               </div>
 
@@ -138,10 +138,10 @@
 
             <div class="card-footer bg-light p-3 d-flex justify-content-between align-items-center">
               <router-link to="/destructions" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Batal
+                Batal
               </router-link>
               <button type="submit" :disabled="submitting" class="btn btn-danger btn-sm px-4 shadow-xs">
-                <i class="bi bi-send me-1"></i> Kirim Pengajuan Pemusnahan
+                Kirim Pengajuan Pemusnahan
               </button>
             </div>
           </form>

@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,6 +30,7 @@ public class OrderService {
     private final OrderAllocationRepository orderAllocationRepository;
     private final OrganizationRepository organizationRepository;
     private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     @Transactional(readOnly = true)
     public OrderResponse getOrder(Long orderId) {
@@ -79,32 +82,45 @@ public class OrderService {
 
     @Transactional
     public OrderResponse createOrder(OrderRequest request, User creator) {
+        if (creator != null && creator.getId() != null) {
+            creator = userRepository.findById(creator.getId()).orElse(creator);
+        }
+
         Organization organization = organizationRepository.findById(request.organizationId())
-                .orElseThrow(() -> new RuntimeException("Organisasi tidak ditemukan: " + request.organizationId()));
+                .orElseThrow(() -> new BadRequestException("Organisasi tidak ditemukan: " + request.organizationId()));
+
+        Warehouse requestingWarehouse = (creator != null) ? creator.getWarehouse() : null;
+        if (requestingWarehouse == null && organization != null) {
+            List<Warehouse> orgWarehouses = warehouseRepository.findByOrganizationId(organization.getId());
+            if (!orgWarehouses.isEmpty()) {
+                requestingWarehouse = orgWarehouses.get(0);
+            }
+        }
 
         Order order = Order.builder()
                 .orderNumber("ORD-" + System.currentTimeMillis())
                 .requestingOrganization(organization)
-                .requestingWarehouse(creator.getWarehouse())
+                .requestingWarehouse(requestingWarehouse)
                 .createdByUser(creator)
                 .priority(request.priority() != null ? request.priority() : "NORMAL")
-                .requiredDate(request.requiredDate())
+                .requiredDate(request.requiredDate() != null ? request.requiredDate() : LocalDate.now().plusDays(3))
                 .status("SUBMITTED")
                 .notes(request.notes())
                 .submittedAt(LocalDateTime.now())
                 .totalItems(0)
                 .totalEstimatedValue(BigDecimal.ZERO)
+                .items(new ArrayList<>())
                 .build();
 
         BigDecimal totalEstimatedValue = BigDecimal.ZERO;
         int totalItems = 0;
         for (OrderRequest.ItemRequest itemRequest : request.items()) {
             if (itemRequest.qty() == null || itemRequest.qty() <= 0) {
-                throw new RuntimeException("Kuantitas order harus lebih dari 0");
+                throw new BadRequestException("Kuantitas order harus lebih dari 0");
             }
 
             Item item = itemRepository.findById(itemRequest.itemId())
-                    .orElseThrow(() -> new RuntimeException("Barang tidak ditemukan: " + itemRequest.itemId()));
+                    .orElseThrow(() -> new BadRequestException("Barang tidak ditemukan: " + itemRequest.itemId()));
             BigDecimal unitPrice = item.getEstimatedUnitPrice() != null ? item.getEstimatedUnitPrice() : BigDecimal.ZERO;
             BigDecimal subtotal = unitPrice.multiply(BigDecimal.valueOf(itemRequest.qty()));
 
@@ -133,22 +149,27 @@ public class OrderService {
         order.setIsOverbudget(remainingBudget.compareTo(BigDecimal.ZERO) > 0
                 && totalEstimatedValue.compareTo(remainingBudget) > 0);
 
-        Order saved = orderRepository.save(order);
+        Order saved = orderRepository.saveAndFlush(order);
         return OrderResponse.from(orderRepository.findByIdWithDetails(saved.getId()).orElse(saved));
     }
 
     @Transactional
     public Order approveOrder(Long orderId, User approver) {
+        if (approver != null && approver.getId() != null) {
+            approver = userRepository.findById(approver.getId()).orElse(approver);
+        }
+
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order tidak ditemukan: " + orderId));
 
         order.setStatus("APPROVED");
+        order.setFulfillmentStatus("UNFULFILLED");
         order.setApprovedByUser(approver);
         order.setApprovedAt(LocalDateTime.now());
 
         // Reserve stock in central warehouse
-        Warehouse centralWarehouse = warehouseRepository.findByType("CENTRAL_LOGISTICS")
-                .orElseGet(() -> warehouseRepository.findAll().get(0));
+        Warehouse centralWarehouse = warehouseRepository.findFirstByType("CENTRAL_LOGISTICS")
+                .orElseGet(() -> warehouseRepository.findAll().stream().findFirst().orElse(null));
 
         for (OrderItem oi : order.getItems()) {
             oi.setQtyApproved(oi.getQtyRequested());
@@ -173,7 +194,27 @@ public class OrderService {
             }
         }
 
-        Order saved = orderRepository.save(order);
+        Order saved = orderRepository.saveAndFlush(order);
         return orderRepository.findByIdWithDetails(saved.getId()).orElse(saved);
+    }
+
+    @Transactional
+    public void deleteOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order tidak ditemukan: " + orderId));
+        if ("APPROVED".equalsIgnoreCase(order.getStatus()) ||
+            "PRODUCTION".equalsIgnoreCase(order.getStatus()) ||
+            "IN_PRODUCTION".equalsIgnoreCase(order.getStatus()) ||
+            "PRODUKSI".equalsIgnoreCase(order.getStatus()) ||
+            "ALLOCATED".equalsIgnoreCase(order.getStatus()) ||
+            "PICKING".equalsIgnoreCase(order.getStatus()) ||
+            "PACKING".equalsIgnoreCase(order.getStatus()) ||
+            "READY_TO_SHIP".equalsIgnoreCase(order.getStatus()) ||
+            "IN_TRANSIT".equalsIgnoreCase(order.getStatus()) ||
+            "RECEIVED".equalsIgnoreCase(order.getStatus()) ||
+            "COMPLETED".equalsIgnoreCase(order.getStatus())) {
+            throw new RuntimeException("Order yang sudah disetujui tidak dapat dihapus");
+        }
+        orderRepository.delete(order);
     }
 }

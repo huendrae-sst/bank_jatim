@@ -15,19 +15,19 @@
       </div>
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <router-link to="/destructions" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-arrow-left me-1"></i> Kembali
+          Kembali
         </router-link>
         <router-link :to="`/destructions/${destruction.id}/berita-acara`" target="_blank" class="btn btn-sm btn-outline-danger fw-bold">
-          <i class="bi bi-file-earmark-pdf me-1"></i> Cetak Berita Acara
+          Cetak Berita Acara
         </router-link>
         <template v-if="destruction.status === 'REQUESTED'">
           <button type="button" class="btn btn-sm btn-success fw-bold shadow-xs px-3" @click="showApproveModal = true">
-            <i class="bi bi-check-circle me-1"></i> Otorisasi Persetujuan
+            Otorisasi Persetujuan
           </button>
         </template>
         <template v-else-if="destruction.status === 'APPROVED'">
           <button type="button" class="btn btn-sm btn-danger fw-bold shadow-xs px-3" @click="showExecuteModal = true">
-            <i class="bi bi-fire me-1"></i> Eksekusi Pemusnahan Fisik
+            Eksekusi Pemusnahan Fisik
           </button>
         </template>
       </div>
@@ -64,7 +64,7 @@
         </div>
 
         <!-- Items Table -->
-        <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-box me-2"></i>Rincian Barang yang Dimusnahkan</h6>
+        <h6 class="fw-bold mb-3 text-dark">Rincian Barang yang Dimusnahkan</h6>
         <div class="table-responsive border rounded-3">
           <table class="table table-hover align-middle mb-0 fs-8">
             <thead class="table-light text-secondary text-uppercase fs-9">
@@ -170,7 +170,7 @@ const destruction = ref({
   warehouse_name: 'Gudang Sentral Margomulyo Surabaya',
   org_name: 'Divisi Logistik & Umum',
   reason: 'EXPIRED_CHIP',
-  reason_details: 'Kartu ATM chip / warkat telah melewati masa simpan atau cacat fisik.',
+  reason_details: 'Kartu ATM chip / produk telah melewati masa simpan atau cacat fisik.',
   witness_name_1: 'Achmad Soebarjo',
   witness_title_1: 'Pemimpin Cabang Pembantu',
   witness_name_2: 'Bambang Irawan',

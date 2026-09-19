@@ -5,13 +5,12 @@
       <div class="no-print mb-4 d-flex justify-content-between align-items-center bg-slate-50 p-3 rounded border border-slate-200">
         <div class="d-flex align-items-center gap-2">
           <router-link to="/procurement/po" class="text-xs text-slate-600 font-semibold text-decoration-none d-inline-flex align-items-center">
-            <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar PO
+            Kembali ke Daftar PO
           </router-link>
           <span class="text-slate-300">|</span>
           <span class="text-xs text-slate-500 font-monospace">Surat Pesanan Resmi Bank Jatim</span>
         </div>
         <button @click="triggerPrint" class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1">
-          <i class="bi bi-printer"></i>
           <span>Cetak Purchase Order (Print)</span>
         </button>
       </div>

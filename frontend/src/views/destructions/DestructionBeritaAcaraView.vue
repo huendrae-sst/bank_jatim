@@ -2,7 +2,7 @@
   <div class="ba-print-page bg-light min-vh-100 p-3 p-md-4">
     <div class="no-print text-center py-3">
       <button @click="triggerPrint" class="btn btn-primary btn-sm px-4 shadow-sm">
-        <i class="bi bi-printer me-1"></i> Cetak / Simpan PDF
+        Cetak / Simpan PDF
       </button>
       <router-link :to="`/destructions/${destruction.id}`" class="btn btn-secondary btn-sm ms-2">
         Kembali

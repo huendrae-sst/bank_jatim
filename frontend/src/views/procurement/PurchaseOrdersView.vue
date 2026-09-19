@@ -58,10 +58,10 @@
 
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/procurement/consolidation" class="btn btn-sm btn-outline-secondary fs-8">
-            <i class="bi bi-layers text-primary me-1"></i> Konsolidasi PR
+            Konsolidasi PR
           </router-link>
           <router-link to="/reports/procurement-coverage" class="btn btn-sm btn-danger fw-bold shadow-xs fs-8">
-            <i class="bi bi-diagram-3 me-1"></i> Matriks Coverage
+            Matriks Coverage
           </router-link>
         </div>
       </div>
@@ -93,7 +93,7 @@
           </div>
           <div class="col-auto" v-if="searchQuery || filterWarehouse !== 'ALL' || filterVendor !== 'ALL'">
             <button type="button" class="btn btn-sm btn-outline-danger fs-8" @click="resetFilters" title="Reset Filter">
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <!-- Search Bar -->
@@ -108,7 +108,7 @@
                 class="form-control form-control-sm border-start-0 border-end-0 fs-8"
                 placeholder="Cari Nomor PO, Ref PR, atau Vendor..."
               />
-              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button"><i class="bi bi-search me-1"></i> Cari</button>
+              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">Cari</button>
             </div>
           </div>
         </div>
@@ -141,7 +141,7 @@
               </td>
               <td>
                 <span class="badge text-bg-light border fs-9">
-                  <i class="bi bi-building me-1"></i> {{ po.warehouse }}
+                  {{ po.warehouse }}
                 </span>
               </td>
               <td>
@@ -245,7 +245,7 @@
               Batal
             </button>
             <button type="button" class="btn btn-sm btn-danger fw-bold shadow-xs px-3" @click="submitGoodsReceipt">
-              <i class="bi bi-check2-circle me-1"></i> Simpan & Update Stok Masuk
+              Simpan & Update Stok Masuk
             </button>
           </div>
         </div>

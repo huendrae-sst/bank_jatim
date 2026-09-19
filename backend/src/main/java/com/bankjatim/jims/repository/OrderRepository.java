@@ -73,11 +73,52 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             """)
     List<Order> findPendingApprovals();
 
-    @Query("SELECT o FROM Order o WHERE o.status = 'APPROVED'")
-    List<Order> findApprovedOrdersQueue();
+    @Query("SELECT o FROM Order o WHERE o.status = 'APPROVED' AND (:orderType IS NULL OR o.orderType = :orderType) ORDER BY o.createdAt ASC")
+    List<Order> findApprovedOrdersQueue(@Param("orderType") String orderType);
 
-    @Query("SELECT o FROM Order o WHERE o.status IN ('PICKING', 'PACKING')")
-    List<Order> findWarehouseProcessingOrders();
+    default List<Order> findApprovedOrdersQueue() {
+        return findApprovedOrdersQueue(null);
+    }
+
+    @Query("SELECT o FROM Order o WHERE o.status IN ('PICKING', 'PACKING') AND (:orderType IS NULL OR o.orderType = :orderType) ORDER BY o.createdAt ASC")
+    List<Order> findWarehouseProcessingOrders(@Param("orderType") String orderType);
+
+    default List<Order> findWarehouseProcessingOrders() {
+        return findWarehouseProcessingOrders(null);
+    }
+
+    @Query("SELECT o FROM Order o WHERE o.status = 'READY_TO_SHIP' AND (:orderType IS NULL OR o.orderType = :orderType) ORDER BY o.createdAt ASC")
+    List<Order> findReadyToShipOrders(@Param("orderType") String orderType);
+
+    default List<Order> findReadyToShipOrders() {
+        return findReadyToShipOrders(null);
+    }
+
+    List<Order> findByOrderTypeOrderByCreatedAtDesc(String orderType);
+
+    @Query("""
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.requestingOrganization
+            LEFT JOIN FETCH o.createdByUser
+            LEFT JOIN FETCH o.approvedByUser
+            LEFT JOIN FETCH o.items oi
+            LEFT JOIN FETCH oi.item
+            WHERE o.orderType = 'EMBOSS_ORDER'
+            ORDER BY o.createdAt DESC
+            """)
+    List<Order> findEmbossOrdersWithDetails();
+
+    @Query("""
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.requestingOrganization
+            LEFT JOIN FETCH o.createdByUser
+            LEFT JOIN FETCH o.approvedByUser
+            LEFT JOIN FETCH o.items oi
+            LEFT JOIN FETCH oi.item
+            WHERE o.orderType = 'ROUTINE_PUSH'
+            ORDER BY o.createdAt DESC
+            """)
+    List<Order> findRoutineDistributionsWithDetails();
 
     List<Order> findByStatus(String status);
 }

@@ -62,8 +62,7 @@
               type="button"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Unit Kerja Baru</span>
+              Tambah
             </button>
           </template>
           <template v-if="activeMainTab === 'warehouses'">
@@ -72,8 +71,7 @@
               type="button"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Gudang Baru</span>
+              Tambah
             </button>
           </template>
           <button
@@ -82,7 +80,6 @@
             class="btn btn-sm btn-outline-secondary fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             title="Cetak Halaman Ini"
           >
-            <i class="bi bi-printer"></i>
             <span>Cetak</span>
           </button>
         </div>
@@ -127,7 +124,7 @@
                 class="btn btn-sm btn-outline-danger fs-8"
                 title="Reset Filter"
               >
-                <i class="bi bi-x-circle me-1"></i> Reset
+                Reset
               </button>
             </div>
 
@@ -173,7 +170,7 @@
                       <div class="fw-bold text-body">{{ org.name }}</div>
                     </div>
                     <div v-if="org.phone" class="fs-9 text-secondary mt-0.5">
-                      <i class="bi bi-telephone me-1"></i>{{ org.phone }}
+                     {{ org.phone }}
                     </div>
                   </td>
 
@@ -193,7 +190,7 @@
                     <span v-else class="text-muted fst-italic fs-8">- Tingkat Teratas -</span>
                     <div v-if="org.region" class="mt-1">
                       <span class="badge bg-danger-subtle text-danger border border-danger-subtle fs-9">
-                        <i class="bi bi-geo-alt me-0.5"></i>{{ org.region.name }}
+                       {{ org.region.name }}
                       </span>
                     </div>
                   </td>
@@ -220,10 +217,10 @@
                         class="btn btn-xs btn-outline-warning py-0.5 px-1.5 fs-9 fw-bold"
                         title="Lihat Gudang Terkait"
                       >
-                        <i class="bi bi-box-seam me-1"></i><span>{{ getOrgWarehouseCount(org) }}</span>
+                       <span>{{ getOrgWarehouseCount(org) }}</span>
                       </button>
                       <span class="badge bg-primary-subtle text-primary fs-9" title="User Pegawai">
-                        <i class="bi bi-people me-1"></i><span>{{ getOrgUserCount(org) }}</span>
+                       <span>{{ getOrgUserCount(org) }}</span>
                       </span>
                     </div>
                   </td>
@@ -328,7 +325,7 @@
                 class="btn btn-sm btn-outline-danger fs-8"
                 title="Reset Filter"
               >
-                <i class="bi bi-x-circle me-1"></i> Reset
+                Reset
               </button>
             </div>
 
@@ -457,16 +454,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-building fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">
-                  Detail Unit Kerja: <span class="font-monospace text-danger">{{ viewOrgData?.code }}</span>
-                </h6>
-                <span class="fs-8 text-secondary">Informasi identitas unit dan hierarki organisasi</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">
+                Detail Unit Kerja: <span class="font-monospace text-danger">{{ viewOrgData?.code }}</span>
+              </h6>
+              <span class="fs-8 text-secondary">Informasi identitas unit dan hierarki organisasi</span>
             </div>
             <button type="button" @click="viewOrgModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -536,14 +528,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-plus-circle fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Tambah Unit Kerja Baru</h6>
-                <span class="fs-8 text-secondary">Registrasi Kantor Pusat, Cabang Utama, atau Capem Bank Jatim</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Tambah Unit Kerja Baru</h6>
+              <span class="fs-8 text-secondary">Registrasi Kantor Pusat, Cabang Utama, atau Capem Bank Jatim</span>
             </div>
             <button type="button" @click="createOrgModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -618,7 +605,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Unit Kerja
+                Simpan
               </button>
             </div>
           </form>
@@ -631,16 +618,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-primary-subtle text-primary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-pencil-square fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">
-                  Edit Unit Kerja: <span class="font-monospace text-danger">{{ editOrgForm.code }}</span>
-                </h6>
-                <span class="fs-8 text-secondary">Perbarui profil atau struktur hierarki</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">
+                Edit Unit Kerja: <span class="font-monospace text-danger">{{ editOrgForm.code }}</span>
+              </h6>
+              <span class="fs-8 text-secondary">Perbarui profil atau struktur hierarki</span>
             </div>
             <button type="button" @click="editOrgModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -713,7 +695,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </form>
@@ -726,14 +708,9 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-danger-subtle d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger text-white p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                <i class="bi bi-trash-fill fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Unit Kerja</h6>
-                <span class="fs-8 text-secondary">Tindakan ini memerlukan verifikasi</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Unit Kerja</h6>
+              <span class="fs-8 text-secondary">Tindakan ini memerlukan verifikasi</span>
             </div>
             <button type="button" @click="deleteOrgModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -761,7 +738,7 @@
               Batal
             </button>
             <button type="button" @click="submitDeleteOrg" class="btn btn-sm btn-danger fw-bold px-3 shadow-xs">
-              <i class="bi bi-trash me-1"></i> Ya, Hapus Unit
+              Ya, Hapus Unit
             </button>
           </div>
         </div>
@@ -773,16 +750,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-box-seam fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">
-                  Detail Lokasi Gudang: <span class="font-monospace text-danger">{{ viewWhData?.code }}</span>
-                </h6>
-                <span class="fs-8 text-secondary">Informasi spesifikasi dan kapasitas gudang</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">
+                Detail Lokasi Gudang: <span class="font-monospace text-danger">{{ viewWhData?.code }}</span>
+              </h6>
+              <span class="fs-8 text-secondary">Informasi spesifikasi dan kapasitas gudang</span>
             </div>
             <button type="button" @click="viewWhModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -832,14 +804,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-warning-subtle text-warning-emphasis p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-box-seam fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Tambah Lokasi Gudang Baru</h6>
-                <span class="fs-8 text-secondary">Registrasi fisik lokasi penyimpanan persediaan</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Tambah Lokasi Gudang Baru</h6>
+              <span class="fs-8 text-secondary">Registrasi fisik lokasi penyimpanan persediaan</span>
             </div>
             <button type="button" @click="createWhModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -887,7 +854,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-warning text-white fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Gudang Baru
+                Simpan
               </button>
             </div>
           </form>
@@ -900,16 +867,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-primary-subtle text-primary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-pencil-square fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">
-                  Edit Gudang: <span class="font-monospace text-danger">{{ editWhForm.code }}</span>
-                </h6>
-                <span class="fs-8 text-secondary">Perbarui identitas fisik atau kepemilikan unit kerja</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">
+                Edit Gudang: <span class="font-monospace text-danger">{{ editWhForm.code }}</span>
+              </h6>
+              <span class="fs-8 text-secondary">Perbarui identitas fisik atau kepemilikan unit kerja</span>
             </div>
             <button type="button" @click="editWhModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -964,7 +926,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </form>
@@ -977,14 +939,9 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-danger-subtle d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger text-white p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                <i class="bi bi-trash-fill fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Gudang</h6>
-                <span class="fs-8 text-secondary">Tindakan ini memerlukan verifikasi</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Gudang</h6>
+              <span class="fs-8 text-secondary">Tindakan ini memerlukan verifikasi</span>
             </div>
             <button type="button" @click="deleteWhModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1012,7 +969,7 @@
               Batal
             </button>
             <button type="button" @click="submitDeleteWh" class="btn btn-sm btn-danger fw-bold px-3 shadow-xs">
-              <i class="bi bi-trash me-1"></i> Ya, Hapus Gudang
+              Ya, Hapus Gudang
             </button>
           </div>
         </div>

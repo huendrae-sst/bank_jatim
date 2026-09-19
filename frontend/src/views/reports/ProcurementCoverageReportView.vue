@@ -14,16 +14,15 @@
       </div>
       <div class="d-flex gap-2">
         <button class="btn btn-sm btn-outline-success fw-bold shadow-xs" @click="handleExport">
-          <i class="bi bi-file-earmark-excel me-1"></i> Ekspor Excel
+          Ekspor Excel
         </button>
       </div>
     </div>
 
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
-      <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+      <div class="card-header bg-white py-3 border-bottom">
         <h5 class="card-title fw-bold mb-0 fs-6">Matriks Keterlacakan Alur PR &rarr; PO &rarr; GRN Penerimaan</h5>
-        <span class="badge bg-light text-secondary border fs-8">Traceability Matrix</span>
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">

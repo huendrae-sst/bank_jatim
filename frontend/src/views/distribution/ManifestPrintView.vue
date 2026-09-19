@@ -11,7 +11,7 @@
           <span class="text-xs text-slate-500 font-monospace">Surat Jalan / Delivery Manifest Bank Jatim</span>
         </div>
         <button @click="triggerPrint" class="btn btn-sm btn-danger fw-bold shadow-xs">
-          <i class="bi bi-printer me-1"></i> Cetak Dokumen (Print)
+          Cetak Dokumen (Print)
         </button>
       </div>
 

@@ -26,17 +26,13 @@
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
             Daftar Akun Pengguna Terdaftar
           </h3>
-          <span v-if="loading" class="badge text-bg-light border text-secondary fs-9">
-            <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
-            Memuat
-          </span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/master/roles" class="btn btn-sm btn-outline-secondary fs-8">
-            <i class="bi bi-shield-lock me-1"></i> Kelola Peran
+            Kelola Peran
           </router-link>
           <button class="btn btn-sm btn-danger fw-bold shadow-xs fs-8" @click="openCreateModal">
-            <i class="bi bi-person-plus me-1"></i> Tambah Pengguna
+            Tambah
           </button>
         </div>
       </div>
@@ -62,7 +58,7 @@
               class="btn btn-sm btn-outline-danger fs-8"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -79,7 +75,7 @@
                 type="button"
                 @click="currentPage = 1"
               >
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -235,7 +231,7 @@
               <button type="button" class="btn btn-sm btn-outline-secondary px-3 fs-8" @click="showModal = false">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs px-3 fs-8" :disabled="saving">
                 <span v-if="saving" class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
-                <i v-else class="bi bi-check2-circle me-1"></i> Simpan Pengguna
+                <span v-else>Simpan</span>
               </button>
             </div>
           </form>

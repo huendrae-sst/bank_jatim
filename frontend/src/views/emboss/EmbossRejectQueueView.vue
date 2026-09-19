@@ -6,16 +6,15 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <router-link to="/emboss/cards" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-arrow-left me-1"></i> Kembali ke Riwayat Berkas
+          Kembali ke Riwayat Berkas
         </router-link>
       </div>
     </div>
 
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
-      <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
+      <div class="card-header border-bottom p-3">
         <h3 class="card-title fw-semibold mb-0 fs-6">Daftar Rekaman Reject (Perlu Perbaikan Data)</h3>
-        <span class="badge text-bg-danger fs-8">{{ rejectList.length }} Rekaman Reject</span>
       </div>
 
       <div class="table-responsive">

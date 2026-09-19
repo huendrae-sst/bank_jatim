@@ -15,9 +15,8 @@
 
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
-      <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
+      <div class="card-header border-bottom p-3">
         <h3 class="card-title fw-semibold mb-0 fs-6">Kalkulasi Kebutuhan Reorder & Run-Out Date</h3>
-        <span class="badge text-bg-danger fs-8">Analisis Moving Average</span>
       </div>
 
       <div class="table-responsive">

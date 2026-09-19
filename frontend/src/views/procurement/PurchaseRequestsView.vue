@@ -67,10 +67,10 @@
         <!-- Section Tombol Tambah & Aksi -->
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/procurement/consolidation" class="btn btn-sm btn-outline-secondary shadow-xs">
-            <i class="bi bi-layers text-primary me-1"></i> Konsolidasi PR
+            Konsolidasi PR
           </router-link>
           <button class="btn btn-sm btn-danger fw-bold shadow-xs" @click="openCreateModal">
-            <i class="bi bi-plus-lg me-1"></i> Ajukan PR Baru
+            Tambah
           </button>
         </div>
       </div>
@@ -104,7 +104,7 @@
           </div>
           <div class="col-auto" v-if="searchQuery || filterOrg !== 'ALL' || filterMethod !== 'ALL'">
             <button type="button" class="btn btn-sm btn-outline-danger fs-8" @click="resetFilters" title="Reset Filter">
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <!-- Search Bar -->
@@ -117,7 +117,7 @@
                 class="form-control form-control-sm border-start-0 border-end-0 fs-8"
                 placeholder="Cari Nomor PR / Keperluan..."
               />
-              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button"><i class="bi bi-search me-1"></i> Cari</button>
+              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">Cari</button>
             </div>
           </div>
         </div>
@@ -163,13 +163,18 @@
               </td>
               <td class="text-center">
                 <span class="badge text-bg-success fs-9">
-                  <i class="bi bi-check2-circle me-1"></i> Tersedia
+                  Tersedia
                 </span>
               </td>
               <td class="text-center">
                 <span class="badge fs-9 text-uppercase" :class="badgeClass(pr.status)">
                   {{ pr.status ? pr.status.replace('_', ' ') : 'SUBMITTED' }}
                 </span>
+                <div v-if="pr.fulfillmentStatus" class="mt-1">
+                  <span class="badge fs-9" :class="fulfillmentBadgeClass(pr.fulfillmentStatus)">
+                    {{ fulfillmentLabel(pr.fulfillmentStatus) }}
+                  </span>
+                </div>
               </td>
               <td class="text-center">
                 <div class="d-inline-flex align-items-center gap-1">
@@ -282,7 +287,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs px-3">
-                <i class="bi bi-send-check me-1"></i> Simpan & Kirim Pengajuan
+                Simpan & Kirim Pengajuan
               </button>
             </div>
           </form>
@@ -324,7 +329,8 @@ const mapPr = (pr) => ({
   purpose: pr.purpose || '-',
   estimatedCost: Number(pr.estimatedTotalCost || pr.estimatedCost || 0),
   budgetStatus: pr.budgetStatus || 'VALIDATED',
-  status: pr.status || 'DRAFT'
+  status: pr.status || 'DRAFT',
+  fulfillmentStatus: pr.fulfillmentStatus || 'UNFULFILLED'
 });
 
 const prList = ref([]);
@@ -390,6 +396,24 @@ const badgeClass = (status) => {
     case 'REJECTED': return 'text-bg-danger';
     case 'PO_ISSUED': return 'text-bg-primary';
     default: return 'text-bg-secondary';
+  }
+};
+
+const fulfillmentLabel = (status) => {
+  switch (status) {
+    case 'FULFILLED': return 'Dipenuhi';
+    case 'PARTIALLY_FULFILLED': return 'Sebagian';
+    case 'UNFULFILLED': return 'Belum Dipenuhi';
+    default: return status || '-';
+  }
+};
+
+const fulfillmentBadgeClass = (status) => {
+  switch (status) {
+    case 'FULFILLED': return 'bg-success text-white';
+    case 'PARTIALLY_FULFILLED': return 'bg-warning text-dark';
+    case 'UNFULFILLED': return 'bg-secondary text-white';
+    default: return 'bg-light text-dark';
   }
 };
 

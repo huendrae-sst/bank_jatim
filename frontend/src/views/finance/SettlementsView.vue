@@ -57,10 +57,10 @@
         </ul>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/reports/general-ledger" class="btn btn-sm btn-outline-secondary fs-8">
-            <i class="bi bi-journal-text me-1"></i> Buku Besar Umum
+            Buku Besar Umum
           </router-link>
           <router-link to="/reports/settlements" class="btn btn-sm btn-danger fw-bold shadow-xs fs-8">
-            <i class="bi bi-file-earmark-bar-graph me-1"></i> Rekapitulasi
+            Rekapitulasi
           </router-link>
         </div>
       </div>
@@ -75,7 +75,7 @@
               class="btn btn-sm btn-outline-danger fs-8"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <!-- Search Bar -->
@@ -88,7 +88,7 @@
                 class="form-control form-control-sm border-start-0 border-end-0 fs-8"
                 placeholder="Cari Settlement, Cabang..."
               />
-              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button"><i class="bi bi-search me-1"></i> Cari</button>
+              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">Cari</button>
             </div>
           </div>
         </div>
@@ -178,7 +178,6 @@
     <div v-if="selectedJournal" class="card card-outline card-danger shadow-xs bg-body mt-3">
       <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center bg-body">
         <div class="d-flex align-items-center gap-2">
-          <i class="bi bi-journal-bookmark-fill text-danger fs-5"></i>
           <div>
             <h5 class="card-title fw-bold mb-0 text-body fs-6">
               Pratinjau Jurnal Buku Besar (General Ledger): {{ selectedJournal.number }}
@@ -205,7 +204,7 @@
             <tbody>
               <tr>
                 <td><span class="font-monospace fw-bold text-body">51200</span></td>
-                <td>Beban Perlengkapan & Warkat Perbankan</td>
+                <td>Beban Perlengkapan & Produk Perbankan</td>
                 <td><span class="font-monospace text-secondary">{{ selectedJournal.debitCostCenter }}</span></td>
                 <td class="text-end font-monospace fw-bold text-success">
                   Rp {{ selectedJournal.totalAmount.toLocaleString('id-ID') }}

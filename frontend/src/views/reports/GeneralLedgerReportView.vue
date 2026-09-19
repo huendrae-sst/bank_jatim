@@ -6,7 +6,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" @click="handleExport">
-          <i class="bi bi-download me-1"></i> Ekspor CSV
+          Ekspor CSV
         </button>
       </div>
     </div>
@@ -85,7 +85,7 @@ const mapSettlementToJournalRows = (settlement) => {
       id: `${settlement.id}-D`,
       journalNo,
       date,
-      account: '51200 - Beban Perlengkapan & Warkat Perbankan',
+      account: '51200 - Beban Perlengkapan & Produk Perbankan',
       description: `Pembebanan settlement ${settlement.debitOrganization?.name || '-'}`,
       debit: amount,
       credit: null,

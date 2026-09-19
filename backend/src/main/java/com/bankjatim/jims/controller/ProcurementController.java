@@ -129,6 +129,22 @@ public class ProcurementController {
         return ResponseEntity.ok(ApiResponse.ok("Penerimaan barang vendor berhasil dicatat", grn));
     }
 
+    @PostMapping("/pr/{id}/dispatch-to-branch")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'PROCUREMENT_OFFICER', 'WAREHOUSE_OFFICER')")
+    @Operation(summary = "Teruskan PR yang Sudah Diterima ke Antrean Gudang Distribusi Cabang")
+    public ResponseEntity<ApiResponse<com.bankjatim.jims.dto.OrderResponse>> dispatchPrToBranch(
+            @PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
+        User user = userRepository.getReferenceById(principal.getId());
+        com.bankjatim.jims.dto.OrderResponse order = procurementService.dispatchPrToBranchDistribution(id, user);
+        return ResponseEntity.ok(ApiResponse.ok("Pemenuhan PR berhasil dialihkan ke antrean Gudang Distribusi Cabang", order));
+    }
+
+    @GetMapping("/pr/fulfillment-orders")
+    @Operation(summary = "Daftar Order Pemenuhan PR yang Mengalir di Distribusi")
+    public ResponseEntity<ApiResponse<List<com.bankjatim.jims.dto.OrderResponse>>> getPrFulfillmentOrders() {
+        return ResponseEntity.ok(ApiResponse.ok(procurementService.getPrFulfillmentOrders()));
+    }
+
     @Data
     public static class ConsolidateRequest {
         private Long vendorId;

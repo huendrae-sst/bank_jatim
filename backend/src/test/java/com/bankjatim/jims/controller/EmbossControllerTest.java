@@ -82,7 +82,7 @@ class EmbossControllerTest {
         private final EmbossFile file;
 
         StubEmbossService(EmbossFile file) {
-            super(null, null, null, null, null);
+            super(null, null, null, null, null, null, null);
             this.file = file;
         }
 

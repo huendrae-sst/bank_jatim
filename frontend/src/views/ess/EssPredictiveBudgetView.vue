@@ -6,7 +6,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" @click="handleExport">
-          <i class="bi bi-download me-1"></i> Ekspor Model Simulasi
+          Ekspor Model Simulasi
         </button>
       </div>
     </div>
@@ -14,7 +14,7 @@
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="card-header border-bottom p-3">
-        <h3 class="card-title fw-semibold mb-0 fs-6">Proyeksi Anggaran Belanja Warkat & Kartu (TA 2027)</h3>
+        <h3 class="card-title fw-semibold mb-0 fs-6">Proyeksi Anggaran Belanja Produk & Kartu (TA 2027)</h3>
       </div>
       <div class="table-responsive">
         <table class="table table-hover mb-0">

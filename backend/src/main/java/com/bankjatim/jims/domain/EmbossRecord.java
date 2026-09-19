@@ -17,6 +17,12 @@ public class EmbossRecord extends BaseEntity {
     @JoinColumn(name = "emboss_file_id", nullable = false)
     private EmbossFile embossFile;
 
+    @Column(name = "external_reference_id")
+    private String externalReferenceId;
+
+    @Column(name = "product_code")
+    private String productCode;
+
     @Column(name = "account_number", nullable = false, length = 50)
     private String accountNumber;
 
@@ -43,6 +49,17 @@ public class EmbossRecord extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "production_order_id")
+    private ProductionOrder productionOrder;
+
+    @Column(name = "production_status", length = 50)
+    private String productionStatus; // NULL, QUEUED, PRODUCED, PRODUCTION_FAILED
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "produced_item_id")
+    private Item producedItem;
 
     @Column(nullable = false, length = 50)
     @Builder.Default

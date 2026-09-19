@@ -38,17 +38,13 @@
           <h3 class="card-title fw-bold mb-0 fs-6 text-body">
             Daftar Wilayah Operasional
           </h3>
-          <span v-if="loading" class="badge text-bg-light border text-secondary fs-9">
-            <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
-            Memuat
-          </span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <button class="btn btn-sm btn-outline-secondary fs-8" @click="loadData" :disabled="loading" title="Refresh Data">
-            <i class="bi bi-arrow-clockwise me-1" :class="{ 'spin-icon': loading }"></i> Refresh
+            Refresh
           </button>
           <button v-if="canManage" class="btn btn-sm btn-danger fw-bold shadow-xs fs-8" @click="openCreateModal">
-            <i class="bi bi-plus-lg me-1"></i> Tambah Wilayah
+            Tambah
           </button>
         </div>
       </div>
@@ -72,7 +68,7 @@
               class="btn btn-sm btn-outline-danger fs-8"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -90,7 +86,7 @@
                 type="button"
                 @click="currentPage = 1"
               >
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -111,12 +107,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-if="loading">
-              <td :colspan="canManage ? 6 : 5" class="text-center py-4 text-secondary fs-8">
-                <span class="spinner-border spinner-border-sm me-1 text-danger"></span> Memuat data master wilayah...
-              </td>
-            </tr>
-            <tr v-else-if="filteredRegions.length === 0">
+            <tr v-if="!loading && filteredRegions.length === 0">
               <td :colspan="canManage ? 6 : 5" class="text-center py-4 text-secondary fs-8">
                 <i class="bi bi-geo-alt fs-3 d-block mb-1 text-muted"></i>
                 Tidak ada data wilayah yang sesuai kriteria pencarian.
@@ -143,7 +134,7 @@
                       class="badge bg-light text-body border font-monospace fs-9 fw-semibold px-2 py-1"
                       :title="branch.code + ' - ' + branch.name"
                     >
-                      <i class="bi bi-building me-1 text-secondary"></i>{{ branch.name }}
+                     {{ branch.name }}
                     </span>
                   </template>
                   <span v-else class="text-muted fs-8 fst-italic">
@@ -209,7 +200,7 @@
         <div class="modal-content shadow-lg border-0">
           <div class="modal-header bg-danger text-white py-2 px-3">
             <h5 class="modal-title fs-7 fw-bold">
-              <i class="bi bi-geo-alt me-1"></i> {{ isEditMode ? 'Ubah Data Wilayah' : 'Tambah Wilayah Baru' }}
+              {{ isEditMode ? 'Ubah Data Wilayah' : 'Tambah Wilayah Baru' }}
             </h5>
             <button type="button" class="btn-close btn-close-white" @click="showFormModal = false"></button>
           </div>
@@ -325,9 +316,9 @@
               <button type="button" class="btn btn-sm btn-secondary" @click="showFormModal = false" :disabled="submitting">
                 Batal
               </button>
-              <button type="submit" class="btn btn-sm btn-danger fw-bold" :disabled="submitting">
+              <button type="submit" class="btn btn-sm btn-danger fw-bold px-3" :disabled="submitting">
                 <span v-if="submitting" class="spinner-border spinner-border-sm me-1"></span>
-                <i v-else class="bi bi-check2-circle me-1"></i> Simpan Wilayah
+                <span v-else>Simpan</span>
               </button>
             </div>
           </form>
@@ -341,7 +332,7 @@
         <div class="modal-content shadow-lg border-0">
           <div class="modal-header bg-primary text-white py-2 px-3">
             <h5 class="modal-title fs-7 fw-bold">
-              <i class="bi bi-diagram-3 me-1"></i> Petakan Cabang: {{ selectedRegion?.name }}
+              Petakan Cabang: {{ selectedRegion?.name }}
             </h5>
             <button type="button" class="btn-close btn-close-white" @click="showMappingModal = false"></button>
           </div>
@@ -415,7 +406,7 @@
             </button>
             <button type="button" class="btn btn-sm btn-primary fw-bold" @click="saveBranchMapping" :disabled="submitting">
               <span v-if="submitting" class="spinner-border spinner-border-sm me-1"></span>
-              <i v-else class="bi bi-check2-circle me-1"></i> Terapkan Pemetaan
+              Terapkan Pemetaan
             </button>
           </div>
         </div>

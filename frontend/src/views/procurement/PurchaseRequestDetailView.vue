@@ -1,13 +1,7 @@
 <template>
   <div class="pr-detail-page space-y-3">
-    <!-- Loading State -->
-    <div v-if="isLoading" class="text-center py-5">
-      <div class="spinner-border text-danger" role="status"></div>
-      <div class="text-secondary fs-8 mt-2">Memuat rincian Purchase Request...</div>
-    </div>
-
     <!-- Error State -->
-    <div v-else-if="errorMessage" class="alert alert-danger p-3 shadow-xs">
+    <div v-if="errorMessage" class="alert alert-danger p-3 shadow-xs">
       <i class="bi bi-exclamation-triangle-fill me-2"></i>
       {{ errorMessage }}
       <div class="mt-2">
@@ -15,14 +9,17 @@
       </div>
     </div>
 
-    <template v-else>
+    <template v-else-if="!isLoading">
       <!-- Breadcrumb & Header -->
       <div class="app-content-header py-2 px-3 mb-3 border-bottom bg-body rounded-3 shadow-xs d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
         <div>
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
             <h3 class="mb-0 text-body fw-bold">{{ pr.pr_number }}</h3>
             <span class="badge fs-8 text-uppercase" :class="badgeClass(pr.status)">
               {{ pr.status ? pr.status.replace('_', ' ') : 'SUBMITTED' }}
+            </span>
+            <span v-if="pr.fulfillment_status" class="badge fs-8 text-uppercase" :class="fulfillmentBadgeClass(pr.fulfillment_status)">
+              Pemenuhan: {{ fulfillmentLabel(pr.fulfillment_status) }}
             </span>
           </div>
           <p class="fs-8 text-secondary mb-0 mt-0.5">
@@ -32,22 +29,34 @@
 
         <div class="d-flex align-items-center gap-2 flex-wrap">
           <router-link to="/procurement/pr" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar
+            Kembali ke Daftar
           </router-link>
           <router-link :to="`/procurement/pr/${pr.id}/print`" target="_blank" class="btn btn-sm btn-outline-danger fw-bold shadow-xs">
-            <i class="bi bi-printer me-1"></i> Cetak PR
+            Cetak PR
           </router-link>
           <template v-if="['SUBMITTED', 'WAITING_APPROVAL'].includes(pr.status)">
             <button type="button" @click="showRejectModal = true" class="btn btn-sm btn-outline-danger fw-bold shadow-xs" :disabled="isSubmitting">
-              <i class="bi bi-x-circle me-1"></i> Tolak PR
+              Tolak PR
             </button>
             <button type="button" @click="approvePr" class="btn btn-sm btn-success fw-bold shadow-xs" :disabled="isSubmitting">
-              <i class="bi bi-check2-all me-1"></i> Setujui PR (Approve)
+              Setujui PR (Approve)
             </button>
           </template>
-          <router-link v-else-if="pr.status === 'APPROVED'" to="/procurement/consolidation" class="btn btn-sm btn-primary fw-bold shadow-xs">
-            <i class="bi bi-layers me-1"></i> Masuk ke Konsolidasi PO
-          </router-link>
+          <template v-else-if="['APPROVED', 'FULLY_ORDERED'].includes(pr.status)">
+            <router-link to="/procurement/consolidation" class="btn btn-sm btn-outline-primary fw-bold shadow-xs">
+              Konsolidasi PO
+            </router-link>
+            <button
+              v-if="pr.fulfillment_status !== 'FULFILLED'"
+              type="button"
+              class="btn btn-sm btn-danger fw-bold shadow-xs"
+              :disabled="isSubmitting"
+              @click="dispatchToBranch"
+              title="Teruskan barang pesanan PR ini ke Antrean Gudang Distribusi Cabang"
+            >
+              Teruskan ke Distribusi Cabang
+            </button>
+          </template>
         </div>
       </div>
 
@@ -83,9 +92,8 @@
 
       <!-- Items Table Card -->
       <div class="card card-outline card-danger shadow-xs mt-3">
-        <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
+        <div class="card-header border-bottom p-3">
           <h3 class="card-title fw-semibold mb-0 fs-6 text-body">Rincian Item Purchase Request</h3>
-          <span class="badge text-bg-secondary fs-9">{{ pr.items?.length || 0 }} Items</span>
         </div>
 
         <div class="table-responsive">
@@ -95,8 +103,9 @@
                 <th class="ps-3 py-2.5">Item SKU & Nama</th>
                 <th class="py-2.5 text-center">Diajukan</th>
                 <th class="py-2.5 text-center">Disetujui</th>
-                <th class="py-2.5 text-center">Dikonsolidasi (PO)</th>
-                <th class="py-2.5 text-center">Sisa Order</th>
+                <th class="py-2.5 text-center">PO Vendor</th>
+                <th class="py-2.5 text-center">Dipenuhi (Kirim)</th>
+                <th class="py-2.5 text-center">Diterima Cabang</th>
                 <th class="py-2.5 text-end">Est. Harga Satuan</th>
                 <th class="py-2.5 text-end pe-3">Subtotal</th>
               </tr>
@@ -110,12 +119,13 @@
                 <td class="text-center font-monospace fw-bold text-secondary">{{ it.qty_requested }}</td>
                 <td class="text-center font-monospace fw-bold text-success">{{ it.qty_approved }}</td>
                 <td class="text-center font-monospace fw-bold text-primary">{{ it.qty_ordered }}</td>
-                <td class="text-center font-monospace fw-bold text-danger">{{ it.remaining_qty }}</td>
+                <td class="text-center font-monospace fw-bold text-info">{{ it.qty_fulfilled }}</td>
+                <td class="text-center font-monospace fw-bold text-success">{{ it.qty_received }}</td>
                 <td class="text-end font-monospace text-secondary">{{ formatRupiah(it.unit_price) }}</td>
                 <td class="text-end pe-3 font-monospace fw-bold text-dark">{{ formatRupiah(it.subtotal) }}</td>
               </tr>
               <tr v-if="!pr.items || pr.items.length === 0">
-                <td colspan="7" class="text-center py-4 text-secondary">Tidak ada rincian item.</td>
+                <td colspan="8" class="text-center py-4 text-secondary">Tidak ada rincian item.</td>
               </tr>
             </tbody>
           </table>
@@ -144,7 +154,7 @@
             <div class="modal-footer d-flex justify-content-end align-items-center gap-2 py-2 px-3">
               <button type="button" class="btn btn-secondary btn-sm" @click="showRejectModal = false">Batal</button>
               <button type="button" class="btn btn-danger btn-sm fw-bold" :disabled="isSubmitting" @click="confirmReject">
-                <i class="bi bi-x-octagon me-1"></i> Konfirmasi Tolak PR
+                Konfirmasi Tolak PR
               </button>
             </div>
           </div>
@@ -170,6 +180,7 @@ const pr = ref({
   id: route.params.id,
   pr_number: '',
   status: '',
+  fulfillment_status: '',
   created_at: null,
   org_name: '',
   cost_center_code: '',
@@ -204,11 +215,30 @@ const badgeClass = (st) => {
   }
 };
 
+const fulfillmentLabel = (status) => {
+  switch (status) {
+    case 'FULFILLED': return 'Lengkap Terpenuhi';
+    case 'PARTIALLY_FULFILLED': return 'Sebagian';
+    case 'UNFULFILLED': return 'Belum Dipenuhi';
+    default: return status || '-';
+  }
+};
+
+const fulfillmentBadgeClass = (status) => {
+  switch (status) {
+    case 'FULFILLED': return 'bg-success text-white';
+    case 'PARTIALLY_FULFILLED': return 'bg-warning text-dark';
+    case 'UNFULFILLED': return 'bg-secondary text-white';
+    default: return 'bg-light text-dark';
+  }
+};
+
 const mapPrData = (data) => {
   return {
     id: data.id,
     pr_number: data.prNumber,
     status: data.status,
+    fulfillment_status: data.fulfillmentStatus || 'UNFULFILLED',
     created_at: data.createdAt,
     org_name: data.organization?.name || 'Kantor Pusat',
     cost_center_code: data.organization?.code || '-',
@@ -226,6 +256,8 @@ const mapPrData = (data) => {
       qty_requested: i.qtyRequested || 0,
       qty_approved: i.qtyApproved || 0,
       qty_ordered: i.qtyOrdered || 0,
+      qty_fulfilled: i.qtyFulfilled || 0,
+      qty_received: i.qtyReceived || 0,
       remaining_qty: Math.max(0, (i.qtyApproved || i.qtyRequested || 0) - (i.qtyOrdered || 0)),
       unit_price: i.estimatedUnitPrice || 0,
       subtotal: i.estimatedSubtotal || 0
@@ -258,6 +290,20 @@ const approvePr = async () => {
     alert('Purchase Request berhasil disetujui!');
   } catch (err) {
     alert('Gagal menyetujui PR: ' + (err.response?.data?.message || err.message));
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+const dispatchToBranch = async () => {
+  if (!confirm('Apakah Anda yakin ingin meneruskan barang hasil pengadaan PR ini ke antrean Gudang Distribusi Cabang (Picking, Packing & Pengiriman)?')) return;
+  isSubmitting.value = true;
+  try {
+    const res = await api.post(`/procurement/pr/${pr.value.id}/dispatch-to-branch`);
+    alert(res.data?.message || 'Pemenuhan PR berhasil diteruskan ke antrean Gudang Distribusi Cabang!');
+    await fetchPr();
+  } catch (err) {
+    alert('Gagal meneruskan PR ke distribusi: ' + (err.response?.data?.message || err.message));
   } finally {
     isSubmitting.value = false;
   }

@@ -117,7 +117,7 @@
                   class="btn btn-xs btn-outline-danger mt-2"
                   @click="resetRoleFilters"
                 >
-                  <i class="bi bi-arrow-counterclockwise me-1"></i> Reset Filter
+                  Reset Filter
                 </button>
               </div>
             </div>
@@ -132,7 +132,6 @@
           <div class="card-header border-bottom p-3 bg-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
             <div>
               <h5 class="mb-0 fw-bold fs-6 text-body">
-                <i class="bi bi-list-check text-danger me-2"></i>
                 Hak Akses Menu: <span class="text-danger">{{ activeRole?.name || activeRoleCode }}</span>
               </h5>
               <div class="text-secondary fs-9 mt-0.5">
@@ -150,7 +149,7 @@
                   @click="selectAllMenus"
                   title="Centang Seluruh Menu"
                 >
-                  <i class="bi bi-check-all me-1"></i> Pilih Semua
+                  Pilih Semua
                 </button>
                 <button
                   type="button"
@@ -159,7 +158,7 @@
                   @click="deselectAllMenus"
                   title="Batalkan Semua Pilihan"
                 >
-                  <i class="bi bi-dash-square me-1"></i> Batalkan
+                  Batalkan
                 </button>
               </div>
 
@@ -179,8 +178,7 @@
                 :disabled="!isDirty || isSuperAdminActive || menuStore.assignmentLoading"
                 @click="saveRolePermissions"
               >
-                <i class="bi bi-check2-circle me-1.5"></i>
-                <span>Simpan Perubahan</span>
+                <span>Simpan</span>
                 <span v-if="isDirty" class="position-absolute top-0 start-100 translate-middle p-1.5 bg-warning border border-light rounded-circle">
                   <span class="visually-hidden">Perubahan belum disimpan</span>
                 </span>
@@ -350,7 +348,7 @@
             <div class="fs-8 text-secondary">
               <template v-if="isDirty">
                 <span class="text-warning fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i> Ada perubahan yang belum disimpan.</span>
-                Klik tombol <strong>Simpan Perubahan</strong> untuk menerapkan hak akses ke sistem.
+                Klik tombol <strong>Simpan</strong> untuk menerapkan hak akses ke sistem.
               </template>
               <template v-else>
                 <span class="text-success fw-semibold"><i class="bi bi-check-circle-fill me-1"></i> Seluruh konfigurasi hak akses telah tersimpan.</span>
@@ -368,11 +366,11 @@
               </button>
               <button
                 type="button"
-                class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs"
+                class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs px-3"
                 :disabled="!isDirty || isSuperAdminActive || menuStore.assignmentLoading"
                 @click="saveRolePermissions"
               >
-                <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </div>

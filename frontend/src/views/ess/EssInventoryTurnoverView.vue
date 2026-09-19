@@ -6,7 +6,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" @click="handleExport">
-          <i class="bi bi-download me-1"></i> Ekspor CSV
+          Ekspor CSV
         </button>
       </div>
     </div>
@@ -90,7 +90,7 @@ const fetchItoData = async () => {
     const multiplierMap = {
       'Kartu ATM': 4.0,
       'Buku Tabungan': 3.5,
-      'Warkat': 2.0,
+      'Produk': 2.0,
       'ATK': 1.5,
       'Cetakan': 1.2
     };

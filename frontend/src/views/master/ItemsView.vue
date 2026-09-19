@@ -84,8 +84,7 @@
               @click="openCreateItemModal"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Master Barang</span>
+              Tambah
             </button>
           </template>
           <template v-if="activeMainTab === 'categories'">
@@ -94,8 +93,7 @@
               @click="openCreateCategoryModal"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Kategori Baru</span>
+              Tambah
             </button>
           </template>
           <template v-if="activeMainTab === 'uoms'">
@@ -104,8 +102,7 @@
               @click="openCreateUomModal"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Satuan Baru</span>
+              Tambah
             </button>
           </template>
           <template v-if="activeMainTab === 'conversions'">
@@ -114,8 +111,7 @@
               @click="openCreateConversionModal"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Konversi Satuan</span>
+              Tambah
             </button>
           </template>
           <button
@@ -124,7 +120,6 @@
             class="btn btn-sm btn-outline-secondary fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             title="Cetak Halaman Ini"
           >
-            <i class="bi bi-printer"></i>
             <span>Cetak</span>
           </button>
         </div>
@@ -168,7 +163,7 @@
                 class="btn btn-sm btn-outline-danger fs-8"
                 title="Reset Filter"
               >
-                <i class="bi bi-x-circle me-1"></i> Reset
+                Reset
               </button>
             </div>
 
@@ -213,7 +208,7 @@
                   <td class="ps-3">
                     <div class="font-monospace fw-bold text-danger">{{ it.sku }}</div>
                     <div v-if="it.barcode" class="font-monospace text-secondary fs-9">
-                      <i class="bi bi-upc me-1"></i>{{ it.barcode }}
+                     {{ it.barcode }}
                     </div>
                   </td>
 
@@ -338,7 +333,7 @@
                 class="btn btn-sm btn-outline-danger fs-8"
                 title="Reset Filter"
               >
-                <i class="bi bi-x-circle me-1"></i> Reset
+                Reset
               </button>
             </div>
 
@@ -390,7 +385,7 @@
                       class="badge bg-secondary-subtle text-secondary-emphasis font-monospace border-0 cursor-pointer"
                       title="Filter barang dalam kategori ini"
                     >
-                      <i class="bi bi-box-seam me-1"></i> {{ getCategoryItemsCount(cat.id) }} Barang
+                      {{ getCategoryItemsCount(cat.id) }} Barang
                     </button>
                   </td>
                   <td class="text-center">
@@ -468,7 +463,7 @@
                 class="btn btn-sm btn-outline-danger fs-8"
                 title="Reset Filter"
               >
-                <i class="bi bi-x-circle me-1"></i> Reset
+                Reset
               </button>
             </div>
 
@@ -522,7 +517,7 @@
                   </td>
                   <td class="text-center">
                     <span class="badge text-bg-light border font-monospace">
-                      <i class="bi bi-box me-1 text-danger"></i> {{ getUomUsageCount(uom.code) }} Barang
+                      {{ getUomUsageCount(uom.code) }} Barang
                     </span>
                   </td>
                   <td class="text-center pe-4">
@@ -600,7 +595,7 @@
                 class="btn btn-sm btn-outline-danger fs-8"
                 title="Reset Filter"
               >
-                <i class="bi bi-x-circle me-1"></i> Reset
+                Reset
               </button>
             </div>
 
@@ -646,7 +641,7 @@
                       </span>
                     </div>
                     <span v-else class="badge bg-info-subtle text-info-emphasis border border-info-subtle fs-8 px-2 py-1">
-                      <i class="bi bi-globe2 me-1"></i> Standar Global (Semua Barang)
+                      Standar Global (Semua Barang)
                     </span>
                   </td>
                   <td>
@@ -723,16 +718,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-eye fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">
-                  Detail Master Barang: <span class="font-monospace text-danger">{{ selectedItem.sku }}</span>
-                </h6>
-                <span class="fs-8 text-secondary">Informasi spesifikasi teknis dan parameter persediaan</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">
+                Detail Master Barang: <span class="font-monospace text-danger">{{ selectedItem.sku }}</span>
+              </h6>
+              <span class="fs-8 text-secondary">Informasi spesifikasi teknis dan parameter persediaan</span>
             </div>
             <div class="d-flex align-items-center gap-2">
               <span class="badge" :class="isItemActive(selectedItem) ? 'text-bg-success' : 'text-bg-secondary'">
@@ -780,7 +770,7 @@
             <div class="border rounded-2 overflow-hidden">
               <div class="bg-body-secondary py-1.5 px-3 border-bottom d-flex align-items-center justify-content-between">
                 <span class="fs-8 fw-bold text-uppercase text-secondary">
-                  <i class="bi bi-sliders text-danger me-1"></i> Parameter Kontrol Persediaan
+                  Parameter Kontrol Persediaan
                 </span>
               </div>
               <div class="table-responsive mb-0">
@@ -828,7 +818,7 @@
               Tutup
             </button>
             <button type="button" @click="viewItemModalOpen = false; openEditItemModal(selectedItem)" class="btn btn-sm btn-primary px-3">
-              <i class="bi bi-pencil-square me-1"></i> Edit Data Barang
+              Edit Data Barang
             </button>
           </div>
         </div>
@@ -840,14 +830,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-plus-circle fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Tambah Master Barang Baru</h6>
-                <span class="fs-8 text-secondary">Registrasi item barang ke dalam sistem persediaan</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Tambah Master Barang Baru</h6>
+              <span class="fs-8 text-secondary">Registrasi item barang ke dalam sistem persediaan</span>
             </div>
             <button type="button" @click="createItemModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -901,7 +886,7 @@
               <div class="border rounded-2 p-2.5 bg-body-tertiary">
                 <div class="d-flex align-items-center justify-content-between mb-2 pb-1 border-bottom border-secondary-subtle">
                   <span class="fs-8 fw-bold text-uppercase text-secondary d-flex align-items-center gap-1.5">
-                    <i class="bi bi-sliders text-danger"></i> Parameter Kontrol Persediaan
+                    Parameter Kontrol Persediaan
                   </span>
                 </div>
                 <div class="row g-2">
@@ -949,7 +934,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Master Barang
+                Simpan
               </button>
             </div>
           </form>
@@ -962,16 +947,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-primary-subtle text-primary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-pencil-square fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">
-                  Edit Master Barang: <span class="font-monospace text-danger">{{ itemForm.sku }}</span>
-                </h6>
-                <span class="fs-8 text-secondary">Perbarui parameter katalog, harga, atau batas kuota stok</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">
+                Edit Master Barang: <span class="font-monospace text-danger">{{ itemForm.sku }}</span>
+              </h6>
+              <span class="fs-8 text-secondary">Perbarui parameter katalog, harga, atau batas kuota stok</span>
             </div>
             <button type="button" @click="editItemModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1031,7 +1011,7 @@
               <div class="border rounded-2 p-2.5 bg-body-tertiary">
                 <div class="d-flex align-items-center justify-content-between mb-2 pb-1 border-bottom border-secondary-subtle">
                   <span class="fs-8 fw-bold text-uppercase text-secondary d-flex align-items-center gap-1.5">
-                    <i class="bi bi-sliders text-danger"></i> Parameter Kontrol Persediaan
+                    Parameter Kontrol Persediaan
                   </span>
                 </div>
                 <div class="row g-2">
@@ -1079,7 +1059,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </form>
@@ -1092,14 +1072,9 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-danger-subtle d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger text-white p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                <i class="bi bi-trash-fill fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Master Barang</h6>
-                <span class="fs-8 text-secondary">Tindakan ini memerlukan verifikasi</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-danger">Konfirmasi Hapus Master Barang</h6>
+              <span class="fs-8 text-secondary">Tindakan ini memerlukan verifikasi</span>
             </div>
             <button type="button" @click="deleteItemModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1129,7 +1104,7 @@
               Batal
             </button>
             <button type="button" @click="submitDeleteItem" class="btn btn-sm btn-danger fw-bold px-3 shadow-xs">
-              <i class="bi bi-trash me-1"></i> Ya, Hapus Barang
+              Ya, Hapus Barang
             </button>
           </div>
         </div>
@@ -1145,14 +1120,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-tags fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Tambah Kategori Barang Baru</h6>
-                <span class="fs-8 text-secondary">Klasifikasi pengelompokan jenis barang persediaan</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Tambah Kategori Barang Baru</h6>
+              <span class="fs-8 text-secondary">Klasifikasi pengelompokan jenis barang persediaan</span>
             </div>
             <button type="button" @click="createCatModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1175,7 +1145,7 @@
             <div class="card-footer bg-body-tertiary d-flex justify-content-end gap-2 py-3 px-4 border-top">
               <button type="button" @click="createCatModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Kategori
+                Simpan
               </button>
             </div>
           </form>
@@ -1188,16 +1158,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-tag fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">
-                  Detail Kategori: <span class="font-monospace text-danger">{{ selectedCategory.code }}</span>
-                </h6>
-                <span class="fs-8 text-secondary">Informasi klasifikasi barang persediaan</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">
+                Detail Kategori: <span class="font-monospace text-danger">{{ selectedCategory.code }}</span>
+              </h6>
+              <span class="fs-8 text-secondary">Informasi klasifikasi barang persediaan</span>
             </div>
             <button type="button" @click="viewCatModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1233,14 +1198,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-warning-subtle text-warning-emphasis p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-pencil-square fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Edit Kategori Barang</h6>
-                <span class="fs-8 text-secondary">Perbarui informasi kode atau nama kategori</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Edit Kategori Barang</h6>
+              <span class="fs-8 text-secondary">Perbarui informasi kode atau nama kategori</span>
             </div>
             <button type="button" @click="editCatModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1262,7 +1222,7 @@
             <div class="card-footer bg-body-tertiary d-flex justify-content-end gap-2 py-3 px-4 border-top">
               <button type="button" @click="editCatModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </form>
@@ -1275,10 +1235,7 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-              <h6 class="mb-0 fw-bold">Konfirmasi Hapus Kategori</h6>
-            </div>
+            <h6 class="mb-0 fw-bold">Konfirmasi Hapus Kategori</h6>
             <button type="button" @click="deleteCatModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 text-center">
@@ -1297,7 +1254,7 @@
               @click="submitDeleteCategory"
               class="btn btn-sm btn-danger fw-bold px-3 shadow-xs"
             >
-              <i class="bi bi-trash me-1"></i> Ya, Hapus Kategori
+              Ya, Hapus Kategori
             </button>
           </div>
         </div>
@@ -1313,14 +1270,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-rulers fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Tambah Satuan Ukuran (UOM) Baru</h6>
-                <span class="fs-8 text-secondary">Registrasi unit satuan persediaan katalog barang</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Tambah Satuan Ukuran (UOM) Baru</h6>
+              <span class="fs-8 text-secondary">Registrasi unit satuan persediaan katalog barang</span>
             </div>
             <button type="button" @click="createUomModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1350,7 +1302,7 @@
             <div class="card-footer bg-body-tertiary d-flex justify-content-end gap-2 py-3 px-4 border-top">
               <button type="button" @click="createUomModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Satuan
+                Simpan
               </button>
             </div>
           </form>
@@ -1363,16 +1315,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-rulers fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">
-                  Detail Satuan Ukuran: <span class="font-monospace text-danger">{{ selectedUom.code }}</span>
-                </h6>
-                <span class="fs-8 text-secondary">Informasi unit pengukuran barang</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">
+                Detail Satuan Ukuran: <span class="font-monospace text-danger">{{ selectedUom.code }}</span>
+              </h6>
+              <span class="fs-8 text-secondary">Informasi unit pengukuran barang</span>
             </div>
             <button type="button" @click="viewUomModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1412,14 +1359,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-warning-subtle text-warning-emphasis p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-pencil-square fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Edit Satuan Ukuran (UOM)</h6>
-                <span class="fs-8 text-secondary">Perbarui informasi nama atau klasifikasi satuan</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Edit Satuan Ukuran (UOM)</h6>
+              <span class="fs-8 text-secondary">Perbarui informasi nama atau klasifikasi satuan</span>
             </div>
             <button type="button" @click="editUomModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1449,7 +1391,7 @@
             <div class="card-footer bg-body-tertiary d-flex justify-content-end gap-2 py-3 px-4 border-top">
               <button type="button" @click="editUomModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </form>
@@ -1462,10 +1404,7 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-              <h6 class="mb-0 fw-bold">Konfirmasi Hapus Satuan</h6>
-            </div>
+            <h6 class="mb-0 fw-bold">Konfirmasi Hapus Satuan</h6>
             <button type="button" @click="deleteUomModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 text-center">
@@ -1484,7 +1423,7 @@
               @click="submitDeleteUom"
               class="btn btn-sm btn-danger fw-bold px-3 shadow-xs"
             >
-              <i class="bi bi-trash me-1"></i> Ya, Hapus Satuan
+              Ya, Hapus Satuan
             </button>
           </div>
         </div>
@@ -1500,14 +1439,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-arrow-left-right fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Tambah Aturan Konversi Satuan Baru</h6>
-                <span class="fs-8 text-secondary">Definisikan rasio pengali antar-satuan barang</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Tambah Aturan Konversi Satuan Baru</h6>
+              <span class="fs-8 text-secondary">Definisikan rasio pengali antar-satuan barang</span>
             </div>
             <button type="button" @click="createConvModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1558,7 +1492,7 @@
             <div class="card-footer bg-body-tertiary d-flex justify-content-end gap-2 py-3 px-4 border-top">
               <button type="button" @click="createConvModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Konversi
+                Simpan
               </button>
             </div>
           </form>
@@ -1571,14 +1505,9 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-secondary-subtle text-secondary p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-arrow-left-right fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Detail Aturan Konversi Satuan</h6>
-                <span class="fs-8 text-secondary">Formula rasio konversi unit</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Detail Aturan Konversi Satuan</h6>
+              <span class="fs-8 text-secondary">Formula rasio konversi unit</span>
             </div>
             <button type="button" @click="viewConvModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1637,14 +1566,9 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-warning-subtle text-warning-emphasis p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-pencil-square fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Edit Aturan Konversi Satuan</h6>
-                <span class="fs-8 text-secondary">Perbarui informasi rasio satuan</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Edit Aturan Konversi Satuan</h6>
+              <span class="fs-8 text-secondary">Perbarui informasi rasio satuan</span>
             </div>
             <button type="button" @click="editConvModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
@@ -1692,7 +1616,7 @@
             <div class="card-footer bg-body-tertiary d-flex justify-content-end gap-2 py-3 px-4 border-top">
               <button type="button" @click="editConvModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </form>
@@ -1705,10 +1629,7 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-2xl overflow-hidden" style="background-color: var(--bs-body-bg); color: var(--bs-body-color);">
           <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-              <h6 class="mb-0 fw-bold">Konfirmasi Hapus Konversi</h6>
-            </div>
+            <h6 class="mb-0 fw-bold">Konfirmasi Hapus Konversi</h6>
             <button type="button" @click="deleteConvModalOpen = false" class="btn-close" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 text-center">
@@ -1723,7 +1644,7 @@
           <div class="card-footer bg-body-tertiary d-flex justify-content-end gap-2 py-3 px-4 border-top">
             <button type="button" @click="deleteConvModalOpen = false" class="btn btn-sm btn-outline-secondary px-3">Batal</button>
             <button type="button" @click="submitDeleteConversion" class="btn btn-sm btn-danger fw-bold px-3 shadow-xs">
-              <i class="bi bi-trash me-1"></i> Ya, Hapus Konversi
+              Ya, Hapus Konversi
             </button>
           </div>
         </div>

@@ -48,11 +48,36 @@
             </button>
           </li>
         </ul>
+
+        <div v-if="activeTab === 'queue'" class="d-flex align-items-center gap-2">
+          <button
+            type="button"
+            class="btn btn-sm btn-danger fw-bold shadow-xs"
+            :disabled="selectedOrderIds.length === 0 || isBatchProcessing"
+            @click="processBatchPicking"
+          >
+            Proses Batch Picking ({{ selectedOrderIds.length }} Terpilih)
+          </button>
+        </div>
       </div>
 
       <!-- Filter & Search Toolbar -->
       <div class="card-body p-3 bg-body-tertiary border-bottom">
         <div class="row g-2 align-items-center">
+          <div class="col-12 col-sm-6 col-md-3">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-body text-secondary border-end-0 fs-8">
+                <i class="bi bi-tag"></i>
+              </span>
+              <select v-model="filterOrderType" class="form-select form-select-sm border-start-0 fs-8">
+                <option value="ALL">Semua Jalur Order</option>
+                <option value="INTERNAL_REQUEST">Order Permintaan</option>
+                <option value="PURCHASE_REQUEST">Order Pembelian (PR)</option>
+                <option value="EMBOSS_ORDER">Order Cetak / Emboss</option>
+                <option value="ROUTINE_PUSH">Distribusi Rutin</option>
+              </select>
+            </div>
+          </div>
           <div class="col-12 col-sm-6 col-md-3">
             <div class="input-group input-group-sm">
               <span class="input-group-text bg-body text-secondary border-end-0 fs-8">
@@ -66,7 +91,7 @@
               </select>
             </div>
           </div>
-          <div class="col-12 col-sm-6 col-md-3">
+          <div class="col-12 col-sm-6 col-md-2">
             <div class="input-group input-group-sm">
               <span class="input-group-text bg-body text-secondary border-end-0 fs-8">
                 <i class="bi bi-flag"></i>
@@ -78,9 +103,9 @@
               </select>
             </div>
           </div>
-          <div class="col-auto" v-if="searchQuery || filterBranch !== 'ALL' || filterPriority !== 'ALL'">
+          <div class="col-auto" v-if="searchQuery || filterBranch !== 'ALL' || filterPriority !== 'ALL' || filterOrderType !== 'ALL'">
             <button type="button" class="btn btn-sm btn-outline-danger fs-8" @click="resetFilters" title="Reset Filter">
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <!-- Search Bar -->
@@ -95,7 +120,7 @@
                 class="form-control form-control-sm border-start-0 border-end-0 fs-8"
                 placeholder="Cari No Batch, Order, Rak, atau Deskripsi Item..."
               />
-              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button"><i class="bi bi-search me-1"></i> Cari</button>
+              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">Cari</button>
             </div>
           </div>
         </div>
@@ -106,8 +131,17 @@
         <table class="table table-hover align-middle mb-0 fs-8">
           <thead class="table-light text-secondary fs-8 fw-bold text-uppercase">
             <tr>
-              <th class="ps-3">No. Batch Picking</th>
-              <th>Nomor Order</th>
+              <th v-if="activeTab === 'queue'" class="ps-3 text-center" style="width: 40px;">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  :checked="isAllSelected"
+                  @change="toggleSelectAll"
+                  title="Pilih Semua"
+                />
+              </th>
+              <th :class="activeTab === 'queue' ? '' : 'ps-3'">No. Batch Picking</th>
+              <th>Nomor Order &amp; Tipe</th>
               <th>Cabang Peminta</th>
               <th>Lokasi Rak Gudang</th>
               <th>Item &amp; Kuantitas</th>
@@ -118,12 +152,25 @@
           </thead>
           <tbody class="fs-7">
             <tr v-for="item in paginatedQueue" :key="item.id">
-              <td class="ps-3 fw-bold font-monospace text-danger">{{ item.batchNo }}</td>
-              <td class="fw-bold font-monospace">{{ item.orderNumber }}</td>
+              <td v-if="activeTab === 'queue'" class="ps-3 text-center">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  :value="item.id"
+                  v-model="selectedOrderIds"
+                />
+              </td>
+              <td :class="activeTab === 'queue' ? '' : 'ps-3'" class="fw-bold font-monospace text-danger">{{ item.batchNo }}</td>
+              <td>
+                <div class="fw-bold font-monospace">{{ item.orderNumber }}</div>
+                <span class="badge fs-9 text-uppercase" :class="getOrderTypeBadgeClass(item.orderType)">
+                  {{ getOrderTypeLabel(item.orderType) }}
+                </span>
+              </td>
               <td>
                 <span class="fw-semibold text-body">{{ item.branch }}</span>
               </td>
-              <td><span class="badge text-bg-light border fs-9 font-monospace"><i class="bi bi-geo-alt me-1 text-primary"></i>{{ item.binLocation }}</span></td>
+              <td><span class="badge text-bg-light border fs-9 font-monospace">{{ item.binLocation }}</span></td>
               <td class="fs-8 text-body">{{ item.itemDescription }}</td>
               <td class="text-center">
                 <span :class="['badge fs-9', item.priority === 'URGENT' ? 'text-bg-danger' : 'text-bg-secondary']">
@@ -140,7 +187,7 @@
               </td>
             </tr>
             <tr v-if="filteredQueue.length === 0">
-              <td colspan="8" class="text-center py-5 text-secondary">
+              <td :colspan="activeTab === 'queue' ? 9 : 8" class="text-center py-5 text-secondary">
                 <i class="bi bi-inbox fs-1 d-block mb-2 text-muted"></i>
                 Tidak ada antrean picking yang sesuai dengan filter.
               </td>
@@ -187,7 +234,7 @@
                     autofocus
                     required
                   />
-                  <button type="submit" class="btn btn-danger fw-bold"><i class="bi bi-check2 me-1"></i> Verifikasi</button>
+                  <button type="submit" class="btn btn-danger fw-bold">Verifikasi</button>
                 </div>
               </div>
               <div v-if="scanResult" class="alert py-2 px-3 fs-8 mt-2" :class="scanResult.success ? 'alert-success' : 'alert-danger'">
@@ -198,7 +245,7 @@
             <div class="modal-footer border-top bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="scanBarcodeModal = false">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs">
-                <i class="bi bi-check2-circle me-1"></i> Verifikasi Lokasi Rak
+                Verifikasi Lokasi Rak
               </button>
             </div>
           </form>
@@ -222,12 +269,18 @@ const searchQuery = ref('');
 const activeTab = ref('queue');
 const filterBranch = ref('ALL');
 const filterPriority = ref('ALL');
+const filterOrderType = ref('ALL');
 const errorMessage = ref('');
+
+const selectedOrderIds = ref([]);
+const isBatchProcessing = ref(false);
 
 const resetFilters = () => {
   searchQuery.value = '';
   filterBranch.value = 'ALL';
   filterPriority.value = 'ALL';
+  filterOrderType.value = 'ALL';
+  selectedOrderIds.value = [];
   currentPage.value = 1;
 };
 
@@ -244,6 +297,7 @@ const mapQueue = (item) => ({
   id: item.orderId || item.id,
   batchNo: item.batchNo || `PCK-${item.orderNumber || item.orderId || item.id}`,
   orderNumber: item.orderNumber || '-',
+  orderType: item.orderType || 'INTERNAL_REQUEST',
   branch: item.branch || item.requestingOrganization?.name || '-',
   binLocation: item.binLocation || item.warehouse || 'RAK-A1-02',
   itemDescription: item.itemDescription || describeItems(item.items),
@@ -256,9 +310,13 @@ const pendingQueue = ref([]);
 const loadPickingQueue = async () => {
   errorMessage.value = '';
   try {
-    const response = await api.get('/warehouse/picking');
+    const response = await api.get('/warehouse/picking', {
+      params: {
+        type: filterOrderType.value !== 'ALL' ? filterOrderType.value : undefined
+      }
+    });
     const list = response.data?.data ?? response.data ?? [];
-    if (Array.isArray(list) && list.length > 0) {
+    if (Array.isArray(list)) {
       pendingQueue.value = list.map(mapQueue);
     }
   } catch (error) {
@@ -295,6 +353,7 @@ const filteredQueue = computed(() => {
     if (activeTab.value === 'queue' && isCompleted) return false;
     if (activeTab.value === 'history' && !isCompleted) return false;
 
+    if (filterOrderType.value !== 'ALL' && p.orderType !== filterOrderType.value) return false;
     if (filterBranch.value !== 'ALL' && p.branch !== filterBranch.value) return false;
     if (filterPriority.value !== 'ALL' && p.priority !== filterPriority.value) return false;
 
@@ -312,6 +371,21 @@ const filteredQueue = computed(() => {
   });
 });
 
+const isAllSelected = computed(() => {
+  const currentIds = paginatedQueue.value.map(item => item.id);
+  return currentIds.length > 0 && currentIds.every(id => selectedOrderIds.value.includes(id));
+});
+
+const toggleSelectAll = () => {
+  const currentIds = paginatedQueue.value.map(item => item.id);
+  if (isAllSelected.value) {
+    selectedOrderIds.value = selectedOrderIds.value.filter(id => !currentIds.includes(id));
+  } else {
+    const newSelected = new Set([...selectedOrderIds.value, ...currentIds]);
+    selectedOrderIds.value = Array.from(newSelected);
+  }
+};
+
 const paginatedQueue = computed(() => {
   const start = (currentPage.value - 1) * perPage.value;
   return filteredQueue.value.slice(start, start + perPage.value);
@@ -326,6 +400,45 @@ const processPicking = async (item) => {
     } catch (error) {
       errorMessage.value = error?.message || error?.error || 'Gagal memproses picking ke backend.';
     }
+  }
+};
+
+const processBatchPicking = async () => {
+  if (selectedOrderIds.value.length === 0) return;
+  if (!confirm(`Konfirmasi batch picking untuk ${selectedOrderIds.value.length} order sekaligus?`)) return;
+
+  isBatchProcessing.value = true;
+  try {
+    const res = await api.post('/warehouse/picking/batch-process', {
+      orderIds: selectedOrderIds.value
+    });
+    alert(res.data?.message || `${selectedOrderIds.value.length} order berhasil di-picking dan diteruskan ke packing!`);
+    selectedOrderIds.value = [];
+    await loadPickingQueue();
+  } catch (error) {
+    alert('Gagal memproses batch picking: ' + (error?.response?.data?.message || error.message));
+  } finally {
+    isBatchProcessing.value = false;
+  }
+};
+
+const getOrderTypeLabel = (type) => {
+  switch (type) {
+    case 'INTERNAL_REQUEST': return 'Permintaan';
+    case 'PURCHASE_REQUEST': return 'Pembelian (PR)';
+    case 'EMBOSS_ORDER': return 'Cetak/Emboss';
+    case 'ROUTINE_PUSH': return 'Distribusi Rutin';
+    default: return type || 'Permintaan';
+  }
+};
+
+const getOrderTypeBadgeClass = (type) => {
+  switch (type) {
+    case 'INTERNAL_REQUEST': return 'bg-danger-subtle text-danger border border-danger-subtle';
+    case 'PURCHASE_REQUEST': return 'bg-info-subtle text-info-emphasis border border-info-subtle';
+    case 'EMBOSS_ORDER': return 'bg-warning-subtle text-dark border border-warning-subtle';
+    case 'ROUTINE_PUSH': return 'bg-success-subtle text-success-emphasis border border-success-subtle';
+    default: return 'bg-secondary-subtle text-secondary';
   }
 };
 

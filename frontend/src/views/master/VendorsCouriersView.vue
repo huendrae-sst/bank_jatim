@@ -64,8 +64,7 @@
               @click="openCreateVendorModal"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Vendor Rekanan</span>
+              Tambah
             </button>
           </template>
           <template v-if="activeMainTab === 'couriers'">
@@ -74,8 +73,7 @@
               @click="openCreateCourierModal"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Mitra Ekspedisi</span>
+              Tambah
             </button>
           </template>
           <button
@@ -84,7 +82,6 @@
             class="btn btn-sm btn-outline-secondary fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             title="Cetak Halaman Ini"
           >
-            <i class="bi bi-printer"></i>
             <span>Cetak</span>
           </button>
         </div>
@@ -128,7 +125,7 @@
             <!-- Reset Button -->
             <div v-if="vendorSearch || vendorRatingFilter !== 'ALL'" class="col-auto">
               <button type="button" @click="resetVendorFilters" class="btn btn-sm btn-outline-danger fs-8" title="Reset Filter">
-                <i class="bi bi-x-circle me-1"></i> Reset
+                Reset
               </button>
             </div>
           </div>
@@ -162,7 +159,7 @@
                   <!-- SLA -->
                   <td>
                     <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle fs-8">
-                      <i class="bi bi-clock me-1"></i>{{ v.sla_days || v.slaDays || 7 }} Hari
+                     {{ v.sla_days || v.slaDays || 7 }} Hari
                     </span>
                   </td>
 
@@ -183,7 +180,7 @@
                   <!-- Rating -->
                   <td class="text-center">
                     <div class="d-inline-flex align-items-center gap-1 bg-amber-50 text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-0.5 fs-8 fw-bold">
-                      <i class="bi bi-star-fill text-warning"></i>
+                     
                       <span>{{ Number(v.rating || 5.0).toFixed(1) }}</span>
                     </div>
                   </td>
@@ -295,7 +292,7 @@
             <!-- Reset Button -->
             <div v-if="courierSearch || courierStatusFilter" class="col-auto">
               <button type="button" @click="resetCourierFilters" class="btn btn-sm btn-outline-danger fs-8" title="Reset Filter">
-                <i class="bi bi-x-circle me-1"></i> Reset
+                Reset
               </button>
             </div>
           </div>
@@ -328,7 +325,7 @@
                   <!-- SLA -->
                   <td>
                     <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle fs-8">
-                      <i class="bi bi-clock-history me-1"></i>{{ c.sla_days || c.slaDays || 2 }} Hari
+                     {{ c.sla_days || c.slaDays || 2 }} Hari
                     </span>
                   </td>
 
@@ -348,7 +345,7 @@
                   <!-- Total Shipments -->
                   <td class="text-center">
                     <span class="badge bg-body-secondary text-secondary-emphasis fs-8">
-                      <i class="bi bi-box me-1"></i>{{ c.shipments_count || 0 }} Surat Jalan
+                     {{ c.shipments_count || 0 }} Surat Jalan
                     </span>
                   </td>
 
@@ -432,14 +429,9 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-building fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Profil Rekanan Pengadaan</h6>
-                <span class="fs-8 text-secondary font-monospace">{{ selectedVendor ? selectedVendor.code : '' }}</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Profil Rekanan Pengadaan</h6>
+              <span class="fs-8 text-secondary font-monospace">{{ selectedVendor ? selectedVendor.code : '' }}</span>
             </div>
             <button type="button" class="btn-close" @click="viewVendorModalOpen = false" aria-label="Close"></button>
           </div>
@@ -517,14 +509,9 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-building fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Tambah Vendor Rekanan Baru</h6>
-                <span class="fs-8 text-secondary">Registrasi mitra penyedia barang persediaan</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Tambah Vendor Rekanan Baru</h6>
+              <span class="fs-8 text-secondary">Registrasi mitra penyedia barang persediaan</span>
             </div>
             <button type="button" class="btn-close" @click="createVendorModalOpen = false" aria-label="Close"></button>
           </div>
@@ -593,7 +580,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Vendor Rekanan
+                Simpan
               </button>
             </div>
           </form>
@@ -606,10 +593,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-primary text-white d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-pencil-square fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Edit Vendor Rekanan</h6>
-            </div>
+            <h6 class="modal-title fw-bold mb-0">Edit Vendor Rekanan</h6>
             <button type="button" class="btn-close btn-close-white" @click="editVendorModalOpen = false" aria-label="Close"></button>
           </div>
 
@@ -679,7 +663,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-primary fw-bold px-4 shadow-xs">
-                <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </form>
@@ -691,11 +675,8 @@
     <div v-if="deleteVendorModalOpen" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Vendor</h6>
-            </div>
+          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
+            <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Vendor</h6>
             <button type="button" class="btn-close btn-close-white" @click="deleteVendorModalOpen = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8" v-if="selectedVendor">
@@ -708,7 +689,6 @@
           <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
             <button type="button" class="btn btn-sm btn-outline-secondary" @click="deleteVendorModalOpen = false">Batal</button>
             <button type="button" class="btn btn-sm btn-danger shadow-xs d-inline-flex align-items-center gap-1" @click="submitDeleteVendor">
-              <i class="bi bi-trash"></i>
               <span>Ya, Hapus Vendor</span>
             </button>
           </div>
@@ -725,14 +705,9 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-info-subtle text-info-emphasis p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-truck fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Profil Mitra Ekspedisi</h6>
-                <span class="fs-8 text-secondary font-monospace">{{ selectedCourier ? selectedCourier.code : '' }}</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Profil Mitra Ekspedisi</h6>
+              <span class="fs-8 text-secondary font-monospace">{{ selectedCourier ? selectedCourier.code : '' }}</span>
             </div>
             <button type="button" class="btn-close" @click="viewCourierModalOpen = false" aria-label="Close"></button>
           </div>
@@ -802,14 +777,9 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-danger-subtle text-danger p-2 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
-                <i class="bi bi-truck fs-6"></i>
-              </div>
-              <div>
-                <h6 class="mb-0 fw-bold text-body">Tambah Mitra Ekspedisi Baru</h6>
-                <span class="fs-8 text-secondary">Registrasi jasa pengiriman logistik & distribusi</span>
-              </div>
+            <div>
+              <h6 class="mb-0 fw-bold text-body">Tambah Mitra Ekspedisi Baru</h6>
+              <span class="fs-8 text-secondary">Registrasi jasa pengiriman logistik & distribusi</span>
             </div>
             <button type="button" class="btn-close" @click="createCourierModalOpen = false" aria-label="Close"></button>
           </div>
@@ -870,7 +840,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold px-4 shadow-xs">
-                <i class="bi bi-save me-1"></i> Simpan Mitra Ekspedisi
+                Simpan
               </button>
             </div>
           </form>
@@ -883,10 +853,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-primary text-white d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-pencil-square fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Edit Mitra Ekspedisi</h6>
-            </div>
+            <h6 class="modal-title fw-bold mb-0">Edit Mitra Ekspedisi</h6>
             <button type="button" class="btn-close btn-close-white" @click="editCourierModalOpen = false" aria-label="Close"></button>
           </div>
 
@@ -950,7 +917,7 @@
                 Batal
               </button>
               <button type="submit" class="btn btn-sm btn-primary fw-bold px-4 shadow-xs">
-                <i class="bi bi-check2-circle me-1"></i> Simpan Perubahan
+                Simpan
               </button>
             </div>
           </form>
@@ -962,11 +929,8 @@
     <div v-if="deleteCourierModalOpen" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Ekspedisi</h6>
-            </div>
+          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
+            <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Ekspedisi</h6>
             <button type="button" class="btn-close btn-close-white" @click="deleteCourierModalOpen = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8" v-if="selectedCourier">
@@ -979,7 +943,6 @@
           <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
             <button type="button" class="btn btn-sm btn-outline-secondary" @click="deleteCourierModalOpen = false">Batal</button>
             <button type="button" class="btn btn-sm btn-danger shadow-xs d-inline-flex align-items-center gap-1" @click="submitDeleteCourier">
-              <i class="bi bi-trash"></i>
               <span>Ya, Hapus Ekspedisi</span>
             </button>
           </div>

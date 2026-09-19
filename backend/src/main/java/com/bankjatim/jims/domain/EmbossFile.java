@@ -16,6 +16,12 @@ import java.util.List;
 @AllArgsConstructor
 public class EmbossFile extends BaseEntity {
 
+    @Column(name = "file_id", length = 50)
+    private String fileId;
+
+    @Column(name = "file_hash")
+    private String fileHash;
+
     @Column(nullable = false)
     private String filename;
 
@@ -37,6 +43,10 @@ public class EmbossFile extends BaseEntity {
     @Column(nullable = false, length = 50)
     @Builder.Default
     private String status = "UPLOADED";
+
+    @Column(name = "fulfillment_status", nullable = false, length = 50)
+    @Builder.Default
+    private String fulfillmentStatus = "UNFULFILLED"; // UNFULFILLED, PARTIALLY_FULFILLED, FULLY_FULFILLED, RECEIVED
 
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;

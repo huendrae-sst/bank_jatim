@@ -1,202 +1,227 @@
 <template>
   <div class="emboss-detail-page space-y-3">
-    <!-- Breadcrumb & Header -->
-    <div class="app-content-header py-2 px-3 mb-3 border-bottom bg-body rounded-3 shadow-xs d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-2">
-      <div>
-        <div class="d-flex align-items-center gap-2">
-          <h3 class="mb-0 text-body fw-bold">{{ file.file_name }}</h3>
-          <span class="badge text-bg-danger fs-9">{{ file.file_id }}</span>
-        </div>
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb mb-0 fs-8">
-            <li class="breadcrumb-item"><router-link to="/dashboard" class="text-decoration-none text-danger">Beranda</router-link></li>
-            <li class="breadcrumb-item"><router-link to="/emboss" class="text-decoration-none text-danger">Personalisasi Kartu</router-link></li>
-            <li class="breadcrumb-item active text-secondary" aria-current="page">Detail Berkas & Explorer</li>
-          </ol>
-        </nav>
-      </div>
-      <div class="d-flex align-items-center gap-2 flex-wrap">
-        <router-link to="/emboss" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-arrow-left me-1"></i> Kembali
-        </router-link>
-        <router-link v-if="file.reject_records > 0" to="/emboss/reject-queue" class="btn btn-sm btn-outline-danger fw-semibold">
-          <i class="bi bi-exclamation-octagon me-1"></i> Reject Queue ({{ file.reject_records }})
-        </router-link>
-        <button type="button" class="btn btn-sm btn-danger fw-bold shadow-xs" @click="showGenerateModal = true" :disabled="file.success_records === 0 || file.status === 'ORDERS_GENERATED'">
-          <i class="bi bi-cart-plus me-1"></i> {{ file.status === 'ORDERS_GENERATED' ? 'Order Terbit' : 'Generate Order' }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Error Banner -->
-    <div v-if="errorMessage" class="alert alert-danger fs-8 py-2 px-3 mb-3">{{ errorMessage }}</div>
-
-    <!-- Batch Overview Card -->
-    <div class="card card-outline card-danger shadow-xs">
-
-      <div class="card-body p-4">
-        <div class="row g-3">
-          <div class="col-6 col-md-3">
-            <span class="fs-9 text-uppercase text-secondary fw-semibold d-block">Sistem Sumber</span>
-            <span class="badge bg-light text-dark border fs-8 mt-1">{{ file.source.replace('_', ' ') }}</span>
-          </div>
-          <div class="col-6 col-md-3">
-            <span class="fs-9 text-uppercase text-secondary fw-semibold d-block">Durasi Pemrosesan</span>
-            <span class="fs-8 fw-bold text-dark mt-1 d-block font-monospace">
-              <i class="bi bi-stopwatch me-1"></i>{{ file.duration_seconds }} detik
-            </span>
-          </div>
-          <div class="col-6 col-md-3">
-            <span class="fs-9 text-uppercase text-secondary fw-semibold d-block">Diunggah Oleh</span>
-            <span class="fs-8 fw-semibold text-dark mt-1 d-block">{{ file.uploader_name }}</span>
-          </div>
-          <div class="col-6 col-md-3">
-            <span class="fs-9 text-uppercase text-secondary fw-semibold d-block">Waktu Unggah</span>
-            <span class="fs-8 fw-semibold text-dark mt-1 d-block font-monospace">{{ file.created_at }} WIB</span>
-          </div>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="mt-4 pt-3 border-top">
-          <div class="d-flex justify-content-between align-items-center mb-1 fs-8">
-            <span class="fw-semibold text-secondary">
-              Tingkat Keberhasilan: <strong class="text-dark">{{ file.success_rate }}%</strong>
-            </span>
-            <span class="font-monospace text-muted">
-              Total: {{ formatNumber(file.total_records) }} | Valid: {{ formatNumber(file.success_records) }} | Reject: {{ formatNumber(file.reject_records) }} | Duplikat: {{ formatNumber(file.duplicate_records) }}
-            </span>
-          </div>
-          <div class="progress" style="height: 10px;">
-            <div class="progress-bar bg-success" role="progressbar" :style="'width: ' + ((file.success_records / file.total_records) * 100) + '%'"></div>
-            <div class="progress-bar bg-warning" role="progressbar" :style="'width: ' + ((file.duplicate_records / file.total_records) * 100) + '%'"></div>
-            <div class="progress-bar bg-danger" role="progressbar" :style="'width: ' + ((file.reject_records / file.total_records) * 100) + '%'"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <ul class="nav nav-pills fs-7 pb-1 mb-2 gap-1" role="tablist">
-      <li class="nav-item">
-        <button
-          type="button"
-          class="nav-link py-1 px-3 text-nowrap"
-          :class="activeTab === 'records' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-          @click="activeTab = 'records'"
-        >
-          <i class="bi bi-table me-1"></i> Data Mapping & Record Explorer
-        </button>
-      </li>
-      <li class="nav-item">
-        <button
-          type="button"
-          class="nav-link py-1 px-3 text-nowrap"
-          :class="activeTab === 'grouping' ? 'active bg-danger fw-bold text-white' : 'text-body'"
-          @click="activeTab = 'grouping'"
-        >
-          <i class="bi bi-collection me-1"></i> Ringkasan Grouping Order Persediaan
-        </button>
-      </li>
-    </ul>
-
-    <!-- Tab 1: Records Explorer -->
-    <div v-if="activeTab === 'records'" class="card card-outline card-danger shadow-xs">
-      <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
-        <span class="fs-8 fw-bold text-secondary text-uppercase">Tabel Record Data Personalisasi</span>
-        <select v-model="filterStatus" class="form-select form-select-sm fs-9 w-auto">
-          <option value="ALL">-- Semua Status Record --</option>
-          <option value="VALID">VALID</option>
-          <option value="PROCESSED_TO_ORDER">PROCESSED TO ORDER</option>
-          <option value="INVALID">INVALID (Reject)</option>
-          <option value="DUPLICATE">DUPLICATE</option>
-        </select>
-      </div>
-      <div class="table-responsive">
-        <table class="table table-hover table-striped align-middle mb-0 fs-8">
-          <thead class="table-light text-secondary fs-9 text-uppercase">
-            <tr>
-              <th class="ps-3 py-2">Reference ID</th>
-              <th class="py-2">Cabang</th>
-              <th class="py-2">Produk / SKU</th>
-              <th class="py-2">Tipe</th>
-              <th class="py-2">Nama Nasabah (Masked)</th>
-              <th class="py-2">Nomor Kartu / PAN</th>
-              <th class="text-end py-2">Harga</th>
-              <th class="text-center py-2">Status</th>
-              <th class="text-center py-2">Order Terkait</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="rec in filteredRecords" :key="rec.id">
-              <td class="ps-3 py-2 font-monospace fw-bold text-dark">{{ rec.ref_id }}</td>
-              <td class="py-2">
-                <span class="badge bg-light text-dark border font-monospace">{{ rec.branch_code }}</span>
-                <span class="fs-9 text-muted d-block">{{ rec.org_name }}</span>
-              </td>
-              <td class="py-2">
-                <span class="fw-semibold font-monospace">{{ rec.product_code }}</span>
-                <span class="fs-9 text-muted d-block">{{ rec.product_name }}</span>
-              </td>
-              <td class="py-2"><span class="badge bg-secondary bg-opacity-10 text-secondary border fs-9">{{ rec.card_type }}</span></td>
-              <td class="py-2 font-monospace">{{ rec.masked_name }}</td>
-              <td class="py-2 font-monospace fw-bold"><i class="bi bi-shield-lock text-success me-1"></i>{{ rec.masked_pan }}</td>
-              <td class="text-end py-2 font-monospace fw-semibold">{{ formatRupiah(rec.unit_price) }}</td>
-              <td class="text-center py-2">
-                <span class="badge" :class="rec.status === 'VALID' ? 'bg-success bg-opacity-10 text-success border border-success' : 'bg-primary'">
-                  {{ rec.status }}
+    <!-- 1. Judul Halaman & Breadcrumb (UI seperti orders/emboss) -->
+    <div class="app-content-header mb-3">
+      <div class="container-fluid px-0">
+        <div class="row align-items-center">
+          <div class="col-sm-6">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <h3 class="mb-0 text-body fw-bold">
+                <span v-if="isLoading && (!file || !file.id)" class="placeholder-glow">
+                  <span class="placeholder col-6 bg-secondary" style="width: 200px; display: inline-block; height: 1.5rem; border-radius: 4px;"></span>
                 </span>
-              </td>
-              <td class="text-center py-2">
-                <router-link v-if="rec.order_id" :to="`/orders/${rec.order_id}`" class="badge bg-info text-dark text-decoration-none font-monospace">
-                  {{ rec.order_number }}
-                </router-link>
-                <span v-else class="text-muted">-</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <span v-else>{{ file.file_name }}</span>
+              </h3>
+              <template v-if="!isLoading || file.id">
+                <span class="badge text-bg-danger fs-9 font-monospace">{{ file.file_id }}</span>
+                <span class="badge fs-9 text-uppercase" :class="fileStatusBadgeClass(file.status)">
+                  {{ file.status === 'ORDERS_GENERATED' ? 'Order Terbit' : file.status }}
+                </span>
+              </template>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-end mb-0 fs-8">
+              <li class="breadcrumb-item">
+                <router-link to="/dashboard" class="text-decoration-none text-danger">Overview</router-link>
+              </li>
+              <li class="breadcrumb-item">
+                <router-link to="/emboss" class="text-decoration-none text-danger">Personalisasi Kartu</router-link>
+              </li>
+              <li class="breadcrumb-item active text-secondary" aria-current="page">Detail Berkas</li>
+            </ol>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Tab 2: Grouping Order Summary -->
-    <div v-if="activeTab === 'grouping'" class="card card-outline card-danger shadow-xs">
-      <div class="card-header bg-light py-2 px-3 d-flex justify-content-between align-items-center">
-        <span class="fs-8 fw-bold text-secondary text-uppercase">Pengelompokan Otomatis Order Persediaan</span>
-        <span class="fs-9 text-muted">Dikelompokkan berdasarkan Unit Kerja Cabang & Jenis Kartu</span>
-      </div>
-      <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0 fs-8">
-          <thead class="table-light text-secondary fs-9 text-uppercase">
-            <tr>
-              <th class="ps-3 py-2">Cabang Tujuan</th>
-              <th class="py-2">Tipe Kartu</th>
-              <th class="py-2">SKU Barang Master</th>
-              <th class="text-center py-2">Jumlah Kartu (Qty)</th>
-              <th class="text-end py-2">Estimasi Nilai Beban</th>
-              <th class="text-center py-2">Status Konversi</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(g, idx) in groupingSummary" :key="idx">
-              <td class="ps-3 py-2">
-                <span class="fw-bold text-dark font-monospace">{{ g.branch_code }}</span>
-                <span class="fs-9 text-muted d-block">{{ g.org_name }}</span>
-              </td>
-              <td class="py-2"><span class="badge bg-secondary bg-opacity-10 text-secondary border">{{ g.card_type }}</span></td>
-              <td class="py-2">
-                <span class="font-monospace fw-semibold">{{ g.product_code }}</span>
-                <span class="fs-9 text-muted d-block">{{ g.product_name }}</span>
-              </td>
-              <td class="text-center py-2 font-monospace fw-bold fs-7">{{ formatNumber(g.card_count) }} PCS</td>
-              <td class="text-end py-2 font-monospace fw-bold text-dark">{{ formatRupiah(g.estimated_val) }}</td>
-              <td class="text-center py-2"><span class="badge bg-success bg-opacity-10 text-success border border-success">SIAP GENERATE</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <!-- Feedback / Error Alerts -->
+    <div v-if="errorMessage" class="alert alert-danger fs-8 py-2 px-3 mb-3 shadow-xs">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
     </div>
 
-    <!-- Modal Generate Orders -->
+    <!-- Main Card Container (UI seperti orders/emboss) -->
+    <div class="card card-outline card-danger shadow-xs">
+      <!-- Card Header with Title & Action Buttons -->
+      <div class="card-header border-bottom p-3 d-flex flex-column flex-md-row justify-content-between align-items-stretch align-items-md-center gap-2">
+        <h6 class="card-title fw-bold text-body mb-0">
+          Data Rekaman Emboss
+        </h6>
+
+        <!-- Right Side Header Actions: Hapus Tombol Order Sudah Terbit -->
+        <div class="card-tools ms-md-auto d-flex align-items-center gap-2 flex-wrap">
+          <router-link to="/emboss" class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs text-white">
+            Kembali
+          </router-link>
+          <router-link v-if="file.reject_records > 0" to="/emboss/reject-queue" class="btn btn-sm btn-outline-danger fw-bold fs-8">
+            Antrean Reject ({{ file.reject_records }})
+          </router-link>
+          <!-- Tombol Generate Order hanya muncul jika order belum terbit -->
+          <button
+            v-if="file.status !== 'ORDERS_GENERATED' && file.success_records > 0"
+            type="button"
+            class="btn btn-sm btn-danger fw-bold shadow-xs fs-8"
+            @click="showGenerateModal = true"
+          >
+            Generate Order
+          </button>
+        </div>
+      </div>
+        <!-- Filter & Search Toolbar (UI seperti orders/emboss) -->
+        <div class="card-body p-3 bg-body-tertiary border-bottom">
+          <div class="row g-2 align-items-center">
+            <!-- Unit Kerja / Cabang Filter -->
+            <div class="col-12 col-sm-6 col-md-3">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-building"></i></span>
+                <select v-model="recordsFilterBranch" class="form-select form-select-sm border-start-0 fs-8" @change="recordsCurrentPage = 1">
+                  <option value="ALL">Semua Unit Cabang</option>
+                  <option v-for="b in recordBranchOptions" :key="b" :value="b">{{ b }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="col-12 col-sm-6 col-md-2">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-toggle-on"></i></span>
+                <select v-model="recordsFilterStatus" class="form-select form-select-sm border-start-0 fs-8" @change="recordsCurrentPage = 1">
+                  <option value="ALL">Semua Status</option>
+                  <option value="VALID">VALID (Siap Cetak)</option>
+                  <option value="REJECTED">REJECTED (Anomali)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Sort By Filter -->
+            <div class="col-12 col-sm-6 col-md-2">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-sort-down"></i></span>
+                <select v-model="recordsSortBy" class="form-select form-select-sm border-start-0 fs-8">
+                  <option value="id">Urutan File</option>
+                  <option value="masked_name">Nama Nasabah</option>
+                  <option value="account_number">Nomor Rekening</option>
+                  <option value="branch_code">Kode Cabang</option>
+                  <option value="status">Status</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Reset Button -->
+            <div class="col-auto" v-if="isRecordsFiltered">
+              <button type="button" @click="resetRecordsFilter" class="btn btn-sm btn-outline-danger fs-8" title="Reset Filter">
+                Reset
+              </button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="col-12 col-md ms-md-auto">
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-search"></i></span>
+                <input
+                  type="text"
+                  v-model="recordsSearchQuery"
+                  class="form-control form-control-sm border-start-0 border-end-0 fs-8"
+                  placeholder="Cari Nasabah, No Rekening, PAN..."
+                  @input="recordsCurrentPage = 1"
+                />
+                <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button" @click="recordsCurrentPage = 1">
+                  Cari
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Content Data Emboss -->
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 fs-7">
+              <thead class="border-bottom fs-8 text-uppercase fw-semibold text-secondary bg-body-tertiary">
+                <tr>
+                  <th class="ps-3 ps-md-4 py-3" style="width: 140px;">Reference ID</th>
+                  <th class="py-3" style="min-width: 150px;">Cabang</th>
+                  <th class="py-3" style="min-width: 170px;">Produk</th>
+                  <th class="text-center py-3" style="width: 100px;">Tipe</th>
+                  <th class="py-3" style="min-width: 180px;">Nama Nasabah (Masked)</th>
+                  <th class="py-3" style="min-width: 170px;">Nomor Rekening / PAN</th>
+                  <th class="text-center py-3" style="width: 120px;">Status</th>
+                  <th class="text-center pe-3 pe-md-4 py-3" style="width: 100px;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template v-if="!isLoading || paginatedRecords.length > 0">
+                  <tr
+                    v-for="rec in paginatedRecords"
+                    :key="rec.id"
+                  >
+                    <td class="ps-3 ps-md-4 font-monospace fw-bold text-dark">{{ rec.ref_id }}</td>
+                    <td>
+                      <span class="fw-semibold text-body">{{ rec.org_name }}</span>
+                      <div class="fs-9 font-monospace text-secondary">
+                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fs-9">
+                          {{ rec.branch_code }}
+                        </span>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="fw-semibold font-monospace">{{ rec.product_code }}</span>
+                      <span class="fs-9 text-secondary d-block">{{ rec.product_name }}</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-9">{{ rec.card_type }}</span>
+                    </td>
+                    <td class="font-monospace fw-semibold text-body">{{ rec.masked_name }}</td>
+                    <td class="font-monospace">
+                      <div class="text-dark">{{ rec.account_number || '-' }}</div>
+                      <div class="text-secondary fs-9">{{ rec.masked_pan }}</div>
+                    </td>
+                    <td class="text-center">
+                      <span
+                        class="badge fs-9"
+                        :class="rec.status === 'VALID' ? 'bg-success bg-opacity-10 text-success border border-success' : 'bg-danger bg-opacity-10 text-danger border border-danger'"
+                      >
+                        {{ rec.status }}
+                      </span>
+                      <div v-if="rec.rejection_reason" class="fs-9 text-danger mt-0.5" :title="rec.rejection_reason">
+                        {{ rec.rejection_reason }}
+                      </div>
+                    </td>
+                    <!-- Kolom Aksi View Modal Kartu ATM -->
+                    <td class="text-center pe-3 pe-md-4 py-2">
+                      <button
+                        type="button"
+                        class="btn-action-icon text-secondary"
+                        @click="openCardModal(rec)"
+                        title="Lihat Pratinjau Kartu ATM"
+                      >
+                        <i class="bi bi-eye"></i>
+                      </button>
+                    </td>
+                  </tr>
+                  <tr v-if="!isLoading && paginatedRecords.length === 0">
+                    <td colspan="8" class="text-center py-5 text-secondary">
+                      <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary-subtle"></i>
+                      <p class="fw-bold mb-1">Tidak ada data emboss records ditemukan</p>
+                      <p class="fs-8 text-muted mb-0">Coba ubah kata kunci pencarian atau sesuaikan filter status.</p>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Paging Footer Data Emboss -->
+        <PaginationFooter
+          v-if="!isLoading && filteredRecords.length > 0"
+          :total="filteredRecords.length"
+          v-model:currentPage="recordsCurrentPage"
+          v-model:perPage="recordsPerPage"
+        />
+      </div>
+
+    <!-- ==================== MODAL GENERATE ORDERS ==================== -->
     <div v-if="showGenerateModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -206,7 +231,7 @@
           </div>
           <div class="modal-body p-4 space-y-3 fs-8">
             <p class="text-secondary mb-3">
-              Sistem akan membuat <strong>Order Persediaan</strong> otomatis untuk setiap cabang dari <strong>{{ formatNumber(file.success_records) }} kartu valid</strong> di berkas ini.
+              Sistem akan membuat <strong>Order Persediaan</strong> otomatis untuk setiap kantor cabang dari <strong>{{ formatNumber(file.success_records) }} kartu valid</strong> pada berkas ini.
             </p>
             <div>
               <label class="form-label fs-8 fw-bold text-secondary text-uppercase mb-1">
@@ -244,8 +269,157 @@
           </div>
           <div class="modal-footer bg-light d-flex justify-content-end align-items-center gap-2 py-2 px-3">
             <button type="button" class="btn btn-sm btn-outline-secondary px-3" @click="showGenerateModal = false">Batal</button>
-            <button type="button" class="btn btn-sm btn-danger fw-bold" @click="confirmGenerateOrders">
-              <i class="bi bi-check2-circle me-1"></i> Konfirmasi & Buat Order
+            <button type="button" class="btn btn-sm btn-danger fw-bold" :disabled="isGenerating" @click="confirmGenerateOrders">
+              <span v-if="isGenerating" class="spinner-border spinner-border-sm me-1"></span>
+              Konfirmasi & Terbitkan Order
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== MODAL: PRATINJAU FISIK KARTU ATM ==================== -->
+    <div
+      v-if="showCardModal && selectedRecord"
+      class="modal fade show d-block"
+      tabindex="-1"
+      style="background: rgba(0, 0, 0, 0.5); z-index: 1060;"
+      @click.self="showCardModal = false"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+          <!-- Modal Header (UI warna orders/emboss view) -->
+          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <h6 class="modal-title fw-bold text-body fs-6 mb-0">
+                Pratinjau Fisik Kartu ATM / Debit Nasabah
+              </h6>
+              <span
+                class="badge fs-8 text-uppercase"
+                :class="selectedRecord.status === 'VALID' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle'"
+              >
+                {{ selectedRecord.status }}
+              </span>
+            </div>
+            <button type="button" class="btn-close-modal" @click="showCardModal = false" aria-label="Tutup">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+
+          <div class="modal-body p-4">
+            <!-- Container Kartu ATM Visual Realistis -->
+            <div class="d-flex justify-content-center mb-4">
+              <div
+                class="atm-card-mockup shadow-lg"
+                :class="selectedRecord.card_type === 'MASTERCARD' || selectedRecord.product_code?.includes('MC') ? 'atm-card-mastercard' : 'atm-card-gpn'"
+              >
+                <!-- Baris Atas: Logo Bank Jatim & Label Tipe Kartu -->
+                <div class="d-flex justify-content-between align-items-center">
+                  <img
+                    src="/images/logo-bankjatim-white.png"
+                    alt="Bank Jatim"
+                    class="atm-card-logo"
+                  />
+                  <span class="atm-card-type-label">
+                    {{ selectedRecord.card_type === 'MASTERCARD' || selectedRecord.product_code?.includes('MC') ? 'DEBIT PLATINUM' : 'DEBIT GPN' }}
+                  </span>
+                </div>
+
+                <!-- Bagian Tengah Atas: EMV Chip & Simbol Contactless -->
+                <div class="d-flex align-items-center gap-3 my-2">
+                  <div class="emv-chip">
+                    <div class="emv-chip-line emv-chip-line-horizontal"></div>
+                    <div class="emv-chip-line emv-chip-line-vertical"></div>
+                    <div class="emv-chip-center"></div>
+                  </div>
+                  <i class="bi bi-wifi contactless-icon"></i>
+                </div>
+
+                <!-- Nomor Kartu / PAN (Embossed Monospace Style) -->
+                <div class="atm-card-pan my-2">
+                  {{ formatPanBlocks(selectedRecord.masked_pan) }}
+                </div>
+
+                <!-- Baris Bawah: Nama Nasabah, Valid Thru, & Logo Jaringan -->
+                <div class="d-flex justify-content-between align-items-end mt-2">
+                  <div class="pe-2 overflow-hidden" style="max-width: 65%;">
+                    <div class="atm-card-label">CARDHOLDER NAME</div>
+                    <div class="atm-card-name text-truncate">{{ selectedRecord.masked_name || 'NAMA NASABAH' }}</div>
+                  </div>
+
+                  <div class="text-center px-2">
+                    <div class="atm-card-label">VALID THRU</div>
+                    <div class="atm-card-validthru">12/31</div>
+                  </div>
+
+                  <div class="ps-2">
+                    <!-- Logo Mastercard / Logo GPN -->
+                    <div v-if="selectedRecord.card_type === 'MASTERCARD' || selectedRecord.product_code?.includes('MC')" class="mastercard-logo" title="Mastercard Network">
+                      <span class="mc-circle mc-circle-red"></span>
+                      <span class="mc-circle mc-circle-yellow"></span>
+                    </div>
+                    <div v-else class="gpn-logo-badge" title="Gerbang Pembayaran Nasional">
+                      <span class="gpn-badge-text">GPN</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panel Rincian Spesifikasi & Metadata (UI warna orders/emboss view) -->
+            <div class="p-3 rounded-3 bg-body-secondary border border-secondary-subtle">
+              <div class="d-flex align-items-center gap-2 mb-2 pb-2 border-bottom border-secondary-subtle">
+                <i class="bi bi-info-circle text-danger"></i>
+                <span class="fw-bold fs-7 text-body">Spesifikasi Data Personalisasi Berkas</span>
+              </div>
+              <div class="row g-2 fs-8">
+                <div class="col-6 col-sm-4">
+                  <span class="text-secondary d-block fs-9 text-uppercase fw-semibold">Reference ID:</span>
+                  <span class="font-monospace fw-bold text-dark">{{ selectedRecord.ref_id }}</span>
+                </div>
+                <div class="col-6 col-sm-4">
+                  <span class="text-secondary d-block fs-9 text-uppercase fw-semibold">Nomor Rekening:</span>
+                  <span class="font-monospace fw-bold text-dark">{{ selectedRecord.account_number || '-' }}</span>
+                </div>
+                <div class="col-6 col-sm-4">
+                  <span class="text-secondary d-block fs-9 text-uppercase fw-semibold">Kantor Cabang:</span>
+                  <span class="fw-semibold text-body">{{ selectedRecord.org_name }}</span>
+                  <span class="badge bg-secondary-subtle text-secondary font-monospace fs-9 ms-1">{{ selectedRecord.branch_code }}</span>
+                </div>
+                <div class="col-6 col-sm-4">
+                  <span class="text-secondary d-block fs-9 text-uppercase fw-semibold">Produk:</span>
+                  <span class="fw-semibold text-body">{{ selectedRecord.product_name }}</span>
+                  <div class="fs-9 font-monospace text-secondary">{{ selectedRecord.product_code }}</div>
+                </div>
+                <div class="col-6 col-sm-4">
+                  <span class="text-secondary d-block fs-9 text-uppercase fw-semibold">Tipe Jaringan:</span>
+                  <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fs-9">{{ selectedRecord.card_type }}</span>
+                </div>
+                <div class="col-6 col-sm-4">
+                  <span class="text-secondary d-block fs-9 text-uppercase fw-semibold">Status Validasi:</span>
+                  <span
+                    class="badge fs-9"
+                    :class="selectedRecord.status === 'VALID' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle'"
+                  >
+                    {{ selectedRecord.status }}
+                  </span>
+                </div>
+                <div v-if="selectedRecord.rejection_reason" class="col-12 text-danger fs-8 border-top border-secondary-subtle pt-2 mt-2">
+                  <i class="bi bi-exclamation-octagon me-1"></i>
+                  <strong>Alasan Rejection:</strong> {{ selectedRecord.rejection_reason }}
+                </div>
+                <div v-if="selectedRecord.order_number && selectedRecord.order_number !== '-'" class="col-12 fs-8 border-top border-secondary-subtle pt-2 mt-2">
+                  <span class="text-secondary fw-semibold">Order Persediaan: </span>
+                  <span class="font-monospace text-danger fw-bold">{{ selectedRecord.order_number }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer (UI warna orders/emboss view) -->
+          <div class="modal-footer bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3 border-top">
+            <button type="button" class="btn btn-sm btn-outline-secondary px-3 fs-8" @click="showCardModal = false">
+              Tutup
             </button>
           </div>
         </div>
@@ -255,19 +429,44 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const route = useRoute();
-const activeTab = ref('records');
-const filterStatus = ref('ALL');
+const isLoading = ref(true);
+
+// Records State (Data Emboss)
+const recordsFilterBranch = ref('ALL');
+const recordsFilterStatus = ref('ALL');
+const recordsSortBy = ref('id');
+const recordsSearchQuery = ref('');
+const recordsCurrentPage = ref(1);
+const recordsPerPage = ref(10);
+
+// Modal & Process State
 const showGenerateModal = ref(false);
 const deliveryMethod = ref('COURIER');
 const pickupNip = ref('');
 const pickupName = ref('');
 const errorMessage = ref('');
 const isGenerating = ref(false);
+
+// ATM Card View Modal State
+const showCardModal = ref(false);
+const selectedRecord = ref(null);
+
+const openCardModal = (rec) => {
+  selectedRecord.value = rec;
+  showCardModal.value = true;
+};
+
+const formatPanBlocks = (pan) => {
+  if (!pan) return '•••• •••• •••• ••••';
+  const clean = String(pan).replace(/\s+/g, '');
+  return clean.match(/.{1,4}/g)?.join(' ') || clean;
+};
 
 const file = ref({
   id: null,
@@ -296,43 +495,83 @@ const mapRecord = (rec) => ({
   product_name: rec.item?.name || (rec.cardType?.includes('MC') ? 'Kartu Mastercard Chip' : 'Kartu ATM Chip GPN Reguler'),
   card_type: rec.cardType || 'GPN',
   masked_name: rec.customerName || '-',
+  account_number: rec.accountNumber || '-',
   masked_pan: rec.cardNumberMasked || '-',
   unit_price: 25000,
   status: rec.status || 'VALID',
+  rejection_reason: rec.rejectionReason || null,
   order_id: rec.order?.id || null,
   order_number: rec.order?.orderNumber || '-'
 });
 
-const groupingSummary = computed(() => {
-  const map = new Map();
+// Branch options
+const recordBranchOptions = computed(() => {
+  const set = new Set();
   for (const r of records.value) {
-    if (r.status === 'REJECTED') continue;
-    const key = `${r.branch_code}__${r.card_type}__${r.product_code}`;
-    if (!map.has(key)) {
-      map.set(key, {
-        branch_code: r.branch_code,
-        org_name: r.org_name,
-        card_type: r.card_type,
-        product_code: r.product_code,
-        product_name: r.product_name,
-        card_count: 0,
-        estimated_val: 0
-      });
-    }
-    const g = map.get(key);
-    g.card_count += 1;
-    g.estimated_val += r.unit_price;
+    if (r.branch_code) set.add(r.branch_code);
   }
-  return Array.from(map.values());
+  return Array.from(set).sort();
 });
 
+// Records filtering & sorting
+const isRecordsFiltered = computed(() => {
+  return recordsFilterBranch.value !== 'ALL' || recordsFilterStatus.value !== 'ALL' || !!recordsSearchQuery.value;
+});
+
+const resetRecordsFilter = () => {
+  recordsFilterBranch.value = 'ALL';
+  recordsFilterStatus.value = 'ALL';
+  recordsSearchQuery.value = '';
+  recordsCurrentPage.value = 1;
+};
+
 const filteredRecords = computed(() => {
-  if (filterStatus.value === 'ALL') return records.value;
-  return records.value.filter(r => r.status === filterStatus.value);
+  let list = records.value;
+  if (recordsFilterBranch.value !== 'ALL') {
+    list = list.filter(r => r.branch_code === recordsFilterBranch.value);
+  }
+  if (recordsFilterStatus.value !== 'ALL') {
+    list = list.filter(r => r.status === recordsFilterStatus.value);
+  }
+  if (recordsSearchQuery.value) {
+    const q = recordsSearchQuery.value.toLowerCase().trim();
+    list = list.filter(r =>
+      (r.masked_name && r.masked_name.toLowerCase().includes(q)) ||
+      (r.account_number && r.account_number.toLowerCase().includes(q)) ||
+      (r.masked_pan && r.masked_pan.toLowerCase().includes(q)) ||
+      (r.branch_code && r.branch_code.toLowerCase().includes(q)) ||
+      (r.ref_id && r.ref_id.toLowerCase().includes(q))
+    );
+  }
+
+  // Sort
+  const sortKey = recordsSortBy.value;
+  list = [...list].sort((a, b) => {
+    let valA = a[sortKey] || '';
+    let valB = b[sortKey] || '';
+    if (typeof valA === 'string') valA = valA.toLowerCase();
+    if (typeof valB === 'string') valB = valB.toLowerCase();
+    return valA > valB ? 1 : valA < valB ? -1 : 0;
+  });
+
+  return list;
+});
+
+const paginatedRecords = computed(() => {
+  const start = (recordsCurrentPage.value - 1) * recordsPerPage.value;
+  return filteredRecords.value.slice(start, start + recordsPerPage.value);
 });
 
 const formatNumber = (val) => new Intl.NumberFormat('id-ID').format(val || 0);
-const formatRupiah = (val) => 'Rp ' + formatNumber(val);
+
+const fileStatusBadgeClass = (status) => {
+  switch (status) {
+    case 'ORDERS_GENERATED': return 'bg-success text-white';
+    case 'VALIDATED': return 'bg-primary text-white';
+    case 'PROCESSING': return 'bg-warning text-dark';
+    default: return 'bg-secondary text-white';
+  }
+};
 
 const loadFile = async () => {
   try {
@@ -344,7 +583,7 @@ const loadFile = async () => {
       const reject = Number(data.rejectedRecords || 0);
       file.value = {
         id: data.id,
-        file_id: `#EB-202609-00${data.id}`,
+        file_id: data.fileId || `#EB-202609-00${data.id}`,
         file_name: data.filename || '-',
         source: 'CORE_BANKING_ALTO',
         duration_seconds: 2.8,
@@ -365,11 +604,26 @@ const loadFile = async () => {
 
 const loadRecords = async () => {
   try {
-    const statusParam = filterStatus.value === 'ALL' ? '' : `?status=${filterStatus.value}`;
+    const statusParam = recordsFilterStatus.value === 'ALL' ? '' : `?status=${recordsFilterStatus.value}`;
     const res = await api.get(`/emboss/${route.params.id}/records${statusParam}`);
     records.value = (res.data || []).map(mapRecord);
   } catch (err) {
     errorMessage.value = err?.message || err?.error || 'Gagal memuat daftar rekaman berkas emboss.';
+  }
+};
+
+const loadAllData = async () => {
+  isLoading.value = true;
+  errorMessage.value = '';
+  try {
+    await Promise.allSettled([
+      loadFile(),
+      loadRecords()
+    ]);
+  } catch (err) {
+    console.error('Failed to load emboss detail data:', err);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -379,8 +633,7 @@ const confirmGenerateOrders = async () => {
     await api.post(`/emboss/${route.params.id}/generate-orders`);
     showGenerateModal.value = false;
     alert('Order persediaan cabang berhasil dibuat dari berkas emboss.');
-    await loadFile();
-    await loadRecords();
+    await loadAllData();
   } catch (err) {
     alert('Gagal membuat order: ' + (err?.message || err?.error || 'Terjadi kesalahan sistem'));
   } finally {
@@ -388,12 +641,249 @@ const confirmGenerateOrders = async () => {
   }
 };
 
-watch(filterStatus, () => {
-  loadRecords();
-});
-
-onMounted(async () => {
-  await loadFile();
-  await loadRecords();
-});
+onMounted(loadAllData);
 </script>
+
+<style scoped>
+.btn-xs {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  border-radius: 0.2rem;
+}
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  color: var(--bs-secondary);
+  cursor: pointer;
+}
+.btn-close-modal:hover {
+  color: var(--bs-dark);
+}
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ==================== REALISTIC ATM CARD MOCKUP ==================== */
+.atm-card-mockup {
+  width: 100%;
+  max-width: 440px;
+  height: 260px;
+  border-radius: 18px;
+  padding: 22px 26px;
+  color: #ffffff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  user-select: none;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.atm-card-mockup:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 42px rgba(0, 0, 0, 0.5), 0 6px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Bank Jatim Signature Ruby Red Metallic Gradient */
+.atm-card-gpn {
+  background: linear-gradient(135deg, #c7141b 0%, #8f080e 45%, #420204 100%);
+}
+.atm-card-gpn::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -25%;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0) 65%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+.atm-card-gpn::after {
+  content: '';
+  position: absolute;
+  bottom: -30px;
+  left: -20px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Mastercard Titanium/Platinum Dark Theme */
+.atm-card-mastercard {
+  background: linear-gradient(135deg, #2c3038 0%, #17191e 50%, #0d0e12 100%);
+}
+.atm-card-mastercard::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(217, 37, 42, 0.22) 0%, rgba(217, 37, 42, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Header Elements */
+.atm-card-logo {
+  height: 34px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+}
+
+.atm-card-type-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* EMV Chip */
+.emv-chip {
+  width: 48px;
+  height: 36px;
+  background: linear-gradient(135deg, #e6c86e 0%, #fef3a4 40%, #c49a2a 75%, #8c6a12 100%);
+  border-radius: 7px;
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.6), 0 2px 5px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  border: 1px solid #75550c;
+  flex-shrink: 0;
+}
+.emv-chip-line {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.35);
+}
+.emv-chip-line-horizontal {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  transform: translateY(-50%);
+}
+.emv-chip-line-vertical {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+}
+.emv-chip-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 20px;
+  height: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.contactless-icon {
+  font-size: 1.35rem;
+  transform: rotate(90deg);
+  color: rgba(255, 255, 255, 0.8);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+/* Card Number / PAN Embossed */
+.atm-card-pan {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.32rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000, 0 -1px 1px rgba(255, 255, 255, 0.4);
+  word-spacing: 4px;
+}
+
+/* Bottom Labels */
+.atm-card-label {
+  font-size: 0.56rem;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.75);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.atm-card-name {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000, 0 -1px 1px rgba(255, 255, 255, 0.35);
+  line-height: 1.1;
+}
+
+.atm-card-validthru {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px #000, 0 -1px 1px rgba(255, 255, 255, 0.35);
+  line-height: 1.1;
+}
+
+/* GPN Badge */
+.gpn-logo-badge {
+  background: #ffffff;
+  color: #c8102e;
+  padding: 3px 9px;
+  border-radius: 5px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.gpn-badge-text {
+  font-weight: 900;
+  font-size: 0.92rem;
+  letter-spacing: 1.2px;
+  line-height: 1;
+}
+
+/* Mastercard Network Logo */
+.mastercard-logo {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 48px;
+  height: 30px;
+}
+.mc-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  position: absolute;
+}
+.mc-circle-red {
+  background-color: #eb001b;
+  left: 0;
+}
+.mc-circle-yellow {
+  background-color: #f79e1b;
+  right: 0;
+  opacity: 0.92;
+  mix-blend-mode: hard-light;
+}
+</style>

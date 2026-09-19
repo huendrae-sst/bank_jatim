@@ -24,12 +24,6 @@
       </div>
     </div>
 
-    <!-- Alert / Toast Banner -->
-    <div v-if="alertMessage" class="alert alert-dismissible fade show shadow-xs fs-8 py-2 px-3 mb-3" :class="alertClass" role="alert">
-      <i :class="alertIcon" class="me-2 fs-7"></i>
-      <span>{{ alertMessage }}</span>
-      <button type="button" class="btn-close py-2" @click="alertMessage = ''" aria-label="Close"></button>
-    </div>
 
     <!-- 3. Main Tree Navigation Card -->
     <div class="card card-outline card-danger shadow-xs mb-4">
@@ -43,10 +37,10 @@
 
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2 flex-wrap">
           <button class="btn btn-sm btn-outline-secondary fs-8" @click="exportConfiguration" title="Ekspor JSON Konfigurasi Menu">
-            <i class="bi bi-download me-1"></i> Ekspor
+            Ekspor
           </button>
           <button class="btn btn-sm btn-danger fw-bold shadow-xs fs-8" @click="openCreateModal(null)">
-            <i class="bi bi-plus-lg me-1"></i> Tambah Menu Baru
+            Tambah
           </button>
         </div>
       </div>
@@ -73,13 +67,13 @@
 
             <div class="col-12 col-md-7 d-flex align-items-center justify-content-md-end gap-2 flex-wrap">
               <span class="badge bg-secondary-subtle text-secondary border fs-9 py-1 px-2 d-none d-lg-inline-flex align-items-center">
-                <i class="bi bi-arrows-move me-1 text-danger"></i> Drag & drop baris untuk ubah urutan menu
+                <i class="bi bi-arrows-move me-1 text-danger"></i> Drag &amp; drop modul parent atau baris menu untuk ubah urutan
               </span>
               <button type="button" class="btn btn-sm btn-outline-secondary fs-8" @click="expandAllModules">
-                <i class="bi bi-arrows-expand me-1"></i> Buka Semua
+                Buka Semua
               </button>
               <button type="button" class="btn btn-sm btn-outline-secondary fs-8" @click="collapseAllModules">
-                <i class="bi bi-arrows-collapse me-1"></i> Tutup Semua
+                Tutup Semua
               </button>
             </div>
           </div>
@@ -90,8 +84,18 @@
           <div
             v-for="(modGroup, mIdx) in treeModules"
             :key="modGroup.module"
-            class="tree-module-block mb-3 border rounded-3 shadow-xs bg-body overflow-hidden"
-            :class="{ 'border-danger': isExpanded(modGroup.module) }"
+            class="tree-module-block mb-3 border rounded-3 shadow-xs bg-body overflow-hidden transition-all"
+            :class="{
+              'border-danger': isExpanded(modGroup.module),
+              'dragging-module': draggedModule?.module === modGroup.module,
+              'drag-over-module': dragOverModuleIdx === mIdx
+            }"
+            draggable="true"
+            @dragstart="onModuleDragStart($event, modGroup, mIdx)"
+            @dragover.prevent="onModuleDragOver($event, mIdx)"
+            @dragleave="onModuleDragLeave($event, mIdx)"
+            @drop.prevent="onModuleDrop($event, mIdx)"
+            @dragend="onModuleDragEnd($event)"
           >
             <!-- Module Parent Node (Level 1) -->
             <div
@@ -100,6 +104,15 @@
               @click="toggleModule(modGroup.module)"
             >
               <div class="d-flex align-items-center gap-2">
+                <!-- Module Drag Handle Grip -->
+                <div
+                  class="drag-handle text-secondary cursor-grab p-1"
+                  title="Tahan dan geser untuk memindahkan urutan modul ini"
+                  @click.stop
+                >
+                  <i class="bi bi-grip-vertical fs-5"></i>
+                </div>
+
                 <!-- Expand/Collapse Chevron -->
                 <i
                   class="bi bi-chevron-right fs-8 tree-chevron transition-transform"
@@ -108,6 +121,9 @@
 
                 <!-- Module Title (Hanya Label) -->
                 <span class="fw-bold fs-7">{{ modGroup.module }}</span>
+                <span class="badge bg-body text-secondary border fs-9 d-none d-sm-inline">
+                  {{ modGroup.items.length }} Sub-Menu
+                </span>
               </div>
 
               <!-- Module Header Tools -->
@@ -118,7 +134,7 @@
                   @click="openCreateModal(modGroup.module)"
                   title="Tambah Sub-Menu di Modul Ini"
                 >
-                  <i class="bi bi-plus-lg me-1"></i> Sub-Menu
+                  Tambah
                 </button>
               </div>
             </div>
@@ -242,7 +258,6 @@
         <div class="modal-content border-0 shadow-lg">
           <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
             <h6 class="modal-title fw-bold text-body fs-6 mb-0">
-              <i :class="isEditMode ? 'bi-pencil-square' : 'bi-plus-circle'" class="text-danger me-2"></i>
               {{ isEditMode ? 'Edit Konfigurasi Menu' : 'Tambah Menu Baru' }}
             </h6>
             <button type="button" class="btn-close" @click="showModal = false" aria-label="Tutup"></button>
@@ -377,8 +392,8 @@
               <button type="button" class="btn btn-sm btn-outline-secondary fs-8" @click="showModal = false">
                 Batal
               </button>
-              <button type="submit" class="btn btn-sm btn-danger fw-bold fs-8">
-                <i class="bi bi-check2-circle me-1"></i> Simpan Konfigurasi
+              <button type="submit" class="btn btn-sm btn-danger fw-bold fs-8 px-3">
+                Simpan
               </button>
             </div>
           </form>
@@ -392,6 +407,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useMenuStore, MODULE_CATEGORIES } from '@/stores/menu';
 import { useRoleStore } from '@/stores/role';
+import { toast } from '@/utils/toast';
 
 const menuStore = useMenuStore();
 const roleStore = useRoleStore();
@@ -403,25 +419,17 @@ const searchQuery = ref('');
 // Expanded module branches in treeview
 const expandedModules = ref(new Set());
 
-// Alert notification
-const alertMessage = ref('');
-const alertClass = ref('alert-success');
-const alertIcon = ref('bi-check-circle');
-
+// Toast notification helper
 const showAlert = (msg, type = 'success') => {
-  alertMessage.value = msg;
   if (type === 'success') {
-    alertClass.value = 'alert-success';
-    alertIcon.value = 'bi-check-circle';
+    toast.success(msg, 'Berhasil');
+  } else if (type === 'error') {
+    toast.error(msg, 'Gagal');
+  } else if (type === 'warn' || type === 'warning') {
+    toast.warn(msg, 'Peringatan');
   } else {
-    alertClass.value = 'alert-danger';
-    alertIcon.value = 'bi-exclamation-triangle';
+    toast.info(msg, 'Informasi');
   }
-  setTimeout(() => {
-    if (alertMessage.value === msg) {
-      alertMessage.value = '';
-    }
-  }, 4000);
 };
 
 // Modal State
@@ -548,8 +556,68 @@ const treeModules = computed(() => {
   return result;
 });
 
+// Module Level Drag and Drop States
+const draggedModule = ref(null);
+const draggedModuleIdx = ref(-1);
+const dragOverModuleIdx = ref(null);
+
+const onModuleDragStart = (e, modGroup, mIdx) => {
+  if (draggedItem.value) return;
+  draggedModule.value = modGroup;
+  draggedModuleIdx.value = mIdx;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', 'MODULE:' + modGroup.module);
+  setTimeout(() => {
+    if (e.target) e.target.classList.add('opacity-50');
+  }, 0);
+};
+
+const onModuleDragOver = (e, mIdx) => {
+  if (!draggedModule.value) return;
+  if (draggedModuleIdx.value === mIdx) return;
+  dragOverModuleIdx.value = mIdx;
+};
+
+const onModuleDragLeave = (e, mIdx) => {
+  if (dragOverModuleIdx.value === mIdx) {
+    dragOverModuleIdx.value = null;
+  }
+};
+
+const onModuleDrop = async (e, targetIdx) => {
+  e.preventDefault();
+  dragOverModuleIdx.value = null;
+  if (!draggedModule.value) return;
+  const fromIdx = draggedModuleIdx.value;
+  if (fromIdx === targetIdx || fromIdx === -1) return;
+
+  const list = [...treeModules.value];
+  const [removed] = list.splice(fromIdx, 1);
+  list.splice(targetIdx, 0, removed);
+
+  try {
+    await menuStore.reorderModules(list);
+    showAlert(`Urutan modul "${removed.module}" berhasil dipindahkan.`);
+  } catch (err) {
+    showAlert('Gagal memindahkan urutan modul: ' + (err?.message || err), 'error');
+  } finally {
+    draggedModule.value = null;
+    draggedModuleIdx.value = -1;
+  }
+};
+
+const onModuleDragEnd = (e) => {
+  draggedModule.value = null;
+  draggedModuleIdx.value = -1;
+  dragOverModuleIdx.value = null;
+  if (e.target) {
+    e.target.classList.remove('opacity-50');
+  }
+};
+
 // Drag and Drop Handlers (Native HTML5 Drag and Drop)
 const onDragStart = (e, item, moduleName) => {
+  e.stopPropagation();
   draggedItem.value = item;
   draggedFromModule.value = moduleName;
   e.dataTransfer.effectAllowed = 'move';
@@ -751,6 +819,16 @@ const exportConfiguration = () => {
   transform: rotate(90deg);
 }
 
+
+.tree-module-block.dragging-module {
+  opacity: 0.45;
+  border: 2px dashed #dc3545 !important;
+}
+
+.tree-module-block.drag-over-module {
+  border-top: 3px solid #dc3545 !important;
+  box-shadow: 0 -3px 8px rgba(220, 53, 69, 0.25) !important;
+}
 
 .tree-module-header {
   cursor: pointer;

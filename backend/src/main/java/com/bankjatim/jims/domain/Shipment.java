@@ -20,6 +20,13 @@ public class Shipment extends BaseEntity {
     @Column(name = "manifest_number", nullable = false, unique = true, length = 100)
     private String manifestNumber;
 
+    @Column(name = "distribution_type", nullable = false, length = 50)
+    @Builder.Default
+    private String distributionType = "ORDER_REQUEST"; // ORDER_REQUEST, PURCHASE_REQUEST, EMBOSS, ROUTINE_PUSH
+
+    @Column(name = "batch_manifest_number", length = 100)
+    private String batchManifestNumber;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
     private Order order;
@@ -75,4 +82,8 @@ public class Shipment extends BaseEntity {
 
     @Column(name = "delivered_at")
     private LocalDateTime deliveredAt;
+
+    @OneToMany(mappedBy = "shipment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private java.util.List<ShipmentItem> items = new java.util.ArrayList<>();
 }

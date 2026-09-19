@@ -15,24 +15,24 @@
       </div>
       <div class="d-flex align-items-center gap-2 flex-wrap">
         <router-link to="/returns" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-arrow-left me-1"></i> Kembali
+          Kembali
         </router-link>
         <template v-if="returnData.status === 'REQUESTED'">
           <button type="button" class="btn btn-sm btn-outline-danger" @click="showRejectModal = true">
-            <i class="bi bi-x-circle me-1"></i> Tolak
+            Tolak
           </button>
           <button type="button" class="btn btn-sm btn-success fw-bold px-3 shadow-xs" @click="showApproveModal = true">
-            <i class="bi bi-check-circle me-1"></i> Setujui Retur
+            Setujui Retur
           </button>
         </template>
         <template v-else-if="returnData.status === 'APPROVED'">
           <button type="button" class="btn btn-sm btn-danger fw-bold px-3 shadow-xs" @click="showShipModal = true">
-            <i class="bi bi-truck me-1"></i> Kirim Barang Retur
+            Kirim Barang Retur
           </button>
         </template>
         <template v-else-if="returnData.status === 'SHIPPED'">
           <button type="button" class="btn btn-sm btn-success fw-bold px-3 shadow-xs" @click="showReceiveModal = true">
-            <i class="bi bi-box-seam me-1"></i> Konfirmasi Terima di Pusat
+            Konfirmasi Terima di Pusat
           </button>
         </template>
       </div>
@@ -71,7 +71,7 @@
         </div>
 
         <!-- Items Table -->
-        <h6 class="fw-bold mb-3 text-dark"><i class="bi bi-box me-2"></i>Rincian Barang yang Diretur</h6>
+        <h6 class="fw-bold mb-3 text-dark">Rincian Barang yang Diretur</h6>
         <div class="table-responsive border rounded-3">
           <table class="table table-hover align-middle mb-0 fs-8">
             <thead class="table-light text-secondary text-uppercase fs-9">
@@ -146,7 +146,7 @@
             <p class="text-secondary mb-2">Mohon berikan alasan penolakan permohonan retur ini agar cabang dapat melakukan revisi atau penyesuaian:</p>
             <div>
               <label class="form-label fw-bold mb-1">Alasan Penolakan <span class="text-danger">*</span></label>
-              <textarea v-model="rejectReason" class="form-control form-control-sm" rows="3" placeholder="Contoh: Format berkas tidak lengkap / barang bukan persediaan warkat..." required></textarea>
+              <textarea v-model="rejectReason" class="form-control form-control-sm" rows="3" placeholder="Contoh: Format berkas tidak lengkap / barang bukan persediaan produk..." required></textarea>
             </div>
           </div>
           <div class="modal-footer d-flex justify-content-end align-items-center gap-2 py-2 px-3">

@@ -34,4 +34,22 @@ public interface EmbossRecordRepository extends JpaRepository<EmbossRecord, Long
             ORDER BY r.id DESC
             """)
     List<EmbossRecord> findRejectedWithDetails();
+
+    List<EmbossRecord> findByProductionOrderIdOrderByIdAsc(Long productionOrderId);
+
+    @Query("""
+            SELECT r FROM EmbossRecord r
+            JOIN FETCH r.embossFile
+            LEFT JOIN FETCH r.item
+            LEFT JOIN FETCH r.producedItem
+            LEFT JOIN FETCH r.order
+            WHERE r.productionOrder.id = :productionOrderId
+            ORDER BY r.id ASC
+            """)
+    List<EmbossRecord> findByProductionOrderIdWithDetails(@Param("productionOrderId") Long productionOrderId);
+
+    List<EmbossRecord> findByProductionOrderIdAndProductionStatus(Long productionOrderId, String productionStatus);
+
+    @Query("SELECT r FROM EmbossRecord r WHERE r.order.id IN :orderIds AND r.status = 'VALID' AND r.productionOrder IS NULL")
+    List<EmbossRecord> findValidUnassignedByOrderIds(@Param("orderIds") List<Long> orderIds);
 }

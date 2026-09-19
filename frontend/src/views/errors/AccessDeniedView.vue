@@ -13,7 +13,6 @@
           :to="navigationStore.firstAccessiblePath"
           class="btn btn-danger"
         >
-          <i class="bi bi-arrow-left me-2"></i>
           Kembali ke menu utama
         </router-link>
         <router-link v-else to="/login" class="btn btn-outline-secondary">

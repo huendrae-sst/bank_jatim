@@ -54,7 +54,7 @@
         <!-- Section Tombol Tambah Aligned with Tabs -->
         <div v-if="!authStore.isRegionalUser" class="card-tools ms-md-auto">
           <button type="button" @click="openCreateModal" class="btn btn-sm btn-danger fw-bold shadow-xs">
-            <i class="bi bi-plus-lg me-1"></i> Buat Order Baru
+            Tambah
           </button>
         </div>
       </div>
@@ -95,6 +95,19 @@
             </div>
           </div>
 
+          <!-- Order Type Filter -->
+          <div class="col-12 col-sm-6 col-md-2">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-body text-secondary border-end-0 fs-8"><i class="bi bi-tag"></i></span>
+              <select v-model="filterOrderType" class="form-select form-select-sm border-start-0 fs-8">
+                <option value="ALL">Semua Tipe Order</option>
+                <option value="INTERNAL_REQUEST">Permintaan Cabang</option>
+                <option value="PURCHASE_REQUEST">Pembelian (PR)</option>
+                <option value="ROUTINE_PUSH">Distribusi Rutin</option>
+              </select>
+            </div>
+          </div>
+
           <!-- Sort Field Filter -->
           <div class="col-12 col-sm-6 col-md-2">
             <div class="input-group input-group-sm">
@@ -111,7 +124,7 @@
           <!-- Reset Button -->
           <div class="col-auto" v-if="isFiltered">
             <button type="button" @click="resetFilters" class="btn btn-sm btn-outline-danger fs-8" title="Reset Filter">
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
 
@@ -126,7 +139,7 @@
                 class="form-control form-control-sm border-start-0 border-end-0 fs-8"
               />
               <button type="button" @click="currentPage = 1" class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs">
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -142,31 +155,31 @@
                 <th class="ps-3 ps-md-4 py-3" style="min-width: 170px;">
                   <span class="d-inline-flex align-items-center gap-1 cursor-pointer" @click="toggleSort('order_number')">
                     Nomor Order
-                    <i v-if="sortBy === 'order_number'" class="bi" :class="sortDir === 'asc' ? 'bi-sort-up text-danger fw-bold' : 'bi-sort-down text-danger fw-bold'"></i>
-                    <i v-else class="bi bi-arrow-down-up opacity-25 fs-9"></i>
+                   
+                   
                   </span>
                 </th>
                 <th class="py-3" style="min-width: 190px;">Unit Kerja Peminta</th>
                 <th class="text-center py-3" style="width: 150px;">
                   <span class="d-inline-flex align-items-center gap-1 cursor-pointer" @click="toggleSort('status')">
                     Status Alur
-                    <i v-if="sortBy === 'status'" class="bi" :class="sortDir === 'asc' ? 'bi-sort-up text-danger fw-bold' : 'bi-sort-down text-danger fw-bold'"></i>
-                    <i v-else class="bi bi-arrow-down-up opacity-25 fs-9"></i>
+                   
+                   
                   </span>
                 </th>
                 <th class="text-end py-3" style="min-width: 140px;">
                   <span class="d-inline-flex align-items-center justify-content-end gap-1 cursor-pointer" @click="toggleSort('total_estimated_value')">
                     Total Nilai
-                    <i v-if="sortBy === 'total_estimated_value'" class="bi" :class="sortDir === 'asc' ? 'bi-sort-numeric-up text-danger fw-bold' : 'bi-sort-numeric-down text-danger fw-bold'"></i>
-                    <i v-else class="bi bi-arrow-down-up opacity-25 fs-9"></i>
+                   
+                   
                   </span>
                 </th>
                 <th class="text-end py-3" style="min-width: 130px;">Ongkir Ekspedisi</th>
                 <th class="py-3" style="min-width: 160px;">
                   <span class="d-inline-flex align-items-center gap-1 cursor-pointer" @click="toggleSort('created_at')">
                     Tanggal Order
-                    <i v-if="sortBy === 'created_at'" class="bi" :class="sortDir === 'asc' ? 'bi-sort-up text-danger fw-bold' : 'bi-sort-down text-danger fw-bold'"></i>
-                    <i v-else class="bi bi-arrow-down-up opacity-25 fs-9"></i>
+                   
+                   
                   </span>
                 </th>
                 <th class="text-center pe-3 pe-md-4 py-3" style="width: 120px;">Aksi</th>
@@ -176,11 +189,16 @@
               <tr v-for="ord in paginatedOrders" :key="ord.id">
                 <!-- Order Number & Maker -->
                 <td class="ps-3 ps-md-4">
-                  <a href="#" @click.prevent="openViewModal(ord)" class="fw-bold font-monospace text-danger text-decoration-none">
-                    {{ ord.order_number }}
-                  </a>
-                  <div class="fs-8 text-secondary">
-                    <i class="bi bi-person me-1"></i>{{ ord.requester?.name || '-' }}
+                  <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                    <a href="#" @click.prevent="openViewModal(ord)" class="fw-bold font-monospace text-danger text-decoration-none">
+                      {{ ord.order_number }}
+                    </a>
+                    <span class="badge fs-9 text-uppercase" :class="getOrderTypeBadgeClass(ord.order_type)">
+                      {{ getOrderTypeLabel(ord.order_type) }}
+                    </span>
+                  </div>
+                  <div class="fs-8 text-secondary mt-0.5">
+                   {{ ord.requester?.name || '-' }}
                   </div>
                 </td>
 
@@ -199,6 +217,11 @@
                   <span class="badge fs-8 text-uppercase" :class="getBadgeClass(ord.status)">
                     {{ getStatusLabel(ord.status) }}
                   </span>
+                  <div v-if="ord.fulfillment_status" class="mt-1">
+                    <span class="badge fs-9" :class="getFulfillmentBadgeClass(ord.fulfillment_status)">
+                      {{ getFulfillmentLabel(ord.fulfillment_status) }}
+                    </span>
+                  </div>
                 </td>
 
                 <!-- Total Value -->
@@ -337,7 +360,7 @@
                   Daftar Barang yang Diminta ({{ createRows.length }} item)
                 </label>
                 <button type="button" @click="addCreateRow" class="btn btn-sm btn-outline-danger py-1 px-2 fs-8 fw-semibold">
-                  <i class="bi bi-plus-circle me-1"></i> Tambah Item
+                  Tambah
                 </button>
               </div>
 
@@ -407,13 +430,13 @@
             </div>
           </div>
 
-          <!-- Modal Footer (Tombol Batal dan Submit Order Rata Kanan) -->
+          <!-- Modal Footer (Tombol Batal dan Simpan Rata Kanan) -->
           <div class="modal-footer bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3 border-top">
-            <button type="button" @click="createModal = false" class="btn btn-sm btn-outline-secondary px-3 fs-8">
+            <button type="button" @click="createModal = false" :disabled="submitting" class="btn btn-sm btn-outline-secondary px-3 fs-8">
               Batal
             </button>
-            <button type="button" @click="submitCreateOrder" class="btn btn-sm btn-danger fw-bold shadow-xs px-3 fs-8">
-              <i class="bi bi-send me-1"></i> Submit Order
+            <button type="button" @click="submitCreateOrder" :disabled="submitting" class="btn btn-sm btn-danger fw-bold shadow-xs px-3 fs-8">
+              Simpan
             </button>
           </div>
         </div>
@@ -533,7 +556,6 @@
               target="_blank"
               class="btn btn-sm btn-outline-danger d-inline-flex align-items-center gap-1 shadow-xs fs-8"
             >
-              <i class="bi bi-printer"></i>
               <span>Cetak Order</span>
             </router-link>
             <button type="button" @click="viewModal = false" class="btn btn-sm btn-outline-secondary px-3 fs-8">
@@ -642,7 +664,7 @@
                   @click="addEditItemRow"
                   class="btn btn-sm btn-outline-danger py-1 px-2 fs-8 fw-semibold"
                 >
-                  <i class="bi bi-plus-circle me-1"></i> Tambah Item
+                  Tambah
                 </button>
               </div>
 
@@ -720,14 +742,13 @@
             </div>
           </div>
 
-          <!-- Modal Footer (Tombol Batal dan Simpan Perubahan Rata Kanan) -->
+          <!-- Modal Footer (Tombol Batal dan Simpan Rata Kanan) -->
           <div class="modal-footer bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3 border-top">
             <button type="button" @click="editModal = false" class="btn btn-sm btn-outline-secondary px-3 fs-8">
               Batal
             </button>
-            <button type="button" @click="saveEditOrder" class="btn btn-sm btn-primary fw-bold shadow-xs px-3 fs-8 d-inline-flex align-items-center gap-1">
-              <i class="bi bi-save me-1"></i>
-              <span>Simpan Perubahan</span>
+            <button type="button" @click="saveEditOrder" class="btn btn-sm btn-primary fw-bold shadow-xs px-3 fs-8">
+              Simpan
             </button>
           </div>
         </div>
@@ -775,7 +796,7 @@
               Batal
             </button>
             <button type="button" @click="confirmDeleteOrder" class="btn btn-sm btn-danger fw-bold px-3 fs-8 shadow-xs">
-              <i class="bi bi-trash me-1"></i> Ya, Hapus Order
+              Ya, Hapus Order
             </button>
           </div>
         </div>
@@ -789,6 +810,7 @@ import { ref, computed, onMounted } from 'vue';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 import api from '@/api/client';
 import { useAuthStore } from '@/stores/auth';
+import { toast } from '@/utils/toast';
 
 const authStore = useAuthStore();
 
@@ -797,6 +819,7 @@ const currentTab = ref('open');
 const searchQuery = ref('');
 const filterOrg = ref('ALL');
 const filterStatus = ref('ALL');
+const filterOrderType = ref('ALL');
 const sortBy = ref('created_at');
 const sortDir = ref('desc');
 
@@ -807,6 +830,8 @@ const perPage = ref(10);
 const mapOrder = (order) => ({
   id: order.id,
   order_number: order.orderNumber,
+  order_type: order.orderType || 'INTERNAL_REQUEST',
+  fulfillment_status: order.fulfillmentStatus || 'UNFULFILLED',
   organization_id: order.requestingOrganization?.id,
   requesting_organization: {
     id: order.requestingOrganization?.id,
@@ -911,7 +936,9 @@ const loadOrders = async () => {
 
     const list = extractOrdersList(response);
     if (list !== null) {
-      orders.value = list.map(mapOrder);
+      orders.value = list
+        .map(mapOrder)
+        .filter(o => o.order_type !== 'EMBOSS_ORDER');
     }
   } catch (err) {
     console.warn('Failed loading orders from backend', err);
@@ -941,13 +968,14 @@ const isFiltered = computed(() => {
     searchQuery.value.trim() !== '' ||
     filterOrg.value !== 'ALL' ||
     filterStatus.value !== 'ALL' ||
+    filterOrderType.value !== 'ALL' ||
     sortBy.value !== 'created_at'
   );
 });
 
 // Filtering and Sorting
 const filteredOrders = computed(() => {
-  let list = [...orders.value];
+  let list = orders.value.filter(o => o.order_type !== 'EMBOSS_ORDER');
 
   // Tab Filtering
   if (currentTab.value === 'open') {
@@ -964,6 +992,11 @@ const filteredOrders = computed(() => {
   // Status Filter
   if (filterStatus.value !== 'ALL') {
     list = list.filter(o => o.status === filterStatus.value);
+  }
+
+  // Order Type Filter
+  if (filterOrderType.value !== 'ALL') {
+    list = list.filter(o => (o.order_type || 'INTERNAL_REQUEST') === filterOrderType.value);
   }
 
   // Search Query
@@ -1021,6 +1054,7 @@ const resetFilters = () => {
   searchQuery.value = '';
   filterOrg.value = 'ALL';
   filterStatus.value = 'ALL';
+  filterOrderType.value = 'ALL';
   sortBy.value = 'created_at';
   sortDir.value = 'desc';
   currentPage.value = 1;
@@ -1084,6 +1118,44 @@ const getBadgeClass = (status) => {
   }
 };
 
+const getOrderTypeLabel = (type) => {
+  switch (type) {
+    case 'INTERNAL_REQUEST': return 'Permintaan';
+    case 'PURCHASE_REQUEST': return 'Pembelian (PR)';
+    case 'EMBOSS_ORDER': return 'Cetak/Emboss';
+    case 'ROUTINE_PUSH': return 'Distribusi Rutin';
+    default: return type || 'Permintaan';
+  }
+};
+
+const getOrderTypeBadgeClass = (type) => {
+  switch (type) {
+    case 'INTERNAL_REQUEST': return 'bg-danger-subtle text-danger border border-danger-subtle';
+    case 'PURCHASE_REQUEST': return 'bg-info-subtle text-info-emphasis border border-info-subtle';
+    case 'EMBOSS_ORDER': return 'bg-warning-subtle text-dark border border-warning-subtle';
+    case 'ROUTINE_PUSH': return 'bg-success-subtle text-success-emphasis border border-success-subtle';
+    default: return 'bg-secondary-subtle text-secondary';
+  }
+};
+
+const getFulfillmentLabel = (status) => {
+  switch (status) {
+    case 'FULFILLED': return 'Terpenuhi';
+    case 'PARTIALLY_FULFILLED': return 'Sebagian';
+    case 'UNFULFILLED': return 'Belum Dipenuhi';
+    default: return status || '-';
+  }
+};
+
+const getFulfillmentBadgeClass = (status) => {
+  switch (status) {
+    case 'FULFILLED': return 'bg-success text-white';
+    case 'PARTIALLY_FULFILLED': return 'bg-warning text-dark';
+    case 'UNFULFILLED': return 'bg-secondary text-white';
+    default: return 'bg-light text-dark';
+  }
+};
+
 // ==================== MODAL 1: CREATE ====================
 const createModal = ref(false);
 const newOrderForm = ref({
@@ -1094,9 +1166,12 @@ const newOrderForm = ref({
 });
 const createRows = ref([]);
 
+const submitting = ref(false);
+
 const openCreateModal = () => {
+  const defaultOrgId = organizations.value.length > 0 ? organizations.value[0].id : 1;
   newOrderForm.value = {
-    organization_id: 1,
+    organization_id: defaultOrgId,
     priority: 'NORMAL',
     required_date: new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0],
     notes: ''
@@ -1120,7 +1195,7 @@ const removeCreateRow = (index) => {
 const onCreateItemChange = (index) => {
   const row = createRows.value[index];
   const item = itemsCatalog.value.find(i => i.id === row.item_id);
-  const p = item ? item.estimated_unit_price : 0;
+  const p = item ? (item.estimated_unit_price || item.estimatedUnitPrice || 0) : 0;
   row.price = p;
   row.subtotal = p * (parseInt(row.qty, 10) || 0);
 };
@@ -1135,9 +1210,46 @@ const createTotal = computed(() => {
   return createRows.value.reduce((acc, it) => acc + (parseFloat(it.subtotal) || 0), 0);
 });
 
-const submitCreateOrder = () => {
-  alert('Pembuatan order belum tersedia di backend production.');
-  createModal.value = false;
+const submitCreateOrder = async () => {
+  const validItems = createRows.value
+    .filter(r => r.item_id && parseInt(r.qty, 10) > 0)
+    .map(r => ({
+      itemId: Number(r.item_id),
+      qty: parseInt(r.qty, 10)
+    }));
+
+  if (validItems.length === 0) {
+    toast.error('Peringatan', 'Minimal harus memilih 1 barang dengan jumlah lebih dari 0.');
+    return;
+  }
+
+  if (!newOrderForm.value.organization_id) {
+    toast.error('Peringatan', 'Unit kerja peminta harus dipilih.');
+    return;
+  }
+
+  submitting.value = true;
+  try {
+    const payload = {
+      organizationId: Number(newOrderForm.value.organization_id),
+      priority: newOrderForm.value.priority || 'NORMAL',
+      requiredDate: newOrderForm.value.required_date,
+      notes: newOrderForm.value.notes || '',
+      items: validItems
+    };
+
+    const response = await api.post('/orders', payload);
+    const orderData = response?.data || response;
+    const orderNum = orderData?.orderNumber || orderData?.order_number || '';
+    toast.success('Berhasil', `Pesanan cabang ${orderNum} berhasil dibuat dan diajukan.`);
+    createModal.value = false;
+    await loadOrders();
+  } catch (err) {
+    const msg = err?.response?.data?.message || err?.message || 'Gagal membuat pesanan cabang.';
+    toast.error('Gagal', msg);
+  } finally {
+    submitting.value = false;
+  }
 };
 
 // ==================== MODAL 2: DETAIL ====================

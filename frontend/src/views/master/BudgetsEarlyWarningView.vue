@@ -6,7 +6,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <router-link to="/master/budgets" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-arrow-left me-1"></i> Kembali ke Master Pagu
+          Kembali ke Master Pagu
         </router-link>
       </div>
     </div>

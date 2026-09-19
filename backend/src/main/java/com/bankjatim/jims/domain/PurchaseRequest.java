@@ -52,6 +52,10 @@ public class PurchaseRequest extends BaseEntity {
     @Builder.Default
     private String status = "DRAFT";
 
+    @Column(name = "fulfillment_status", nullable = false, length = 50)
+    @Builder.Default
+    private String fulfillmentStatus = "UNFULFILLED"; // UNFULFILLED, PARTIALLY_FULFILLED, FULLY_FULFILLED, RECEIVED
+
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 

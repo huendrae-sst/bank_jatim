@@ -62,8 +62,7 @@
               @click="openCreateCoaModal"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Rekening GL</span>
+              Tambah
             </button>
           </template>
           <template v-if="activeMainTab === 'cost_centers'">
@@ -72,8 +71,7 @@
               @click="openCreateCcModal"
               class="btn btn-sm btn-danger fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             >
-              <i class="bi bi-plus-circle"></i>
-              <span>Tambah Cost Center</span>
+              Tambah
             </button>
           </template>
           <button
@@ -82,7 +80,6 @@
             class="btn btn-sm btn-outline-secondary fw-bold shadow-xs d-inline-flex align-items-center gap-1 fs-8"
             title="Cetak Halaman Ini"
           >
-            <i class="bi bi-printer"></i>
             <span>Cetak</span>
           </button>
         </div>
@@ -139,7 +136,7 @@
             <!-- Reset Filter -->
             <div v-if="coaSearch || coaType !== 'ALL' || coaStatus !== 'ALL'" class="col-12 col-sm-auto">
               <button type="button" @click="resetCoaFilters" class="btn btn-sm btn-outline-secondary w-100 fs-8">
-                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                Reset
               </button>
             </div>
           </div>
@@ -307,7 +304,7 @@
             <!-- Reset Filter -->
             <div v-if="ccSearch || ccOrgId !== 'ALL' || ccStatus !== 'ALL'" class="col-12 col-sm-auto">
               <button type="button" @click="resetCcFilters" class="btn btn-sm btn-outline-secondary w-100 fs-8">
-                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                Reset
               </button>
             </div>
           </div>
@@ -346,7 +343,7 @@
                   {{ cc.department || '-' }}
                 </td>
                 <td class="py-2.5 px-3 text-secondary fs-8">
-                  <i class="bi bi-person me-1 fs-9"></i>{{ cc.pic_name || '-' }}
+                 {{ cc.pic_name || '-' }}
                 </td>
                 <td class="py-2.5 px-3 text-center">
                   <span
@@ -429,11 +426,8 @@
     <div v-if="createCoaModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-journal-plus fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Tambah Rekening Akun GL Baru</h6>
-            </div>
+          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
+            <h6 class="modal-title fw-bold mb-0">Tambah Rekening Akun GL Baru</h6>
             <button type="button" class="btn-close btn-close-white" @click="createCoaModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="submitCreateCoa">
@@ -498,9 +492,8 @@
             </div>
             <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="createCoaModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-danger shadow-xs d-inline-flex align-items-center gap-1">
-                <i class="bi bi-check2-circle"></i>
-                <span>Simpan Akun GL</span>
+              <button type="submit" class="btn btn-sm btn-danger shadow-xs px-3">
+                Simpan
               </button>
             </div>
           </form>
@@ -512,11 +505,8 @@
     <div v-if="editCoaModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-primary text-white py-2.5 px-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-pencil-square fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Edit Rekening Akun GL</h6>
-            </div>
+          <div class="modal-header bg-primary text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
+            <h6 class="modal-title fw-bold mb-0">Edit Rekening Akun GL</h6>
             <button type="button" class="btn-close btn-close-white" @click="editCoaModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="submitEditCoa">
@@ -584,9 +574,8 @@
             </div>
             <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="editCoaModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-primary shadow-xs d-inline-flex align-items-center gap-1">
-                <i class="bi bi-check2-circle"></i>
-                <span>Simpan Perubahan</span>
+              <button type="submit" class="btn btn-sm btn-primary shadow-xs px-3">
+                Simpan
               </button>
             </div>
           </form>
@@ -599,10 +588,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-journal-text text-danger fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Rincian Rekening Akun GL</h6>
-            </div>
+            <h6 class="modal-title fw-bold mb-0">Rincian Rekening Akun GL</h6>
             <button type="button" class="btn-close" @click="viewCoaModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-2.5 fs-8" v-if="selectedCoa">
@@ -657,11 +643,8 @@
     <div v-if="deleteCoaModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Akun GL</h6>
-            </div>
+          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
+            <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Akun GL</h6>
             <button type="button" class="btn-close btn-close-white" @click="deleteCoaModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8" v-if="selectedCoa">
@@ -674,7 +657,6 @@
           <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
             <button type="button" class="btn btn-sm btn-outline-secondary" @click="deleteCoaModal = false">Batal</button>
             <button type="button" class="btn btn-sm btn-danger shadow-xs d-inline-flex align-items-center gap-1" @click="submitDeleteCoa">
-              <i class="bi bi-trash"></i>
               <span>Ya, Hapus Akun</span>
             </button>
           </div>
@@ -690,11 +672,8 @@
     <div v-if="createCcModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-diagram-3 fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Tambah Master Cost Center Baru</h6>
-            </div>
+          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
+            <h6 class="modal-title fw-bold mb-0">Tambah Master Cost Center Baru</h6>
             <button type="button" class="btn-close btn-close-white" @click="createCcModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="submitCreateCc">
@@ -760,9 +739,8 @@
             </div>
             <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="createCcModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-danger shadow-xs d-inline-flex align-items-center gap-1">
-                <i class="bi bi-check2-circle"></i>
-                <span>Simpan Cost Center</span>
+              <button type="submit" class="btn btn-sm btn-danger shadow-xs px-3">
+                Simpan
               </button>
             </div>
           </form>
@@ -774,11 +752,8 @@
     <div v-if="editCcModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-primary text-white py-2.5 px-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-pencil-square fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Edit Cost Center</h6>
-            </div>
+          <div class="modal-header bg-primary text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
+            <h6 class="modal-title fw-bold mb-0">Edit Cost Center</h6>
             <button type="button" class="btn-close btn-close-white" @click="editCcModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="submitEditCc">
@@ -846,9 +821,8 @@
             </div>
             <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary" @click="editCcModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-primary shadow-xs d-inline-flex align-items-center gap-1">
-                <i class="bi bi-check2-circle"></i>
-                <span>Simpan Perubahan</span>
+              <button type="submit" class="btn btn-sm btn-primary shadow-xs px-3">
+                Simpan
               </button>
             </div>
           </form>
@@ -861,10 +835,7 @@
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
           <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-diagram-3 text-danger fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Rincian Cost Center</h6>
-            </div>
+            <h6 class="modal-title fw-bold mb-0">Rincian Cost Center</h6>
             <button type="button" class="btn-close" @click="viewCcModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-2.5 fs-8" v-if="selectedCc">
@@ -921,11 +892,8 @@
     <div v-if="deleteCcModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-              <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Cost Center</h6>
-            </div>
+          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
+            <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Cost Center</h6>
             <button type="button" class="btn-close btn-close-white" @click="deleteCcModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8" v-if="selectedCc">
@@ -938,7 +906,6 @@
           <div class="modal-footer bg-body-tertiary d-flex justify-content-end gap-2 py-2.5 px-4 border-top">
             <button type="button" class="btn btn-sm btn-outline-secondary" @click="deleteCcModal = false">Batal</button>
             <button type="button" class="btn btn-sm btn-danger shadow-xs d-inline-flex align-items-center gap-1" @click="submitDeleteCc">
-              <i class="bi bi-trash"></i>
               <span>Ya, Hapus Cost Center</span>
             </button>
           </div>
@@ -1013,7 +980,7 @@ const organizationList = ref([]);
 const defaultCoaList = [
   { id: 1, account_code: '11101', account_name: 'Kas Besar Kantor Pusat', account_type: 'ASSET', classification: 'Kas & Setara Kas', normal_balance: 'DEBIT', description: 'Kas fisik vault utama kantor operasional', is_active: true },
   { id: 2, account_code: '11301', account_name: 'Persediaan Alat Tulis Kantor (ATK)', account_type: 'ASSET', classification: 'Aset Lancar Logistik', normal_balance: 'DEBIT', description: 'Persediaan perlengkapan kantor dan ATK seluruh cabang', is_active: true },
-  { id: 3, account_code: '11302', account_name: 'Persediaan Formulir Warkat & Kliring', account_type: 'ASSET', classification: 'Aset Lancar Sekuriti', normal_balance: 'DEBIT', description: 'Persediaan cetakan warkat bilyet giro dan cek sekuriti', is_active: true },
+  { id: 3, account_code: '11302', account_name: 'Persediaan Formulir Produk & Kliring', account_type: 'ASSET', classification: 'Aset Lancar Sekuriti', normal_balance: 'DEBIT', description: 'Persediaan cetakan produk bilyet giro dan cek sekuriti', is_active: true },
   { id: 4, account_code: '11303', account_name: 'Persediaan Blanko Kartu ATM & Chip Debit', account_type: 'ASSET', classification: 'Aset Lancar Kartu', normal_balance: 'DEBIT', description: 'Kartu debit chip belum diemboss di gudang kartu', is_active: true },
   { id: 5, account_code: '21101', account_name: 'Hutang Dagang Rekanan Pengadaan', account_type: 'LIABILITY', classification: 'Kewajiban Lancar', normal_balance: 'CREDIT', description: 'Kewajiban jangka pendek terhadap vendor logistik', is_active: true },
   { id: 6, account_code: '31101', account_name: 'Modal Saham Ditempatkan', account_type: 'EQUITY', classification: 'Ekuitas Utama', normal_balance: 'CREDIT', description: 'Modal disetor perbankan', is_active: true },

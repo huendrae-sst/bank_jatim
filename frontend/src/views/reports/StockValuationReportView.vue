@@ -6,10 +6,10 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" @click="exportCsv">
-          <i class="bi bi-file-earmark-spreadsheet text-success me-1"></i> Ekspor CSV
+          Ekspor CSV
         </button>
         <button class="btn btn-sm btn-danger fw-bold" @click="printReport">
-          <i class="bi bi-printer me-1"></i> Cetak Laporan
+          Cetak Laporan
         </button>
       </div>
     </div>

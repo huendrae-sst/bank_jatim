@@ -6,19 +6,18 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <router-link to="/master/budgets/early-warning" class="btn btn-sm btn-outline-danger">
-          <i class="bi bi-shield-exclamation me-1"></i> Radar EWS Anggaran
+          Radar EWS Anggaran
         </router-link>
         <button class="btn btn-sm btn-danger fw-bold shadow-xs" @click="openCreateModal">
-          <i class="bi bi-plus-lg me-1"></i> Alokasi Pagu Baru
+          Tambah
         </button>
       </div>
     </div>
 
     <!-- Table Card -->
     <div class="card card-outline card-danger shadow-xs">
-      <div class="card-header border-bottom p-3 d-flex justify-content-between align-items-center">
+      <div class="card-header border-bottom p-3">
         <h3 class="card-title fw-semibold mb-0 fs-6">Pagu Anggaran Tahun Anggaran 2026</h3>
-        <span class="badge text-bg-secondary fs-8">Tahun Berjalan</span>
       </div>
 
       <div class="table-responsive">
@@ -86,7 +85,7 @@
               </div>
               <div class="mb-2">
                 <label class="form-label fw-bold mb-1">Pos Beban / COA <span class="text-danger">*</span></label>
-                <input type="text" v-model="budgetForm.coa" class="form-control form-control-sm" placeholder="Contoh: 5.2.01 (Beban Warkat & Cetakan)" required />
+                <input type="text" v-model="budgetForm.coa" class="form-control form-control-sm" placeholder="Contoh: 5.2.01 (Beban Produk & Cetakan)" required />
               </div>
               <div class="mb-2">
                 <label class="form-label fw-bold mb-1">Nominal Pagu Ditetapkan (Rp) <span class="text-danger">*</span></label>
@@ -95,8 +94,8 @@
             </div>
             <div class="modal-footer d-flex justify-content-end align-items-center gap-2 py-2 px-3">
               <button type="button" class="btn btn-sm btn-secondary" @click="showModal = false">Batal</button>
-              <button type="submit" class="btn btn-sm btn-danger fw-bold">
-                <i class="bi bi-check2-circle me-1"></i> Simpan Pagu
+              <button type="submit" class="btn btn-sm btn-danger fw-bold px-3">
+                Simpan
               </button>
             </div>
           </form>
@@ -169,7 +168,7 @@ const mapDefaultBudget = (b) => {
   return {
     id: b.id,
     branchName: b.org || '-',
-    coa: b.costCenter || '5.2.01 (Beban Warkat & Cetakan)',
+    coa: b.costCenter || '5.2.01 (Beban Produk & Cetakan)',
     allocated,
     committed,
     realized,
@@ -214,14 +213,14 @@ const loadBudgets = async () => {
 
 const budgetForm = reactive({
   branchName: '',
-  coa: '5.2.01 (Beban Warkat & Cetakan)',
+  coa: '5.2.01 (Beban Produk & Cetakan)',
   allocated: 300000000
 });
 
 const openCreateModal = () => {
   Object.assign(budgetForm, {
     branchName: '',
-    coa: '5.2.01 (Beban Warkat & Cetakan)',
+    coa: '5.2.01 (Beban Produk & Cetakan)',
     allocated: 300000000
   });
   showModal.value = true;

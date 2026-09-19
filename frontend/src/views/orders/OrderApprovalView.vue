@@ -33,7 +33,7 @@
               :class="statusTab === 'pending' ? 'active bg-danger fw-bold text-white' : 'text-body'"
               @click="setTab('pending')"
             >
-              <i class="bi bi-hourglass-split me-1"></i> Menunggu Persetujuan
+              Menunggu Persetujuan
             </button>
           </li>
           <li class="nav-item">
@@ -43,7 +43,7 @@
               :class="statusTab === 'history' ? 'active bg-danger fw-bold text-white' : 'text-body'"
               @click="setTab('history')"
             >
-              <i class="bi bi-check2-circle me-1"></i> Riwayat Persetujuan
+              Riwayat Persetujuan
             </button>
           </li>
         </ul>
@@ -128,7 +128,7 @@
               class="btn btn-sm btn-outline-danger fs-8"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -147,7 +147,7 @@
                 type="button"
                 @click="currentPage = 1"
               >
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -178,6 +178,9 @@
                 >
                   {{ order.order_number }}
                 </router-link>
+                <span v-if="isEmbossOrder(order)" class="badge bg-danger-subtle text-danger border border-danger-subtle fs-9 ms-1">
+                  Emboss
+                </span>
                 <div class="fs-9 text-secondary">{{ order.created_at_formatted }}</div>
               </td>
               <td>
@@ -199,23 +202,23 @@
                 </span>
               </td>
               <td>
-                <span class="badge fs-8" :class="badgeClass(order.status)">
-                  {{ order.status ? order.status.replace(/_/g, ' ') : '-' }}
+                <span class="badge fs-8 text-uppercase" :class="badgeClass(order.status)">
+                  {{ getStatusLabel(order.status) }}
                 </span>
                 <div v-if="order.is_overbudget" class="mt-1">
                   <span class="badge bg-danger fs-9">
-                    <i class="bi bi-exclamation-octagon-fill me-1"></i> Overbudget ({{ order.projected_utilization }}%)
+                    Overbudget ({{ order.projected_utilization }}%)
                   </span>
                 </div>
                 <div v-else-if="order.switchingRecommendations && order.switchingRecommendations.length > 0" class="mt-1">
                   <span class="badge text-bg-warning fs-9">
-                    <i class="bi bi-arrow-left-right me-1"></i> Rekomendasi Switch
+                    Rekomendasi Switch
                   </span>
                 </div>
               </td>
               <td class="text-center pe-3">
                 <div class="d-inline-flex align-items-center gap-1">
-                  <template v-if="['SUBMITTED', 'WAITING_APPROVAL'].includes(order.status)">
+                  <template v-if="['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(order.status)">
                     <button
                       type="button"
                       class="btn-action-icon text-success"
@@ -280,7 +283,7 @@
           <div class="card card-outline card-secondary shadow-xs">
             <div class="card-header border-bottom d-flex justify-content-between align-items-center py-2 px-3">
               <span class="fs-7 fw-bold text-body">
-                <i class="bi bi-list-task text-danger me-1"></i> Antrean Order ({{ filteredOrders.length }})
+                Antrean Order ({{ filteredOrders.length }})
               </span>
               <span class="fs-8 text-secondary">Pilih untuk memproses</span>
             </div>
@@ -297,8 +300,11 @@
                   <span class="font-monospace fw-bold fs-7" :class="ord.id === selectedOrder.id ? 'text-danger' : 'text-body'">
                     {{ ord.order_number }}
                   </span>
-                  <span class="badge fs-8" :class="badgeClass(ord.status)">
-                    {{ ord.status ? ord.status.replace(/_/g, ' ') : '' }}
+                  <span v-if="isEmbossOrder(ord)" class="badge bg-danger-subtle text-danger border border-danger-subtle fs-9 ms-1">
+                    Emboss
+                  </span>
+                  <span class="badge fs-8 text-uppercase" :class="badgeClass(ord.status)">
+                    {{ getStatusLabel(ord.status) }}
                   </span>
                 </div>
                 <div class="fs-8 fw-semibold text-body mb-1">
@@ -343,8 +349,11 @@
                   <div>
                     <div class="d-flex align-items-center flex-wrap gap-2">
                       <h4 class="fw-bold mb-0 font-monospace text-body">{{ selectedOrder.order_number }}</h4>
+                      <span v-if="isEmbossOrder(selectedOrder)" class="badge bg-danger-subtle text-danger border border-danger-subtle fs-8">
+                        <i class="bi bi-credit-card-2-front me-1"></i> Order Emboss
+                      </span>
                       <span class="badge fs-8 text-uppercase" :class="badgeClass(selectedOrder.status)">
-                        {{ selectedOrder.status ? selectedOrder.status.replace(/_/g, ' ') : '' }}
+                        {{ getStatusLabel(selectedOrder.status) }}
                       </span>
                       <span v-if="selectedOrder.is_overbudget" class="badge bg-danger fs-8">
                         <i class="bi bi-exclamation-octagon-fill me-1"></i> OVERBUDGET ({{ selectedOrder.projected_utilization }}%)
@@ -369,16 +378,16 @@
 
                   <!-- Action Buttons -->
                   <div class="d-flex flex-wrap align-items-center gap-2">
-                    <template v-if="['SUBMITTED', 'WAITING_APPROVAL'].includes(selectedOrder.status)">
+                    <template v-if="['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(selectedOrder.status)">
                       <button type="button" @click="openRejectModal(selectedOrder)" class="btn btn-sm btn-outline-danger fw-bold">
-                        <i class="bi bi-x-circle me-1"></i> Tolak Order
+                        Tolak Order
                       </button>
                       <button type="button" @click="approveOrder(selectedOrder)" class="btn btn-sm btn-success fw-bold shadow-xs">
-                        <i class="bi bi-check2-all me-1"></i> Setujui & Reservasi Stok
+                        Setujui & Reservasi Stok
                       </button>
                     </template>
                     <router-link :to="`/orders/${selectedOrder.id}/print`" target="_blank" class="btn btn-sm btn-outline-secondary">
-                      <i class="bi bi-printer me-1"></i> Cetak
+                      Cetak
                     </router-link>
                   </div>
                 </div>
@@ -426,7 +435,7 @@
                         </td>
                         <td>
                           <div class="fw-semibold font-monospace fs-8 text-body">
-                            <i class="bi bi-calendar-event me-1 text-secondary"></i>{{ tl.date_formatted }}
+                           {{ tl.date_formatted }}
                           </div>
                         </td>
                         <td>
@@ -480,7 +489,7 @@
                       </div>
                     </div>
                     <button @click="openSwitchingModal(rec)" class="btn btn-sm btn-warning text-dark fw-bold">
-                      <i class="bi bi-arrow-left-right me-1"></i> Ajukan Switching Stock
+                      Ajukan Switching Stock
                     </button>
                   </div>
                 </div>
@@ -489,15 +498,10 @@
 
             <!-- 4. Rincian Barang yang Diminta Card -->
             <div class="card card-outline card-secondary shadow-xs">
-              <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+              <div class="card-header border-bottom">
                 <h3 class="card-title fs-6 fw-bold mb-0 text-body">
                   Rincian Barang yang Diminta
                 </h3>
-                <div class="card-tools">
-                  <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fs-8">
-                    {{ selectedOrder.items?.length || 0 }} jenis barang
-                  </span>
-                </div>
               </div>
               <div class="card-body p-0">
                 <div class="table-responsive">
@@ -588,7 +592,7 @@
             Batal
           </button>
           <button type="button" @click="confirmReject" class="btn btn-sm btn-danger fw-bold shadow-xs px-3">
-            <i class="bi bi-x-circle me-1"></i> Tolak Order
+            Tolak Order
           </button>
         </div>
       </div>
@@ -645,7 +649,7 @@
             Batal
           </button>
           <button type="button" @click="submitSwitching" class="btn btn-sm btn-warning text-dark fw-bold shadow-xs px-3">
-            <i class="bi bi-arrow-left-right me-1"></i> Ajukan Proposal Switching
+            Ajukan Proposal Switching
           </button>
         </div>
       </div>
@@ -679,6 +683,8 @@ const switchReason = ref('Pemenuhan kekurangan stok pusat dari kelebihan stok ca
 const mapApprovalOrder = (o) => ({
   id: o.id,
   order_number: o.orderNumber || o.order_number,
+  order_type: o.orderType || o.order_type || (o.orderNumber?.includes('EMBOSS') ? 'EMBOSS_ORDER' : 'INTERNAL_REQUEST'),
+  emboss_file_id: o.embossFile?.id || o.emboss_file_id,
   status: o.status,
   priority: o.priority || 'NORMAL',
   is_overbudget: Boolean(o.isOverbudget),
@@ -762,11 +768,11 @@ const branchList = computed(() => {
 
 // Counts for tabs
 const pendingCount = computed(() => {
-  return orders.value.filter(o => ['SUBMITTED', 'WAITING_APPROVAL'].includes(o.status)).length;
+  return orders.value.filter(o => ['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(o.status)).length;
 });
 
 const historyCount = computed(() => {
-  return orders.value.filter(o => !['SUBMITTED', 'WAITING_APPROVAL'].includes(o.status)).length;
+  return orders.value.filter(o => !['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(o.status)).length;
 });
 
 const allCount = computed(() => orders.value.length);
@@ -778,7 +784,7 @@ const setTab = (tab) => {
 
   // Auto-select first matching order when switching to history
   if (tab === 'history') {
-    const historyList = orders.value.filter(o => !['SUBMITTED', 'WAITING_APPROVAL'].includes(o.status));
+    const historyList = orders.value.filter(o => !['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(o.status));
     selectedOrder.value = historyList[0] || null;
   }
 };
@@ -788,9 +794,9 @@ const filteredOrders = computed(() => {
   let list = orders.value;
 
   if (statusTab.value === 'pending') {
-    list = list.filter(o => ['SUBMITTED', 'WAITING_APPROVAL'].includes(o.status));
+    list = list.filter(o => ['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(o.status));
   } else if (statusTab.value === 'history') {
-    list = list.filter(o => !['SUBMITTED', 'WAITING_APPROVAL'].includes(o.status));
+    list = list.filter(o => !['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(o.status));
   }
 
   if (searchQuery.value.trim()) {
@@ -839,6 +845,36 @@ const formatRupiah = (val) => {
   return 'Rp ' + new Intl.NumberFormat('id-ID').format(Math.round(val || 0));
 };
 
+const statusMap = {
+  DRAFT: 'Draft',
+  SUBMITTED: 'Diajukan',
+  WAITING_APPROVAL: 'Menunggu Approval',
+  APPROVED: 'Disetujui',
+  PRODUCTION: 'Produksi',
+  IN_PRODUCTION: 'Produksi',
+  PRODUKSI: 'Produksi',
+  ALLOCATED: 'Teralokasi',
+  PICKING: 'Picking',
+  PACKING: 'Packing',
+  READY_TO_SHIP: 'Siap Kirim',
+  IN_TRANSIT: 'Dalam Pengiriman',
+  RECEIVED: 'Diterima Cabang',
+  COMPLETED: 'Selesai',
+  REJECTED: 'Ditolak',
+  CANCELLED: 'Dibatalkan'
+};
+
+const getStatusLabel = (st) => {
+  return statusMap[st] || (st ? st.replace(/_/g, ' ') : '-');
+};
+
+const isEmbossOrder = (ord) => {
+  if (!ord) return false;
+  return ord.order_type === 'EMBOSS_ORDER' ||
+    Boolean(ord.order_number && ord.order_number.toUpperCase().includes('EMBOSS')) ||
+    Boolean(ord.emboss_file_id || ord.emboss_file);
+};
+
 const badgeClass = (st) => {
   switch (st) {
     case 'COMPLETED':
@@ -850,12 +886,18 @@ const badgeClass = (st) => {
     case 'ALLOCATED':
     case 'APPROVED':
       return 'text-bg-primary';
+    case 'PRODUCTION':
+    case 'IN_PRODUCTION':
+    case 'PRODUKSI':
+      return 'text-bg-warning text-dark border border-warning-subtle';
     case 'WAITING_APPROVAL':
     case 'SUBMITTED':
       return 'text-bg-warning';
     case 'CANCELLED':
     case 'REJECTED':
       return 'text-bg-danger';
+    case 'DRAFT':
+      return 'text-bg-secondary';
     default:
       return 'text-bg-light border';
   }
@@ -885,18 +927,19 @@ const timelineStepClass = (state) => {
   }
 };
 
-// Dynamic Timeline Generation matching jatim_php
+// Dynamic Timeline Generation matching jatim_php & Emboss Workflow
 const currentTimeline = computed(() => {
   if (!selectedOrder.value) return [];
   const ord = selectedOrder.value;
   const isRejected = ord.status === 'REJECTED';
+  const isEmboss = isEmbossOrder(ord);
 
   if (isRejected) {
     return [
       {
         step: 1,
         code: 'SUBMITTED',
-        label: 'Order Diajukan (Submitted)',
+        label: isEmboss ? 'Draft Order Emboss Dibuat' : 'Order Diajukan (Submitted)',
         status_state: 'DONE',
         date_formatted: ord.created_at_formatted + ' WIB',
         actor_name: ord.requester?.name || 'Maker Cabang',
@@ -910,7 +953,7 @@ const currentTimeline = computed(() => {
         code: 'REJECTED',
         label: 'Persetujuan Order (Ditolak / Rejected)',
         status_state: 'REJECTED',
-        date_formatted: '05 Sep 2026, 10:15 WIB',
+        date_formatted: ord.created_at_formatted ? ord.created_at_formatted + ' WIB' : '10:15 WIB',
         actor_name: 'Penyelia Otorisator',
         actor_role: 'Order Approver',
         description: ord.notes || 'Ditolak: Pagu anggaran cabang tidak mencukupi.',
@@ -920,8 +963,129 @@ const currentTimeline = computed(() => {
     ];
   }
 
-  const isApproved = ['APPROVED', 'ALLOCATED', 'PICKING', 'READY_TO_SHIP', 'IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);
-  const isWaitingApproval = ['SUBMITTED', 'WAITING_APPROVAL'].includes(ord.status);
+  const isApproved = ['APPROVED', 'PRODUCTION', 'IN_PRODUCTION', 'PRODUKSI', 'ALLOCATED', 'PICKING', 'PACKING', 'READY_TO_SHIP', 'IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);
+  const isWaitingApproval = ['DRAFT', 'SUBMITTED', 'WAITING_APPROVAL'].includes(ord.status);
+
+  // Alur Order Emboss: draft - disetujui - produksi kemudian picking dan selanjutnya
+  if (isEmboss) {
+    const isProdDone = ['PICKING', 'READY_TO_SHIP', 'PACKING', 'IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);
+    const isProdCurrent = ['PRODUCTION', 'IN_PRODUCTION', 'PRODUKSI'].includes(ord.status) || ord.status === 'APPROVED' || ord.status === 'ALLOCATED';
+    const isPickDone = ['READY_TO_SHIP', 'PACKING', 'IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);
+    const isPackDone = ['READY_TO_SHIP', 'IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);
+    const isShipDone = ['IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);
+    const isRecDone = ['RECEIVED', 'COMPLETED'].includes(ord.status);
+
+    return [
+      {
+        step: 1,
+        code: 'DRAFT',
+        label: 'Draft Order Emboss (Draft)',
+        status_state: 'DONE',
+        date_formatted: ord.created_at_formatted + ' WIB',
+        actor_name: ord.requester?.name || 'Maker Cabang',
+        actor_role: 'Staf Operasional Cabang',
+        description: ord.notes || `Draft order emboss diterbitkan dari berkas core banking untuk ${ord.requesting_organization?.name}.`,
+        badge_label: 'SELESAI',
+        badge_class: 'text-bg-success'
+      },
+      {
+        step: 2,
+        code: 'APPROVED',
+        label: 'Persetujuan & Otorisasi Order (Disetujui)',
+        status_state: isApproved ? 'DONE' : (isWaitingApproval ? 'CURRENT' : 'PENDING'),
+        date_formatted: isApproved ? (ord.created_at_formatted ? ord.created_at_formatted + ' WIB' : '12 Sep 2026, 10:45 WIB') : '-',
+        actor_name: isApproved ? 'Penyelia Otorisator' : 'Menunggu Approval',
+        actor_role: isApproved ? 'Order Approver' : 'Pejabat Berwenang',
+        description: isApproved
+          ? 'Order emboss telah disetujui & alokasi kuota bahan baku produk diotorisasi.'
+          : 'Menunggu telaah dan otorisasi oleh Pejabat Pemutus (Approver).',
+        badge_label: isApproved ? 'DISETUJUI' : 'MENUNGGU APPROVAL',
+        badge_class: isApproved ? 'text-bg-success' : 'text-bg-warning'
+      },
+      {
+        step: 3,
+        code: 'PRODUCTION',
+        label: 'Produksi & Personalisasi Kartu (Produksi)',
+        status_state: isProdDone ? 'DONE' : (isProdCurrent ? 'CURRENT' : 'PENDING'),
+        date_formatted: isProdDone ? '12 Sep 2026, 11:30 WIB' : '-',
+        actor_name: isProdDone || isProdCurrent ? 'Petugas Cetak Produk' : '-',
+        actor_role: 'Operator Mesin Emboss',
+        description: isProdDone
+          ? 'Personalisasi emboss kartu debit/ATM dan verifikasi chip nasabah selesai.'
+          : (isProdCurrent
+              ? (['PRODUCTION', 'IN_PRODUCTION', 'PRODUKSI'].includes(ord.status)
+                  ? 'Proses personalisasi data nasabah dan pencetakan fisik kartu sedang berjalan.'
+                  : 'Order telah disetujui, siap masuk antrean produksi & pencetakan kartu.')
+              : 'Menunggu persetujuan order sebelum masuk tahap produksi.'),
+        badge_label: isProdDone
+          ? 'SELESAI'
+          : (['PRODUCTION', 'IN_PRODUCTION', 'PRODUKSI'].includes(ord.status)
+              ? 'PROSES PRODUKSI'
+              : (isApproved ? 'SIAP PRODUKSI' : 'MENUNGGU')),
+        badge_class: isProdDone
+          ? 'text-bg-success'
+          : (isApproved ? 'text-bg-warning text-dark' : 'text-bg-secondary')
+      },
+      {
+        step: 4,
+        code: 'PICKING',
+        label: 'Pengambilan Fisik Gudang (Picking)',
+        status_state: isPickDone ? 'DONE' : (ord.status === 'PICKING' ? 'CURRENT' : 'PENDING'),
+        date_formatted: isPickDone ? '12 Sep 2026, 13:00 WIB' : '-',
+        actor_name: isPickDone || ord.status === 'PICKING' ? 'Petugas Gudang Pusat' : '-',
+        actor_role: 'Logistics Warehouse Officer',
+        description: isPickDone
+          ? 'Pengambilan fisik kartu hasil produksi dan PIN mailer dari rak selesai.'
+          : (isProdDone ? 'Menunggu antrean pengambilan kartu jadi dari ruang produksi/gudang.' : '-'),
+        badge_label: isPickDone ? 'SELESAI' : (ord.status === 'PICKING' ? 'PROSES PICKING' : 'MENUNGGU'),
+        badge_class: isPickDone ? 'text-bg-success' : (ord.status === 'PICKING' ? 'text-bg-primary' : 'text-bg-secondary')
+      },
+      {
+        step: 5,
+        code: 'READY_TO_SHIP',
+        label: 'Pengepakan Koli (Packing)',
+        status_state: isPackDone ? 'DONE' : (['READY_TO_SHIP', 'PACKING'].includes(ord.status) ? 'CURRENT' : 'PENDING'),
+        date_formatted: isPackDone ? '12 Sep 2026, 14:30 WIB' : '-',
+        actor_name: isPackDone || ['READY_TO_SHIP', 'PACKING'].includes(ord.status) ? 'Petugas Packing' : '-',
+        actor_role: 'Logistics Packing Officer',
+        description: isPackDone
+          ? 'Kartu fisik dan amplop PIN telah dikemas rapi dalam kemasan bersegel keamanan.'
+          : (isPickDone ? 'Menunggu proses pengepakan koli dan penimbangan berat paket.' : '-'),
+        badge_label: isPackDone ? 'SELESAI' : (['READY_TO_SHIP', 'PACKING'].includes(ord.status) ? 'PROSES PACKING' : 'MENUNGGU'),
+        badge_class: isPackDone ? 'text-bg-success' : (['READY_TO_SHIP', 'PACKING'].includes(ord.status) ? 'text-bg-primary' : 'text-bg-secondary')
+      },
+      {
+        step: 6,
+        code: 'IN_TRANSIT',
+        label: 'Pengiriman & Manifest Ekspedisi',
+        status_state: isShipDone ? 'DONE' : (ord.status === 'IN_TRANSIT' ? 'CURRENT' : 'PENDING'),
+        date_formatted: isShipDone ? '12 Sep 2026, 16:00 WIB' : '-',
+        actor_name: isShipDone || ord.status === 'IN_TRANSIT' ? 'Logistics Express' : '-',
+        actor_role: 'Kurir Ekspedisi',
+        description: isShipDone
+          ? 'Manifest pengiriman diterbitkan. Paket kartu dalam perjalanan ke cabang tujuan.'
+          : (isPackDone ? 'Menunggu penyerahan paket ke jasa ekspedisi/kurir dan cetak surat jalan.' : '-'),
+        badge_label: isShipDone ? (isRecDone ? 'TERKIRIM' : 'IN-TRANSIT') : 'MENUNGGU',
+        badge_class: isShipDone ? (isRecDone ? 'text-bg-success' : 'text-bg-info') : 'text-bg-secondary'
+      },
+      {
+        step: 7,
+        code: 'RECEIVED',
+        label: 'Diterima Cabang (Selesai)',
+        status_state: isRecDone ? 'DONE' : (isShipDone ? 'CURRENT' : 'PENDING'),
+        date_formatted: isRecDone ? '13 Sep 2026, 09:30 WIB' : '-',
+        actor_name: isRecDone ? (ord.requesting_organization?.name || 'Cabang Pemesan') : '-',
+        actor_role: 'Staf Operasional Cabang',
+        description: isRecDone
+          ? 'Paket fisik kartu telah diterima di kantor cabang, diverifikasi, dan siap diserahkan ke nasabah.'
+          : (isShipDone ? 'Paket dalam perjalanan, menunggu konfirmasi serah terima di cabang.' : '-'),
+        badge_label: isRecDone ? 'SELESAI' : 'MENUNGGU',
+        badge_class: isRecDone ? 'text-bg-success' : 'text-bg-secondary'
+      }
+    ];
+  }
+
+  // Alur order logistik standar (Non-Emboss)
   const isPickingDone = ['PICKING', 'READY_TO_SHIP', 'IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);
   const isPackingDone = ['READY_TO_SHIP', 'IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);
   const isShipmentDone = ['IN_TRANSIT', 'RECEIVED', 'COMPLETED'].includes(ord.status);

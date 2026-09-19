@@ -24,16 +24,15 @@
       <div class="card-header border-bottom p-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
         <div class="d-flex align-items-center gap-2">
           <span class="fw-bold text-body fs-7">
-            <i class="bi bi-clipboard2-data text-danger me-1"></i> Lembar Hitung Fisik Gudang Margomulyo
+            Lembar Hitung Fisik Gudang Margomulyo
           </span>
-          <span class="badge text-bg-warning fs-9">Status: Sedang Berjalan (Open)</span>
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <router-link to="/inventory/stock-opname/history" class="btn btn-sm btn-outline-secondary fs-8">
-            <i class="bi bi-clock-history me-1"></i> Riwayat Opname
+            Riwayat Opname
           </router-link>
           <button class="btn btn-sm btn-danger fw-bold shadow-xs fs-8" @click="saveOpname">
-            <i class="bi bi-save me-1"></i> Simpan Hasil Opname
+            Simpan Hasil Opname
           </button>
         </div>
       </div>
@@ -68,7 +67,7 @@
           </div>
           <div class="col-auto" v-if="searchQuery || filterBin !== 'ALL' || filterDiff !== 'ALL'">
             <button type="button" class="btn btn-sm btn-outline-danger fs-8" @click="resetFilters" title="Reset Filter">
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -83,7 +82,7 @@
                 placeholder="Cari SKU atau nama barang..."
               />
               <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>
@@ -108,7 +107,7 @@
             <tr v-for="item in paginatedOpnameItems" :key="item.sku">
               <td class="ps-3 fw-bold font-monospace text-danger">{{ item.sku }}</td>
               <td class="fw-semibold text-body">{{ item.name }}</td>
-              <td><span class="badge text-bg-light border fs-9 font-monospace"><i class="bi bi-geo-alt text-primary me-1"></i>{{ item.bin }}</span></td>
+              <td><span class="badge text-bg-light border fs-9 font-monospace">{{ item.bin }}</span></td>
               <td class="text-end font-monospace text-body">{{ item.systemQty.toLocaleString('id-ID') }}</td>
               <td class="text-end">
                 <input
@@ -164,7 +163,7 @@
           <div class="modal-footer border-top bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3">
             <button type="button" class="btn btn-sm btn-outline-secondary" @click="showSuccessModal = false">Tutup</button>
             <router-link to="/inventory/stock-opname/history" class="btn btn-sm btn-danger fw-bold shadow-xs">
-              <i class="bi bi-clock-history me-1"></i> Lihat Riwayat Opname
+              Lihat Riwayat Opname
             </router-link>
           </div>
         </div>

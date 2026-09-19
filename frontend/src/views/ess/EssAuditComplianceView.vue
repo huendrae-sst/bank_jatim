@@ -6,7 +6,7 @@
       </div>
       <div class="d-flex align-items-center gap-2">
         <button class="btn btn-sm btn-outline-secondary" @click="handleExport">
-          <i class="bi bi-download me-1"></i> Ekspor Laporan
+          Ekspor Laporan
         </button>
       </div>
     </div>
@@ -89,8 +89,8 @@ const fetchComplianceData = async () => {
         status: 'COMPLIANT'
       },
       {
-        indicator: 'Pemusnahan Warkat Kadaluarsa dengan Berita Acara',
-        standard: 'SOP Pengamanan Warkat Sekuriti',
+        indicator: 'Pemusnahan Produk Kadaluarsa dengan Berita Acara',
+        standard: 'SOP Pengamanan Produk Sekuriti',
         freq: 'Tahunan',
         rate: 100.0,
         status: 'COMPLIANT'
@@ -109,7 +109,7 @@ const fetchComplianceData = async () => {
       { indicator: 'Kesesuaian Saldo Fisik vs Ledger Multi-Bucket', standard: 'SOP Logistik Bab 4 (Toleransi 0%)', freq: 'Harian / EOD', rate: 100.0, status: 'COMPLIANT' },
       { indicator: 'Penyelesaian BAP Penerimaan Barang Cabang', standard: 'Maksimal 2x24 jam sejak tiba', freq: 'Per Pengiriman', rate: 98.4, status: 'COMPLIANT' },
       { indicator: 'Pelaksanaan Stock Opname Triwulanan', standard: 'SK Direksi No. 062/LOG/2025', freq: 'Triwulan', rate: 100.0, status: 'COMPLIANT' },
-      { indicator: 'Pemusnahan Warkat Kadaluarsa dengan Berita Acara', standard: 'SOP Pengamanan Warkat Sekuriti', freq: 'Tahunan', rate: 100.0, status: 'COMPLIANT' }
+      { indicator: 'Pemusnahan Produk Kadaluarsa dengan Berita Acara', standard: 'SOP Pengamanan Produk Sekuriti', freq: 'Tahunan', rate: 100.0, status: 'COMPLIANT' }
     ];
   } finally {
     isLoading.value = false;

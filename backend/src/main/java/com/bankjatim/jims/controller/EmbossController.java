@@ -72,13 +72,13 @@ public class EmbossController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'WAREHOUSE_OFFICER', 'INVENTORY_OFFICER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'WAREHOUSE_OFFICER', 'INVENTORY_OFFICER', 'REQUESTER_CABANG', 'ORDER_APPROVER')")
     @Operation(summary = "Unggah Berkas CSV Emboss Kartu ATM")
     public ResponseEntity<ApiResponse<EmbossFileResponse>> uploadEmbossFile(
             @RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal UserPrincipal principal) {
         try {
-            User user = userRepository.getReferenceById(principal.getId());
+            User user = principal != null && principal.getId() != null ? userRepository.findById(principal.getId()).orElse(null) : null;
             CSVReader reader = new CSVReader(new InputStreamReader(file.getInputStream()));
             List<String[]> rows = reader.readAll();
             EmbossFileResponse embossFile = embossService.processEmbossData(file.getOriginalFilename(), rows, user);
@@ -88,13 +88,23 @@ public class EmbossController {
         }
     }
 
+    @GetMapping("/orders")
+    @Operation(summary = "Daftar Order Emboss Kartu Nasabah")
+    public ResponseEntity<ApiResponse<List<com.bankjatim.jims.dto.OrderResponse>>> getEmbossOrders() {
+        return ResponseEntity.ok(ApiResponse.ok(embossService.getEmbossOrders()));
+    }
+
     @PostMapping("/{id}/generate-orders")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'WAREHOUSE_OFFICER')")
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'WAREHOUSE_OFFICER', 'INVENTORY_OFFICER', 'REQUESTER_CABANG', 'ORDER_APPROVER')")
     @Operation(summary = "Otomatisasi Penerbitan Pesanan Cabang dari Berkas Emboss")
     public ResponseEntity<ApiResponse<Void>> generateOrders(
             @PathVariable Long id, @AuthenticationPrincipal UserPrincipal principal) {
-        User user = userRepository.getReferenceById(principal.getId());
-        embossService.generateOrdersFromEmboss(id, user);
-        return ResponseEntity.ok(ApiResponse.ok("Pesanan cabang dari berkas emboss berhasil dibuat", null));
+        try {
+            User user = principal != null && principal.getId() != null ? userRepository.findById(principal.getId()).orElse(null) : null;
+            embossService.generateOrdersFromEmboss(id, user);
+            return ResponseEntity.ok(ApiResponse.ok("Pesanan cabang dari berkas emboss berhasil dibuat", null));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("Gagal menerbitkan order emboss: " + e.getMessage()));
+        }
     }
 }

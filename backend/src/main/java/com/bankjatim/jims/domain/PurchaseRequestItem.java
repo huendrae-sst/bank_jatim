@@ -35,6 +35,14 @@ public class PurchaseRequestItem extends BaseEntity {
     @Builder.Default
     private Integer qtyOrdered = 0;
 
+    @Column(name = "qty_fulfilled", nullable = false)
+    @Builder.Default
+    private Integer qtyFulfilled = 0;
+
+    @Column(name = "qty_received", nullable = false)
+    @Builder.Default
+    private Integer qtyReceived = 0;
+
     @Column(name = "estimated_unit_price", precision = 15, scale = 2, nullable = false)
     @Builder.Default
     private BigDecimal estimatedUnitPrice = BigDecimal.ZERO;

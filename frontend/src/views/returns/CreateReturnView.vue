@@ -14,7 +14,7 @@
             </nav>
           </div>
           <router-link to="/returns" class="btn btn-sm btn-outline-secondary">
-            <i class="bi bi-arrow-left me-1"></i> Batal
+            Batal
           </router-link>
         </div>
 
@@ -68,9 +68,9 @@
 
               <!-- Daftar Item yang Diretur -->
               <div class="d-flex align-items-center justify-content-between mb-3">
-                <h6 class="fw-bold mb-0 text-dark"><i class="bi bi-box-seam me-2"></i>Item Barang yang Diretur</h6>
+                <h6 class="fw-bold mb-0 text-dark">Item Barang yang Diretur</h6>
                 <button type="button" class="btn btn-sm btn-outline-danger py-1 px-2 fs-8 fw-semibold" @click="addItem">
-                  <i class="bi bi-plus-circle me-1"></i> Tambah Item
+                  Tambah
                 </button>
               </div>
 
@@ -121,10 +121,10 @@
 
             <div class="card-footer bg-light p-3 d-flex justify-content-between align-items-center">
               <router-link to="/returns" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Batal
+                Batal
               </router-link>
               <button type="submit" :disabled="submitting" class="btn btn-danger btn-sm px-4 shadow-xs">
-                <i class="bi bi-send me-1"></i> Kirim Pengajuan Retur
+                Kirim Pengajuan Retur
               </button>
             </div>
           </form>

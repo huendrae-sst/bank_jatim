@@ -1,5 +1,6 @@
 server:
   port: 8080
+  max-http-request-header-size: 64KB
   servlet:
     context-path: /api
 

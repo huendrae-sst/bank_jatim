@@ -50,7 +50,14 @@ public record SwitchingStockResponse(
             if (organization == null) {
                 return null;
             }
-            return new Summary(organization.getId(), organization.getCode(), organization.getName());
+            Long id = com.bankjatim.jims.common.HibernateUtils.getId(organization);
+            try {
+                if (com.bankjatim.jims.common.HibernateUtils.isInitialized(organization)) {
+                    return new Summary(id, organization.getCode(), organization.getName());
+                }
+            } catch (Exception ignored) {
+            }
+            return new Summary(id, null, null);
         }
     }
 
@@ -59,7 +66,14 @@ public record SwitchingStockResponse(
             if (warehouse == null) {
                 return null;
             }
-            return new WarehouseSummary(warehouse.getId(), warehouse.getCode(), warehouse.getName());
+            Long id = com.bankjatim.jims.common.HibernateUtils.getId(warehouse);
+            try {
+                if (com.bankjatim.jims.common.HibernateUtils.isInitialized(warehouse)) {
+                    return new WarehouseSummary(id, warehouse.getCode(), warehouse.getName());
+                }
+            } catch (Exception ignored) {
+            }
+            return new WarehouseSummary(id, null, null);
         }
     }
 
@@ -68,7 +82,14 @@ public record SwitchingStockResponse(
             if (user == null) {
                 return null;
             }
-            return new UserSummary(user.getId(), user.getName(), user.getNip(), user.getEmail());
+            Long id = com.bankjatim.jims.common.HibernateUtils.getId(user);
+            try {
+                if (com.bankjatim.jims.common.HibernateUtils.isInitialized(user)) {
+                    return new UserSummary(id, user.getName(), user.getNip(), user.getEmail());
+                }
+            } catch (Exception ignored) {
+            }
+            return new UserSummary(id, null, null, null);
         }
     }
 
@@ -82,8 +103,10 @@ public record SwitchingStockResponse(
             String notes
     ) {
         static ItemResponse from(SwitchingStockItem switchingStockItem) {
+            if (switchingStockItem == null) return null;
+            Long id = com.bankjatim.jims.common.HibernateUtils.getId(switchingStockItem);
             return new ItemResponse(
-                    switchingStockItem.getId(),
+                    id,
                     ItemSummary.from(switchingStockItem.getItem()),
                     switchingStockItem.getQtyRequested(),
                     switchingStockItem.getQtyApproved(),
@@ -99,7 +122,14 @@ public record SwitchingStockResponse(
             if (item == null) {
                 return null;
             }
-            return new ItemSummary(item.getId(), item.getSku(), item.getName(), item.getUom());
+            Long id = com.bankjatim.jims.common.HibernateUtils.getId(item);
+            try {
+                if (com.bankjatim.jims.common.HibernateUtils.isInitialized(item)) {
+                    return new ItemSummary(id, item.getSku(), item.getName(), item.getUom());
+                }
+            } catch (Exception ignored) {
+            }
+            return new ItemSummary(id, null, null, null);
         }
     }
 }

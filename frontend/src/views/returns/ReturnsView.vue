@@ -58,7 +58,7 @@
 
         <div class="card-tools ms-md-auto">
           <button type="button" class="btn btn-sm btn-danger fw-bold shadow-xs fs-8" @click="openCreateModal">
-            <i class="bi bi-plus-lg me-1"></i> Buat Permohonan Retur
+            Tambah
           </button>
         </div>
       </div>
@@ -94,7 +94,7 @@
           </div>
           <div class="col-auto" v-if="searchQuery || filterBranch !== 'ALL' || filterReason !== 'ALL'">
             <button type="button" class="btn btn-sm btn-outline-danger fs-8" @click="resetFilters" title="Reset Filter">
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <!-- Search Bar -->
@@ -109,7 +109,7 @@
                 class="form-control form-control-sm border-start-0 border-end-0 fs-8"
                 placeholder="Cari No. Retur, Cabang, atau SKU Barang..."
               />
-              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button"><i class="bi bi-search me-1"></i> Cari</button>
+              <button class="btn btn-sm btn-danger fw-bold fs-8 shadow-xs" type="button">Cari</button>
             </div>
           </div>
         </div>
@@ -234,7 +234,7 @@
             <div class="modal-footer bg-body-secondary d-flex justify-content-end align-items-center gap-2 py-2 px-3 border-top">
               <button type="button" class="btn btn-sm btn-outline-secondary px-3 fs-8" @click="showCreateModal = false">Batal</button>
               <button type="submit" class="btn btn-sm btn-danger fw-bold shadow-xs px-3 fs-8">
-                <i class="bi bi-send me-1"></i> Ajukan Permohonan
+                Ajukan Permohonan
               </button>
             </div>
           </form>

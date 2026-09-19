@@ -24,17 +24,29 @@ public class WarehouseService {
     private final WarehousePackingRepository packingRepository;
 
     @Transactional(readOnly = true)
+    public List<WarehouseQueueResponse> getPickingQueue(String orderType) {
+        String normalized = (orderType != null && !orderType.isBlank() && !"ALL".equalsIgnoreCase(orderType)) ? orderType : null;
+        return orderRepository.findApprovedOrdersQueue(normalized).stream()
+                .map(WarehouseQueueResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<WarehouseQueueResponse> getPickingQueue() {
-        return orderRepository.findApprovedOrdersQueue().stream()
+        return getPickingQueue(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WarehouseQueueResponse> getPackingQueue(String orderType) {
+        String normalized = (orderType != null && !orderType.isBlank() && !"ALL".equalsIgnoreCase(orderType)) ? orderType : null;
+        return orderRepository.findWarehouseProcessingOrders(normalized).stream()
                 .map(WarehouseQueueResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public List<WarehouseQueueResponse> getPackingQueue() {
-        return orderRepository.findWarehouseProcessingOrders().stream()
-                .map(WarehouseQueueResponse::from)
-                .toList();
+        return getPackingQueue(null);
     }
 
     @Transactional
@@ -85,5 +97,32 @@ public class WarehouseService {
         orderRepository.save(order);
 
         return WarehousePackingResponse.from(packingRepository.save(packing));
+    }
+
+    @Transactional
+    public List<WarehousePickingResponse> completeBatchPicking(List<Long> orderIds, User picker) {
+        if (orderIds == null || orderIds.isEmpty()) {
+            return List.of();
+        }
+        return orderIds.stream()
+                .map(id -> completePicking(id, picker))
+                .toList();
+    }
+
+    @Transactional
+    public List<WarehousePackingResponse> completeBatchPacking(
+            List<com.bankjatim.jims.dto.BulkOperationDtos.BatchPackingRequest.PackingItem> items, User packer) {
+        if (items == null || items.isEmpty()) {
+            return List.of();
+        }
+        return items.stream()
+                .map(item -> completePacking(
+                        item.orderId(),
+                        item.koliCount() > 0 ? item.koliCount() : 1,
+                        item.totalWeightKg() != null ? item.totalWeightKg() : new BigDecimal("1.00"),
+                        item.dimensionsCm() != null && !item.dimensionsCm().isBlank() ? item.dimensionsCm() : "30x20x15",
+                        packer
+                ))
+                .toList();
     }
 }

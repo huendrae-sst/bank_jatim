@@ -93,7 +93,7 @@ const routes = [
       {
         path: 'dashboard',
         name: 'dashboard',
-        component: () => import('@/views/dashboard/OperationalDashboardView.vue')
+        component: () => import('@/views/dashboard/ExecutiveDashboardView.vue')
       },
       {
         path: 'dashboard/operational',
@@ -133,6 +133,11 @@ const routes = [
         component: () => import('@/views/orders/OrderDetailView.vue')
       },
       {
+        path: 'orders/emboss',
+        name: 'orders-emboss',
+        component: () => import('@/views/orders/OrderEmbossView.vue')
+      },
+      {
         path: 'emboss',
         name: 'emboss-index',
         component: () => import('@/views/emboss/CardPersonalizationView.vue')
@@ -156,6 +161,11 @@ const routes = [
         path: 'production',
         name: 'production-index',
         component: () => import('@/views/production/ProductionIndexView.vue')
+      },
+      {
+        path: 'production/consolidation',
+        name: 'production-consolidation',
+        component: () => import('@/views/production/ProductionConsolidationView.vue')
       },
       {
         path: 'production/:id',
@@ -188,6 +198,11 @@ const routes = [
         path: 'distribution/shipments/:id',
         name: 'distribution-shipment-detail',
         component: () => import('@/views/distribution/ShipmentsView.vue')
+      },
+      {
+        path: 'distribution/routine',
+        name: 'distribution-routine',
+        component: () => import('@/views/distribution/RoutineDistributionView.vue')
       },
 
       // 4. Penerimaan (Receiving)

@@ -8,6 +8,9 @@ import ToastService from 'primevue/toastservice';
 import App from './App.vue';
 import router from './router';
 import PaginationFooter from './components/PaginationFooter.vue';
+import LoadingState from './components/LoadingState.vue';
+import Toast from 'primevue/toast';
+import { toast } from './utils/toast.js';
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import 'primeicons/primeicons.css';
@@ -16,6 +19,11 @@ import './assets/main.css';
 const app = createApp(App);
 
 app.component('PaginationFooter', PaginationFooter);
+app.component('LoadingState', LoadingState);
+app.component('ServerLoading', LoadingState);
+app.component('Toast', Toast);
+
+app.config.globalProperties.$toastNotify = toast;
 
 app.use(createPinia());
 app.use(router);

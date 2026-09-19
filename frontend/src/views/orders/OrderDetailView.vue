@@ -5,14 +5,21 @@
       <div class="container-fluid px-0">
         <div class="row align-items-center">
           <div class="col-sm-6">
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center flex-wrap gap-2">
               <h3 class="mb-0 text-body fw-bold">{{ order.order_number }}</h3>
               <span class="badge fs-8 text-uppercase" :class="badgeClass(order.status)">
                 {{ getStatusLabel(order.status) }}
               </span>
+              <span class="badge fs-8" :class="orderTypeBadgeClass(order.order_type)">
+                {{ orderTypeLabel(order.order_type) }}
+              </span>
+              <span class="badge fs-8" :class="fulfillmentBadgeClass(order.fulfillment_status)">
+                <i class="bi bi-box-seam me-1"></i> Pemenuhan: {{ order.fulfillment_status || 'UNFULFILLED' }}
+              </span>
             </div>
             <p class="fs-8 text-secondary mb-0 mt-0.5">
               Dibuat oleh: <strong class="text-body">{{ order.requester_name }}</strong> &bull; {{ order.created_at_formatted }} WIB &bull; Unit: {{ order.org_name }} ({{ order.org_code }})
+              <span v-if="order.routine_period" class="ms-1 badge bg-secondary-subtle text-secondary font-monospace">{{ order.routine_period }}</span>
             </p>
           </div>
           <div class="col-sm-6">
@@ -36,23 +43,23 @@
     <div class="card p-2.5 mb-3 bg-body shadow-xs d-flex flex-row justify-content-between align-items-center flex-wrap gap-2">
       <div class="d-flex align-items-center gap-2">
         <router-link to="/orders" class="btn btn-sm btn-outline-secondary">
-          <i class="bi bi-arrow-left me-1"></i> Kembali ke Daftar Order
+          Kembali ke Daftar Order
         </router-link>
         <router-link :to="`/orders/${order.id}/print`" target="_blank" class="btn btn-sm btn-outline-danger fw-bold">
-          <i class="bi bi-printer me-1"></i> Cetak Dokumen Order
+          Cetak Dokumen Order
         </router-link>
       </div>
       <div class="d-flex align-items-center gap-2">
         <template v-if="['SUBMITTED', 'WAITING_APPROVAL'].includes(order.status)">
           <button type="button" @click="showRejectModal = true" class="btn btn-sm btn-outline-danger fw-bold">
-            <i class="bi bi-x-circle me-1"></i> Tolak Order
+            Tolak Order
           </button>
           <button type="button" @click="approveOrder" class="btn btn-sm btn-success fw-bold shadow-xs">
-            <i class="bi bi-check2-all me-1"></i> Setujui & Reservasi Stok
+            Setujui & Reservasi Stok
           </button>
         </template>
         <router-link v-else-if="order.status === 'ALLOCATED'" to="/warehouse/picking" class="btn btn-sm btn-primary fw-bold shadow-xs">
-          <i class="bi bi-boxes me-1"></i> Proses Picking Gudang
+          Proses Picking Gudang
         </router-link>
       </div>
     </div>
@@ -111,7 +118,7 @@
                 </td>
                 <td>
                   <div class="fw-semibold font-monospace fs-8 text-body">
-                    <i class="bi bi-calendar-event me-1 text-secondary"></i>{{ tl.date_formatted }}
+                   {{ tl.date_formatted }}
                   </div>
                 </td>
                 <td>
@@ -158,7 +165,7 @@
               </div>
             </div>
             <button @click="openSwitchingModal(rec)" class="btn btn-sm btn-warning text-dark fw-bold">
-              <i class="bi bi-arrow-left-right me-1"></i> Ajukan Switching Stock
+              Ajukan Switching Stock
             </button>
           </div>
         </div>
@@ -167,15 +174,10 @@
 
     <!-- Items Table Card -->
     <div class="card card-outline card-secondary shadow-xs">
-      <div class="card-header border-bottom d-flex justify-content-between align-items-center">
+      <div class="card-header border-bottom">
         <h3 class="card-title fs-6 fw-bold mb-0 text-body">
           Rincian Barang yang Diminta
         </h3>
-        <div class="card-tools">
-          <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle fs-8">
-            {{ order.items.length }} jenis barang
-          </span>
-        </div>
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
@@ -359,6 +361,10 @@ const mapOrder = (data) => ({
   id: data.id,
   order_number: data.orderNumber || '-',
   status: data.status || '',
+  order_type: data.orderType || 'INTERNAL_REQUEST',
+  fulfillment_status: data.fulfillmentStatus || 'UNFULFILLED',
+  batch_manifest_number: data.batchManifestNumber || '',
+  routine_period: data.routinePeriod || '',
   requester_name: data.createdByUser?.name || '-',
   created_at_formatted: formatDate(data.createdAt || data.submittedAt),
   org_name: data.requestingOrganization?.name || '-',
@@ -379,6 +385,33 @@ const mapOrder = (data) => ({
     subtotal_ref: Number(line.subtotalRef || 0)
   }))
 });
+
+const orderTypeLabel = (type) => {
+  switch (type) {
+    case 'PURCHASE_REQUEST': return 'Pembelian PR';
+    case 'EMBOSS_ORDER': return 'Order Emboss';
+    case 'ROUTINE_PUSH': return 'Distribusi Rutin';
+    default: return 'Order Permintaan';
+  }
+};
+
+const orderTypeBadgeClass = (type) => {
+  switch (type) {
+    case 'PURCHASE_REQUEST': return 'bg-primary text-white';
+    case 'EMBOSS_ORDER': return 'bg-info text-dark';
+    case 'ROUTINE_PUSH': return 'bg-danger text-white';
+    default: return 'bg-secondary text-white';
+  }
+};
+
+const fulfillmentBadgeClass = (fStatus) => {
+  switch (fStatus) {
+    case 'RECEIVED': return 'bg-success text-white';
+    case 'FULLY_FULFILLED': return 'bg-primary text-white';
+    case 'PARTIALLY_FULFILLED': return 'bg-warning text-dark';
+    default: return 'bg-secondary text-white';
+  }
+};
 
 const buildTimeline = (currentOrder) => {
   const currentIndex = steps.findIndex((step) => step.code === currentOrder.status);

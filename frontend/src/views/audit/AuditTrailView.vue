@@ -76,7 +76,7 @@
         </div>
         <div class="card-tools ms-md-auto d-flex align-items-center gap-2">
           <button class="btn btn-sm btn-outline-secondary fs-8" @click="handleExport">
-            <i class="bi bi-download me-1"></i> Unduh Log CSV
+            Unduh Log CSV
           </button>
         </div>
       </div>
@@ -104,7 +104,7 @@
               class="btn btn-sm btn-outline-danger fs-8"
               title="Reset Filter"
             >
-              <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+              Reset
             </button>
           </div>
           <div class="col-12 col-md ms-md-auto">
@@ -121,7 +121,7 @@
                 type="button"
                 @click="currentPage = 1"
               >
-                <i class="bi bi-search me-1"></i> Cari
+                Cari
               </button>
             </div>
           </div>

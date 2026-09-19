@@ -8,6 +8,9 @@ import java.util.List;
 public record WarehouseQueueResponse(
         Long orderId,
         String orderNumber,
+        String orderType,
+        String fulfillmentStatus,
+        String routinePeriod,
         String branch,
         String branchCode,
         String warehouse,
@@ -20,6 +23,9 @@ public record WarehouseQueueResponse(
         return new WarehouseQueueResponse(
                 order.getId(),
                 order.getOrderNumber(),
+                order.getOrderType() != null ? order.getOrderType() : "INTERNAL_REQUEST",
+                order.getFulfillmentStatus() != null ? order.getFulfillmentStatus() : "UNFULFILLED",
+                order.getRoutinePeriod(),
                 order.getRequestingOrganization() != null ? order.getRequestingOrganization().getName() : "-",
                 order.getRequestingOrganization() != null ? order.getRequestingOrganization().getCode() : "-",
                 order.getRequestingWarehouse() != null ? order.getRequestingWarehouse().getName() : "-",
