@@ -168,6 +168,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
@@ -275,6 +276,7 @@ const fetchPr = async () => {
   } catch (err) {
     console.error('Failed to load PR', err);
     errorMessage.value = 'Gagal memuat data Purchase Request: ' + (err.response?.data?.message || err.message);
+    toast.error(errorMessage.value, 'Gagal');
   } finally {
     isLoading.value = false;
   }
@@ -287,9 +289,9 @@ const approvePr = async () => {
     const res = await api.post(`/procurement/pr/${pr.value.id}/approve`);
     const data = res.data.data || res.data;
     pr.value = mapPrData(data);
-    alert('Purchase Request berhasil disetujui!');
+    toast.success('Purchase Request berhasil disetujui!', 'Berhasil');
   } catch (err) {
-    alert('Gagal menyetujui PR: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menyetujui PR: ' + (err.response?.data?.message || err.message), 'Gagal');
   } finally {
     isSubmitting.value = false;
   }
@@ -300,10 +302,10 @@ const dispatchToBranch = async () => {
   isSubmitting.value = true;
   try {
     const res = await api.post(`/procurement/pr/${pr.value.id}/dispatch-to-branch`);
-    alert(res.data?.message || 'Pemenuhan PR berhasil diteruskan ke antrean Gudang Distribusi Cabang!');
+    toast.success(res.data?.message || 'Pemenuhan PR berhasil diteruskan ke antrean Gudang Distribusi Cabang!', 'Berhasil');
     await fetchPr();
   } catch (err) {
-    alert('Gagal meneruskan PR ke distribusi: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal meneruskan PR ke distribusi: ' + (err.response?.data?.message || err.message), 'Gagal');
   } finally {
     isSubmitting.value = false;
   }
@@ -311,7 +313,7 @@ const dispatchToBranch = async () => {
 
 const confirmReject = async () => {
   if (!rejectionReason.value.trim()) {
-    alert('Silakan masukkan alasan penolakan.');
+    toast.warn('Silakan masukkan alasan penolakan.', 'Peringatan');
     return;
   }
   isSubmitting.value = true;
@@ -322,9 +324,9 @@ const confirmReject = async () => {
     const data = res.data.data || res.data;
     pr.value = mapPrData(data);
     showRejectModal.value = false;
-    alert('Purchase Request telah ditolak.');
+    toast.success('Purchase Request telah ditolak.', 'Berhasil');
   } catch (err) {
-    alert('Gagal menolak PR: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menolak PR: ' + (err.response?.data?.message || err.message), 'Gagal');
   } finally {
     isSubmitting.value = false;
   }

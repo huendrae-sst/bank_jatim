@@ -18,9 +18,6 @@
       </div>
     </div>
 
-
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
@@ -139,12 +136,12 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterVendor = ref('');
-const errorMessage = ref('');
 
 const describeItems = (items = []) => items
   .map(line => {
@@ -168,7 +165,6 @@ const mapPo = (po) => ({
 const pendingPOs = ref([]);
 
 const loadPendingPOs = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/procurement/po');
     const data = response.data?.content || response.data || [];
@@ -210,9 +206,9 @@ const approvePO = async (po) => {
   try {
     await api.post(`/procurement/po/${po.id}/approve`);
     await loadPendingPOs();
-    alert(`Purchase Order ${po.poNumber} berhasil disetujui dan siap dikirimkan ke vendor.`);
+    toast.success(`Purchase Order ${po.poNumber} berhasil disetujui dan siap dikirimkan ke vendor.`);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menyetujui PO.';
+    toast.error(error?.message || error?.error || 'Gagal menyetujui PO.');
   }
 };
 
@@ -224,9 +220,9 @@ const rejectPO = async (po) => {
   try {
     await api.post(`/procurement/po/${po.id}/reject`, { reason });
     await loadPendingPOs();
-    alert(`Purchase Order ${po.poNumber} ditolak.`);
+    toast.warn(`Purchase Order ${po.poNumber} ditolak.`);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menolak PO.';
+    toast.error(error?.message || error?.error || 'Gagal menolak PO.');
   }
 };
 

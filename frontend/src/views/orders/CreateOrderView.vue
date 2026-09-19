@@ -22,8 +22,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Form Card -->
     <div class="card card-outline card-danger shadow-xs">
       <form @submit.prevent="submitOrder">
@@ -220,10 +218,10 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const router = useRouter();
 const submitting = ref(false);
-const errorMessage = ref('');
 
 const organizations = ref([]);
 
@@ -263,7 +261,7 @@ const loadOptions = async () => {
       return acc;
     }, {});
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat master data order.';
+    toast.error(error?.message || error?.error || 'Gagal memuat master data order.', 'Gagal');
   }
 };
 
@@ -331,7 +329,6 @@ const formatRupiah = (val) => {
 };
 
 const submitOrder = async () => {
-  errorMessage.value = '';
   submitting.value = true;
   try {
     const response = await api.post('/orders', {
@@ -343,9 +340,10 @@ const submitOrder = async () => {
         .filter(row => row.item_id && row.qty)
         .map(row => ({ itemId: row.item_id, qty: row.qty }))
     });
+    toast.success('Pesanan berhasil dibuat.', 'Berhasil');
     router.push(`/orders/${response.data.id}`);
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal membuat order.';
+    toast.error(error?.message || error?.error || 'Gagal membuat order.', 'Gagal');
   } finally {
     submitting.value = false;
   }

@@ -23,10 +23,6 @@
     </div>
 
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">
-      {{ errorMessage }}
-    </div>
-
     <!-- 3. Main PR Data Card -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- Card Header with Navigation Tabs & Section Tombol Tambah -->
@@ -300,6 +296,7 @@ import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 import { extractList } from '@/utils/responseParser';
+import { toast } from '@/utils/toast';
 
 const activeTab = ref('all');
 const searchQuery = ref('');
@@ -308,7 +305,6 @@ const filterMethod = ref('ALL');
 const showCreateModal = ref(false);
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
 
 const resetFilters = () => {
   searchQuery.value = '';
@@ -420,7 +416,6 @@ onMounted(() => {
 });
 
 const loadPurchaseRequests = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/procurement/pr', {
       params: { page: 0, size: 100, sort: 'createdAt,desc' }
@@ -431,6 +426,7 @@ const loadPurchaseRequests = async () => {
     }
   } catch (error) {
     console.warn('Failed loading purchase requests from server:', error);
+    toast.error('Gagal memuat daftar purchase request dari server.', 'Gagal');
     prList.value = [];
   }
 };
@@ -438,9 +434,10 @@ const loadPurchaseRequests = async () => {
 const approvePr = async (id) => {
   try {
     await api.post(`/procurement/pr/${id}/approve`);
+    toast.success('Purchase Request berhasil disetujui.', 'Berhasil');
     await loadPurchaseRequests();
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menyetujui PR.';
+    toast.error(error?.message || error?.error || 'Gagal menyetujui PR.', 'Gagal');
   }
 };
 
@@ -456,7 +453,7 @@ const openCreateModal = () => {
 };
 
 const submitCreatePr = () => {
-  errorMessage.value = 'Pembuatan PR belum memiliki endpoint backend persistent.';
+  toast.warn('Pembuatan PR belum memiliki endpoint backend persistent.', 'Peringatan');
 };
 
 onMounted(loadPurchaseRequests);

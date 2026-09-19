@@ -37,8 +37,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Action Bar / Buttons Header -->
     <div class="card p-2.5 mb-3 bg-body shadow-xs d-flex flex-row justify-content-between align-items-center flex-wrap gap-2">
       <div class="d-flex align-items-center gap-2">
@@ -282,6 +280,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 
@@ -292,7 +291,6 @@ const selectedSwitchItem = ref(null);
 const switchSourceWarehouseId = ref('');
 const switchQty = ref(0);
 const switchReason = ref('Pemenuhan kekurangan stok pusat dari kelebihan stok cabang regional.');
-const errorMessage = ref('');
 
 const steps = [
   { code: 'SUBMITTED', label: 'Diajukan' },
@@ -464,29 +462,28 @@ const formatRupiah = (val) => {
 };
 
 const loadOrder = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get(`/orders/${route.params.id}`);
     order.value = mapOrder(response.data);
   } catch (error) {
     order.value = emptyOrder();
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat detail order.';
+    toast.error(error?.message || error?.error || 'Gagal memuat detail order.', 'Gagal');
   }
 };
 
 const approveOrder = async () => {
-  errorMessage.value = '';
   try {
     await api.post(`/orders/${route.params.id}/approve`);
+    toast.success('Pesanan berhasil disetujui (Approved).', 'Berhasil');
     await loadOrder();
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menyetujui order.';
+    toast.error(error?.message || error?.error || 'Gagal menyetujui order.', 'Gagal');
   }
 };
 
 const confirmReject = () => {
   showRejectModal.value = false;
-  errorMessage.value = 'Penolakan order belum memiliki endpoint backend persistent.';
+  toast.warn('Penolakan order belum memiliki endpoint backend persistent.', 'Peringatan');
 };
 
 const openSwitchingModal = (rec) => {
@@ -498,7 +495,7 @@ const openSwitchingModal = (rec) => {
 
 const submitSwitching = () => {
   showSwitchingModal.value = false;
-  errorMessage.value = 'Pengajuan switching stock belum memiliki endpoint backend persistent.';
+  toast.warn('Pengajuan switching stock belum memiliki endpoint backend persistent.', 'Peringatan');
 };
 
 onMounted(loadOrder);

@@ -167,10 +167,10 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
-const errorMessage = ref('');
 
 const pr = ref({
   pr_number: '',
@@ -207,7 +207,6 @@ const triggerPrint = () => {
 
 const fetchPr = async () => {
   isLoading.value = true;
-  errorMessage.value = '';
   try {
     const res = await api.get(`/procurement/pr/${route.params.id}`);
     const data = res.data.data || res.data;
@@ -235,7 +234,7 @@ const fetchPr = async () => {
     };
   } catch (err) {
     console.error('Failed to fetch PR print data', err);
-    errorMessage.value = 'Gagal memuat data Purchase Request untuk dicetak: ' + (err.response?.data?.message || err.message);
+    toast.error('Gagal memuat data Purchase Request untuk dicetak: ' + (err.response?.data?.message || err.message));
   } finally {
     isLoading.value = false;
   }

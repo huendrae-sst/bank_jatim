@@ -22,13 +22,6 @@
       </div>
     </div>
 
-    <!-- Feedback Alerts -->
-    <div v-if="alertMessage" :class="`alert alert-${alertType} alert-dismissible fade show fs-8 py-2 px-3 mb-3 shadow-xs`">
-      <i :class="alertType === 'success' ? 'bi bi-check-circle-fill me-2' : 'bi bi-exclamation-triangle-fill me-2'"></i>
-      <span>{{ alertMessage }}</span>
-      <button type="button" class="btn-close py-2" @click="alertMessage = ''"></button>
-    </div>
-
     <!-- Main Card Container -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- Card Header with Tabs and Section Action Button -->
@@ -749,6 +742,7 @@
 import { ref, computed, onMounted } from 'vue';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 // State & Filters
 const isLoading = ref(true);
@@ -773,8 +767,6 @@ const perPage = ref(10);
 // Modal states
 const showCreateModal = ref(false);
 const submitting = ref(false);
-const alertMessage = ref('');
-const alertType = ref('success');
 const modalSelectedFile = ref(null);
 const modalFileInputRef = ref(null);
 
@@ -1057,7 +1049,7 @@ const onModalFileSelected = (event) => {
 
 const submitCreateEmbossOrder = async () => {
   if (!modalSelectedFile.value) {
-    alert('Silakan pilih berkas data nasabah (.CSV atau .TXT)');
+    toast.warn('Silakan pilih berkas data nasabah (.CSV atau .TXT)', 'Peringatan');
     return;
   }
 
@@ -1117,8 +1109,7 @@ const submitCreateEmbossOrder = async () => {
       rejectedRecords: fileData?.rejectedRecords || 0
     };
 
-    alertType.value = 'success';
-    alertMessage.value = `Order Emboss berhasil dibuat dengan status Draft untuk berkas ${selectedFile.name}. Silakan lakukan otorisasi di menu Persetujuan Order.`;
+    toast.success(`Order Emboss berhasil dibuat dengan status Draft untuk berkas ${selectedFile.name}.`, 'Berhasil');
     await loadData();
   } catch (err) {
     processState.value = 'error';
@@ -1126,8 +1117,7 @@ const submitCreateEmbossOrder = async () => {
       ? err
       : (err?.response?.data?.message || err?.message || 'Gagal memproses berkas dan membuat Order Emboss');
     processError.value = msg;
-    alertType.value = 'danger';
-    alertMessage.value = msg;
+    toast.error(msg, 'Gagal');
   } finally {
     submitting.value = false;
   }
@@ -1251,13 +1241,11 @@ const confirmDeleteOrder = async () => {
   try {
     await api.delete(`/orders/${deleteOrder.value.id}`);
     deleteModal.value = false;
-    alertType.value = 'success';
-    alertMessage.value = `Order emboss ${deleteOrder.value.order_number} berhasil dihapus.`;
+    toast.success(`Order emboss ${deleteOrder.value.order_number} berhasil dihapus.`, 'Berhasil');
     deleteOrder.value = null;
     await loadData();
   } catch (err) {
-    alertType.value = 'danger';
-    alertMessage.value = err?.response?.data?.message || err?.message || 'Gagal menghapus order emboss.';
+    toast.error(err?.response?.data?.message || err?.message || 'Gagal menghapus order emboss.', 'Gagal');
   } finally {
     isDeleting.value = false;
   }

@@ -256,6 +256,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const searchQuery = ref('');
 const activeTab = ref('all');
@@ -371,16 +372,20 @@ const openGoodsReceiptModal = (po) => {
 
 const submitGoodsReceipt = async () => {
   if (!deliveryNote.value) {
-    alert('Harap isi nomor surat jalan vendor.');
+    toast.warn('Harap isi nomor surat jalan vendor.');
     return;
   }
   if (activeGrnPo.value) {
-    await api.post(`/procurement/po/${activeGrnPo.value.id}/receive-goods`, null, {
-      params: { deliveryNoteNumber: deliveryNote.value }
-    });
-    await loadPurchaseOrders();
-    alert(`Barang masuk dari PO ${activeGrnPo.value.poNumber} berhasil diterima dengan Surat Jalan ${deliveryNote.value}.`);
-    activeGrnPo.value = null;
+    try {
+      await api.post(`/procurement/po/${activeGrnPo.value.id}/receive-goods`, null, {
+        params: { deliveryNoteNumber: deliveryNote.value }
+      });
+      await loadPurchaseOrders();
+      toast.success(`Barang masuk dari PO ${activeGrnPo.value.poNumber} berhasil diterima dengan Surat Jalan ${deliveryNote.value}.`);
+      activeGrnPo.value = null;
+    } catch (error) {
+      toast.error(error?.message || error?.error || 'Gagal memproses penerimaan barang.');
+    }
   }
 };
 </script>

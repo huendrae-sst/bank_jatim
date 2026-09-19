@@ -19,10 +19,6 @@
     </div>
 
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">
-      {{ errorMessage }}
-    </div>
-
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
@@ -140,12 +136,12 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterUnit = ref('');
-const errorMessage = ref('');
 
 const mapPr = (pr) => ({
   id: pr.id,
@@ -182,7 +178,6 @@ const paginatedPRs = computed(() => {
 });
 
 const loadPendingPrs = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/procurement/pr', {
       params: { page: 0, size: 100, sort: 'createdAt,desc' }
@@ -195,6 +190,7 @@ const loadPendingPrs = async () => {
   } catch (error) {
     pendingPRs.value = [];
     console.warn('Failed loading pending PRs from backend:', error);
+    toast.error('Gagal memuat pending PR dari backend.', 'Gagal');
   }
 };
 
@@ -202,14 +198,14 @@ const approvePR = async (pr) => {
   try {
     await api.post(`/procurement/pr/${pr.id}/approve`);
     await loadPendingPrs();
-    alert(`PR ${pr.prNumber} disetujui dan diteruskan ke Pool Konsolidasi Pengadaan.`);
+    toast.success(`PR ${pr.prNumber} disetujui dan diteruskan ke Pool Konsolidasi Pengadaan.`, 'Berhasil');
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menyetujui PR.';
+    toast.error(error?.message || error?.error || 'Gagal menyetujui PR.', 'Gagal');
   }
 };
 
 const rejectPR = (pr) => {
-  errorMessage.value = `Penolakan PR ${pr.prNumber} belum memiliki endpoint backend persistent.`;
+  toast.warn(`Penolakan PR ${pr.prNumber} belum memiliki endpoint backend persistent.`, 'Peringatan');
 };
 
 onMounted(loadPendingPrs);

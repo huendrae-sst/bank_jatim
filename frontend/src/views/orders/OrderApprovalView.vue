@@ -71,10 +71,6 @@
       </div>
     </div>
 
-    <div v-if="loadError" class="alert alert-danger fs-8">
-      {{ loadError }}
-    </div>
-
     <!-- ==================== TAMPILAN 1: TAB MENUNGGU PERSETUJUAN & SEMUA TRANSAKSI (TABLE GRID) ==================== -->
     <div v-if="statusTab === 'pending' || statusTab === 'all'" class="card card-outline card-danger shadow-xs">
       <!-- Toolbar Pencarian & Filter (Pola inventory/switching/approvals) -->
@@ -651,6 +647,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 // State
 const statusTab = ref('pending'); // 'pending' | 'history' | 'all'
@@ -711,7 +708,6 @@ const mapApprovalOrder = (o) => ({
 
 const orders = ref([]);
 const selectedOrder = ref(null);
-const loadError = ref('');
 
 const extractOrdersList = (res) => {
   if (!res) return null;
@@ -726,7 +722,6 @@ const extractOrdersList = (res) => {
 
 // Lifecycle
 onMounted(async () => {
-  loadError.value = '';
   try {
     const res = await api.get('/orders', {
       params: { page: 0, size: 100, sort: 'createdAt,desc' }
@@ -737,6 +732,7 @@ onMounted(async () => {
     }
   } catch (err) {
     console.warn('Failed loading orders from server:', err);
+    toast.error('Gagal memuat daftar pesanan dari server.', 'Gagal');
     orders.value = [];
   } finally {
     if (!selectedOrder.value || !orders.value.find(o => o.id === selectedOrder.value.id)) {
@@ -1173,7 +1169,7 @@ const approveOrder = async (order) => {
       it.qty_allocated = it.qty_requested;
     });
   }
-  alert(`Pesanan ${order.order_number} berhasil disetujui.`);
+  toast.success(`Pesanan ${order.order_number} berhasil disetujui.`, 'Berhasil');
 };
 
 const openRejectModal = (order) => {
@@ -1183,14 +1179,14 @@ const openRejectModal = (order) => {
 
 const confirmReject = () => {
   if (!rejectReason.value.trim()) {
-    alert('Harap isi alasan penolakan.');
+    toast.warn('Harap isi alasan penolakan.', 'Peringatan');
     return;
   }
   const num = orderToReject.value.order_number;
   orderToReject.value.status = 'REJECTED';
   orderToReject.value.notes = 'Ditolak: ' + rejectReason.value.trim();
   orderToReject.value = null;
-  alert(`Pesanan ${num} berhasil ditolak.`);
+  toast.success(`Pesanan ${num} berhasil ditolak.`, 'Berhasil');
 };
 
 // Switching Stock Modal Handlers
@@ -1203,7 +1199,7 @@ const openSwitchingModal = (rec) => {
 
 const submitSwitching = () => {
   showSwitchingModal.value = false;
-  alert(`Proposal switching stock untuk ${selectedSwitchItem.value?.item?.name} sejumlah ${switchQty.value} unit berhasil diajukan!`);
+  toast.success(`Proposal switching stock untuk ${selectedSwitchItem.value?.item?.name} sejumlah ${switchQty.value} unit berhasil diajukan!`, 'Berhasil');
 };
 </script>
 

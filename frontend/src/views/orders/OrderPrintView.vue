@@ -15,8 +15,6 @@
         </button>
       </div>
 
-      <div v-if="errorMessage" class="no-print alert alert-danger fs-8">{{ errorMessage }}</div>
-
       <!-- Official Bank Jatim Letterhead -->
       <div class="border-b-2 border-danger pb-3 mb-4 d-flex justify-content-between align-items-start">
         <div class="d-flex align-items-center gap-3">
@@ -156,9 +154,9 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
-const errorMessage = ref('');
 
 const formatDate = (value) => {
   if (!value) return '-';
@@ -217,13 +215,12 @@ const mapOrder = (data) => ({
 });
 
 const loadOrder = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get(`/orders/${route.params.id}`);
     order.value = mapOrder(response.data);
   } catch (error) {
     order.value = emptyOrder();
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat dokumen order.';
+    toast.error(error?.message || error?.error || 'Gagal memuat dokumen order.', 'Gagal');
   }
 };
 

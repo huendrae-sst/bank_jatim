@@ -43,9 +43,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
-
     <!-- Pool Items Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="card-header border-bottom p-2 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
@@ -223,6 +220,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const selectedItems = ref([]);
 const selectAll = ref(false);
@@ -232,7 +230,6 @@ const perPage = ref(10);
 const searchQuery = ref('');
 const filterVendor = ref('ALL');
 const filterBranch = ref('ALL');
-const errorMessage = ref('');
 const vendorOptions = ref([]);
 const warehouseOptions = ref([]);
 const selectedVendorId = ref(null);
@@ -287,7 +284,6 @@ const loadOptions = async () => {
 const branchOptions = computed(() => [...new Set(poolItems.value.map(item => item.branch).filter(Boolean))]);
 
 const loadPool = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/procurement/consolidation');
     const data = response.data || [];
@@ -337,7 +333,6 @@ const toggleSelectAll = () => {
 };
 
 const consolidateToPo = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.post('/procurement/consolidate', {
       vendorId: selectedVendorId.value,
@@ -348,9 +343,10 @@ const consolidateToPo = async () => {
       poNumber: response.data?.poNumber || '-',
       total: Number(response.data?.totalAmount || 0)
     };
+    toast.success('Purchase Order berhasil diterbitkan dari pool PR.', 'Berhasil');
     await loadPool();
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menerbitkan PO dari pool PR.';
+    toast.error(error?.message || error?.error || 'Gagal menerbitkan PO dari pool PR.', 'Gagal');
   }
 };
 
@@ -359,7 +355,7 @@ onMounted(async () => {
     await loadOptions();
     await loadPool();
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal memuat data master konsolidasi.';
+    toast.error(error?.message || error?.error || 'Gagal memuat data master konsolidasi.', 'Gagal');
   }
 });
 </script>
