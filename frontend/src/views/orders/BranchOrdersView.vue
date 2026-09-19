@@ -308,13 +308,11 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
           <!-- Modal Header -->
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
             <h6 class="modal-title fw-bold text-body fs-6 mb-0">
               Buat Order Permintaan Baru
             </h6>
-            <button type="button" class="btn-close-modal" @click="createModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="createModal = false" aria-label="Close"></button>
           </div>
 
           <!-- Form Body -->
@@ -448,7 +446,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
           <!-- Modal Header -->
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
             <div class="d-flex align-items-center gap-2">
               <h6 class="modal-title fw-bold text-body fs-6 mb-0">
                 Detail Order: <span class="font-monospace text-danger">{{ viewOrder.order_number }}</span>
@@ -457,9 +455,7 @@
                 {{ getStatusLabel(viewOrder.status) }}
               </span>
             </div>
-            <button type="button" class="btn-close-modal" @click="viewModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="viewModal = false" aria-label="Close"></button>
           </div>
 
           <!-- Modal Body -->
@@ -579,7 +575,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
           <!-- Modal Header -->
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
             <div class="d-flex align-items-center gap-2">
               <h6 class="modal-title fw-bold text-body fs-6 mb-0">
                 Edit Order: <span class="font-monospace text-danger">{{ editOrder.order_number }}</span>
@@ -588,9 +584,7 @@
                 {{ getStatusLabel(editOrder.status) }}
               </span>
             </div>
-            <button type="button" class="btn-close-modal" @click="editModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="editModal = false" aria-label="Close"></button>
           </div>
 
           <!-- Modal Body -->
@@ -783,13 +777,11 @@
       <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0 shadow-lg">
           <!-- Modal Header -->
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
             <h6 class="modal-title fw-bold text-danger fs-6 mb-0">
               Konfirmasi Hapus Order
             </h6>
-            <button type="button" class="btn-close-modal" @click="deleteModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="deleteModal = false" aria-label="Close"></button>
           </div>
 
           <!-- Modal Body -->
@@ -1495,15 +1487,5 @@ const confirmDeleteOrder = async () => {
 }
 .space-y-3 > * + * {
   margin-top: 0.75rem;
-}
-.btn-close-modal {
-  background: transparent;
-  border: none;
-  font-size: 1.1rem;
-  color: var(--bs-secondary);
-  cursor: pointer;
-}
-.btn-close-modal:hover {
-  color: var(--bs-dark);
 }
 </style>

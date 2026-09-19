@@ -119,9 +119,9 @@
     <div v-if="showApproveModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header">
-            <h6 class="modal-title fw-bold">Otorisasi Persetujuan Retur</h6>
-            <button type="button" class="btn-close" @click="showApproveModal = false"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Otorisasi Persetujuan Retur</h6>
+            <button type="button" class="btn-close" @click="showApproveModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body fs-8 text-secondary">
             Apakah Anda yakin menyetujui permohonan retur barang dari <strong>{{ returnData.origin_warehouse_name }}</strong>? Cabang akan diinstruksikan untuk mengirimkan fisik barang ke gudang pusat.
@@ -138,9 +138,9 @@
     <div v-if="showRejectModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-danger text-white py-2 px-3">
-            <h6 class="modal-title fw-bold">Tolak Permohonan Retur Cabang</h6>
-            <button type="button" class="btn-close btn-close-white" @click="showRejectModal = false"></button>
+          <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
+            <h6 class="modal-title fw-bold text-danger mb-0">Tolak Permohonan Retur Cabang</h6>
+            <button type="button" class="btn-close" @click="showRejectModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body fs-8 space-y-3">
             <p class="text-secondary mb-2">Mohon berikan alasan penolakan permohonan retur ini agar cabang dapat melakukan revisi atau penyesuaian:</p>
@@ -161,9 +161,9 @@
     <div v-if="showShipModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-primary text-white py-2 px-3">
-            <h6 class="modal-title fw-bold">Kirim Fisik Barang Retur</h6>
-            <button type="button" class="btn-close btn-close-white" @click="showShipModal = false"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Kirim Fisik Barang Retur</h6>
+            <button type="button" class="btn-close" @click="showShipModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body space-y-3 fs-8">
             <div class="mb-2">
@@ -187,9 +187,9 @@
     <div v-if="showReceiveModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-success text-white py-2 px-3">
-            <h6 class="modal-title fw-bold">Konfirmasi Penerimaan Retur di Gudang Pusat</h6>
-            <button type="button" class="btn-close btn-close-white" @click="showReceiveModal = false"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Konfirmasi Penerimaan Retur di Gudang Pusat</h6>
+            <button type="button" class="btn-close" @click="showReceiveModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body space-y-3 fs-8">
             <div class="alert alert-success py-2 fs-8 border-0 mb-3">

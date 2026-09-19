@@ -156,11 +156,11 @@
     <!-- 8. Standardized Receipt Modal -->
     <div v-if="showModal" class="modal-backdrop-custom" @click.self="showModal = false">
       <div class="modal-dialog-custom card shadow-lg">
-        <div class="card-header bg-body border-bottom d-flex justify-content-between align-items-center">
-          <h5 class="mb-0 fw-bold fs-6 text-body">
+        <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+          <h6 class="mb-0 fw-bold text-body">
             Konfirmasi Penerimaan Fisik Barang PO
-          </h5>
-          <button type="button" class="btn-close-modal" @click="showModal = false" aria-label="Tutup"><i class="bi bi-x-lg"></i></button>
+          </h6>
+          <button type="button" class="btn-close" @click="showModal = false" aria-label="Close"></button>
         </div>
         <div class="card-body p-3 fs-8" v-if="selectedPo">
           <div class="alert alert-light border d-flex flex-column gap-1 mb-3">
@@ -335,15 +335,5 @@ onMounted(loadPurchaseOrders);
 .modal-dialog-custom {
   width: 500px;
   max-width: 100%;
-}
-.btn-close-modal {
-  background: transparent;
-  border: none;
-  font-size: 1.1rem;
-  color: var(--bs-secondary);
-  cursor: pointer;
-}
-.btn-close-modal:hover {
-  color: var(--bs-dark);
 }
 </style>

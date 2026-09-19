@@ -446,9 +446,9 @@
     >
       <div class="card shadow-2xl border border-secondary-subtle modal-content-custom overflow-hidden bg-body">
         <!-- Modal Header -->
-        <div class="card-header bg-danger text-white py-2 px-3 d-flex justify-content-between align-items-center">
-          <h5 class="modal-title fs-6 fw-bold mb-0">Import Saldo Awal Excel / CSV</h5>
-          <button type="button" @click="importModalOpen = false" class="btn-close btn-close-white" aria-label="Close"></button>
+        <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+          <h6 class="modal-title fw-bold text-body mb-0">Import Saldo Awal Excel / CSV</h6>
+          <button type="button" @click="importModalOpen = false" class="btn-close" aria-label="Close"></button>
         </div>
 
         <!-- Modal Form -->

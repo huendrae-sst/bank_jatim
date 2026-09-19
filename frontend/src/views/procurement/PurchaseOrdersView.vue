@@ -198,13 +198,11 @@
     <div v-if="activeGrnPo" class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.5); z-index: 1055;">
       <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-          <div class="modal-header border-bottom">
-            <h5 class="modal-title fw-bold text-body">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold text-body mb-0">
               Penerimaan Fisik (GRN) - {{ activeGrnPo.poNumber }}
-            </h5>
-            <button type="button" class="btn-close-modal" @click="activeGrnPo = null">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            </h6>
+            <button type="button" class="btn-close" @click="activeGrnPo = null" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3">
             <div class="alert alert-light border shadow-xs p-3 fs-8 mb-3">

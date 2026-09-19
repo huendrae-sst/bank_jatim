@@ -105,9 +105,9 @@
     <div v-if="showTermsModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title fs-6 fw-bold">Syarat & Ketentuan Penggunaan JIMS</h5>
-            <button type="button" class="btn-close" @click="showTermsModal = false"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fs-6 fw-bold mb-0 text-body">Syarat & Ketentuan Penggunaan JIMS</h6>
+            <button type="button" class="btn-close" @click="showTermsModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body fs-7 text-secondary">
             <p>Sistem Informasi Manajemen Persediaan (JIMS) PT Bank Pembangunan Daerah Jawa Timur Tbk hanya dapat diakses oleh pegawai dan staf resmi Bank Jatim.</p>

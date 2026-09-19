@@ -199,13 +199,11 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
           <!-- Modal Header -->
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
             <h6 class="modal-title fw-bold text-body fs-6 mb-0">
               {{ isEditMode ? 'Ubah Data Wilayah' : 'Tambah Wilayah Baru' }}
             </h6>
-            <button type="button" class="btn-close-modal" @click="showFormModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="showFormModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="saveRegion">
             <div class="modal-body p-3 fs-8 space-y-3">
@@ -335,13 +333,11 @@
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
           <!-- Modal Header -->
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
             <h6 class="modal-title fw-bold text-body fs-6 mb-0">
               Petakan Cabang: <span class="font-monospace text-danger">{{ selectedRegion?.name }}</span>
             </h6>
-            <button type="button" class="btn-close-modal" @click="showMappingModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="showMappingModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-3 fs-8 space-y-3">
             <div class="d-flex justify-content-between align-items-center mb-2">

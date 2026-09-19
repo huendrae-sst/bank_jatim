@@ -145,13 +145,11 @@
     <div v-if="showSuccessModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-          <div class="modal-header border-bottom py-2 px-3">
-            <h6 class="modal-title fw-bold text-body">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold text-body mb-0">
               Stock Opname Berhasil Disimpan
             </h6>
-            <button type="button" class="btn-close-modal" @click="showSuccessModal = false">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="showSuccessModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 fs-8 space-y-2">
             <div class="text-center py-2">

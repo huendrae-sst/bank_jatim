@@ -426,9 +426,9 @@
     <div v-if="createCoaModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
-            <h6 class="modal-title fw-bold mb-0">Tambah Rekening Akun GL Baru</h6>
-            <button type="button" class="btn-close btn-close-white" @click="createCoaModal = false" aria-label="Close"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Tambah Rekening Akun GL Baru</h6>
+            <button type="button" class="btn-close" @click="createCoaModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="submitCreateCoa">
             <div class="modal-body p-4 space-y-3">
@@ -505,9 +505,9 @@
     <div v-if="editCoaModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-primary text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
-            <h6 class="modal-title fw-bold mb-0">Edit Rekening Akun GL</h6>
-            <button type="button" class="btn-close btn-close-white" @click="editCoaModal = false" aria-label="Close"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Edit Rekening Akun GL</h6>
+            <button type="button" class="btn-close" @click="editCoaModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="submitEditCoa">
             <div class="modal-body p-4 space-y-3">
@@ -587,8 +587,8 @@
     <div v-if="viewCoaModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-            <h6 class="modal-title fw-bold mb-0">Rincian Rekening Akun GL</h6>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Rincian Rekening Akun GL</h6>
             <button type="button" class="btn-close" @click="viewCoaModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-2.5 fs-8" v-if="selectedCoa">
@@ -643,9 +643,9 @@
     <div v-if="deleteCoaModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
-            <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Akun GL</h6>
-            <button type="button" class="btn-close btn-close-white" @click="deleteCoaModal = false" aria-label="Close"></button>
+          <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
+            <h6 class="modal-title fw-bold mb-0 text-danger">Konfirmasi Hapus Akun GL</h6>
+            <button type="button" class="btn-close" @click="deleteCoaModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8" v-if="selectedCoa">
             <p class="text-secondary mb-0">Apakah Anda yakin ingin menghapus rekening akun buku besar ini dari master data?</p>
@@ -672,9 +672,9 @@
     <div v-if="createCcModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
-            <h6 class="modal-title fw-bold mb-0">Tambah Master Cost Center Baru</h6>
-            <button type="button" class="btn-close btn-close-white" @click="createCcModal = false" aria-label="Close"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Tambah Master Cost Center Baru</h6>
+            <button type="button" class="btn-close" @click="createCcModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="submitCreateCc">
             <div class="modal-body p-4 space-y-3">
@@ -752,9 +752,9 @@
     <div v-if="editCcModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-primary text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
-            <h6 class="modal-title fw-bold mb-0">Edit Cost Center</h6>
-            <button type="button" class="btn-close btn-close-white" @click="editCcModal = false" aria-label="Close"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Edit Cost Center</h6>
+            <button type="button" class="btn-close" @click="editCcModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="submitEditCc">
             <div class="modal-body p-4 space-y-3">
@@ -834,8 +834,8 @@
     <div v-if="viewCcModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-            <h6 class="modal-title fw-bold mb-0">Rincian Cost Center</h6>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Rincian Cost Center</h6>
             <button type="button" class="btn-close" @click="viewCcModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-2.5 fs-8" v-if="selectedCc">
@@ -892,9 +892,9 @@
     <div v-if="deleteCcModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
-            <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Cost Center</h6>
-            <button type="button" class="btn-close btn-close-white" @click="deleteCcModal = false" aria-label="Close"></button>
+          <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
+            <h6 class="modal-title fw-bold mb-0 text-danger">Konfirmasi Hapus Cost Center</h6>
+            <button type="button" class="btn-close" @click="deleteCcModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8" v-if="selectedCc">
             <p class="text-secondary mb-0">Apakah Anda yakin ingin menghapus Cost Center ini dari master data?</p>

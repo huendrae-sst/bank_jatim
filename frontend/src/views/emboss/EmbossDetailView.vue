@@ -225,9 +225,9 @@
     <div v-if="showGenerateModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-danger text-white py-2 px-3">
-            <h5 class="modal-title fs-6 fw-bold">Generate Order Persediaan JIMS</h5>
-            <button type="button" class="btn-close btn-close-white" @click="showGenerateModal = false"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fs-6 fw-bold text-body mb-0">Generate Order Persediaan JIMS</h6>
+            <button type="button" class="btn-close" @click="showGenerateModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8">
             <p class="text-secondary mb-3">
@@ -289,7 +289,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
           <!-- Modal Header (UI warna orders/emboss view) -->
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
             <div class="d-flex align-items-center gap-2">
               <h6 class="modal-title fw-bold text-body fs-6 mb-0">
                 Pratinjau Fisik Kartu ATM / Debit Nasabah
@@ -301,9 +301,7 @@
                 {{ selectedRecord.status }}
               </span>
             </div>
-            <button type="button" class="btn-close-modal" @click="showCardModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="showCardModal = false" aria-label="Close"></button>
           </div>
 
           <div class="modal-body p-4">
@@ -649,16 +647,6 @@ onMounted(loadAllData);
   padding: 0.15rem 0.4rem;
   font-size: 0.75rem;
   border-radius: 0.2rem;
-}
-.btn-close-modal {
-  background: transparent;
-  border: none;
-  font-size: 1.1rem;
-  color: var(--bs-secondary);
-  cursor: pointer;
-}
-.btn-close-modal:hover {
-  color: var(--bs-dark);
 }
 .spin-icon {
   animation: spin 1s linear infinite;

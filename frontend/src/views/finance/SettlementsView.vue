@@ -185,9 +185,7 @@
             <small class="text-secondary fs-9">Entri Akuntansi Otomatis Multi-Entitas JIMS</small>
           </div>
         </div>
-        <button type="button" class="btn-close-modal" @click="selectedJournal = null" aria-label="Tutup">
-          <i class="bi bi-x-lg"></i>
-        </button>
+        <button type="button" class="btn-close" @click="selectedJournal = null" aria-label="Close"></button>
       </div>
       <div class="card-body p-3">
         <div class="table-responsive">
@@ -322,14 +320,4 @@ onMounted(loadSettlements);
 </script>
 
 <style scoped>
-.btn-close-modal {
-  background: transparent;
-  border: none;
-  font-size: 1.1rem;
-  color: var(--bs-secondary);
-  cursor: pointer;
-}
-.btn-close-modal:hover {
-  color: var(--bs-dark);
-}
 </style>

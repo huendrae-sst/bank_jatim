@@ -141,9 +141,9 @@
       <div v-if="showRejectModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content border-0 shadow">
-            <div class="modal-header bg-danger text-white py-2.5 px-3">
-              <h6 class="modal-title fw-bold">Tolak Purchase Request</h6>
-              <button type="button" class="btn-close btn-close-white" @click="showRejectModal = false"></button>
+            <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
+              <h6 class="modal-title fw-bold text-danger mb-0">Tolak Purchase Request</h6>
+              <button type="button" class="btn-close" @click="showRejectModal = false" aria-label="Close"></button>
             </div>
             <div class="modal-body p-3 fs-8">
               <p class="text-secondary mb-2">

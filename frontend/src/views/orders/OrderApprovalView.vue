@@ -558,11 +558,9 @@
     <!-- ==================== MODAL: TOLAK PESANAN (Tanpa Icon di Judul) ==================== -->
     <div v-if="orderToReject" class="modal-backdrop-custom" @click.self="orderToReject = null">
       <div class="modal-dialog-custom modal-sm card shadow-lg">
-        <div class="card-header bg-danger-subtle d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom border-danger-subtle">
+        <div class="card-header bg-danger-subtle d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
           <h6 class="modal-title fw-bold text-danger mb-0">Konfirmasi Penolakan Order</h6>
-          <button type="button" class="btn-close-modal" @click="orderToReject = null">
-            <i class="bi bi-x-lg"></i>
-          </button>
+          <button type="button" class="btn-close" @click="orderToReject = null" aria-label="Close"></button>
         </div>
         <div class="card-body p-3.5 fs-8">
           <div class="p-2.5 rounded-3 bg-body-secondary border border-secondary-subtle mb-3">
@@ -598,11 +596,9 @@
     <!-- ==================== MODAL: SWITCHING STOCK (Tanpa Icon di Judul) ==================== -->
     <div v-if="showSwitchingModal" class="modal-backdrop-custom" @click.self="showSwitchingModal = false">
       <div class="modal-dialog-custom card shadow-lg">
-        <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
+        <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
           <h6 class="modal-title fw-bold mb-0 text-body">Form Pengajuan Switching Stock</h6>
-          <button type="button" class="btn-close-modal" @click="showSwitchingModal = false">
-            <i class="bi bi-x-lg"></i>
-          </button>
+          <button type="button" class="btn-close" @click="showSwitchingModal = false" aria-label="Close"></button>
         </div>
         <div class="card-body p-3.5 fs-8 space-y-3">
           <div>

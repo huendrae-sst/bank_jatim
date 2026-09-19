@@ -225,11 +225,9 @@
     <!-- Reject Modal -->
     <div v-if="showRejectModal" class="modal-backdrop-custom" @click.self="showRejectModal = false">
       <div class="modal-dialog-custom modal-sm card shadow-lg">
-        <div class="card-header bg-danger-subtle d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom border-danger-subtle">
+        <div class="card-header bg-danger-subtle d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
           <h6 class="modal-title fw-bold text-danger mb-0">Konfirmasi Penolakan Order</h6>
-          <button type="button" class="btn-close-modal" @click="showRejectModal = false">
-            <i class="bi bi-x-lg"></i>
-          </button>
+          <button type="button" class="btn-close" @click="showRejectModal = false" aria-label="Close"></button>
         </div>
         <div class="card-body p-3.5 fs-8">
           <p class="text-secondary mb-2">Tuliskan alasan penolakan permintaan logistik ini:</p>
@@ -245,11 +243,9 @@
     <!-- Switching Stock Modal -->
     <div v-if="showSwitchingModal" class="modal-backdrop-custom" @click.self="showSwitchingModal = false">
       <div class="modal-dialog-custom card shadow-lg">
-        <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
+        <div class="card-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
           <h6 class="modal-title fw-bold mb-0 text-body">Form Pengajuan Switching Stock</h6>
-          <button type="button" class="btn-close-modal" @click="showSwitchingModal = false">
-            <i class="bi bi-x-lg"></i>
-          </button>
+          <button type="button" class="btn-close" @click="showSwitchingModal = false" aria-label="Close"></button>
         </div>
         <div class="card-body p-3.5 fs-8 space-y-3">
           <div>

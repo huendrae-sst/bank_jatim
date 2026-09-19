@@ -156,13 +156,11 @@
     <div v-if="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;" @click.self="showModal = false">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow-lg">
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
             <h6 class="modal-title fw-bold text-body fs-6 mb-0">
               Form Pengajuan Switching Stock Antar-Cabang
             </h6>
-            <button type="button" class="btn-close-modal" @click="showModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="showModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="saveSwitching">
             <div class="modal-body p-3 fs-8 space-y-3">
@@ -215,13 +213,11 @@
     <div v-if="showDetailModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;" @click.self="showDetailModal = false">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-          <div class="modal-header bg-body border-bottom d-flex justify-content-between align-items-center">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
             <h6 class="modal-title fw-bold text-body fs-6 mb-0">
               Rincian Pengajuan Switching Stock
             </h6>
-            <button type="button" class="btn-close-modal" @click="showDetailModal = false" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            <button type="button" class="btn-close" @click="showDetailModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-3 fs-8" v-if="selectedSwitch">
             <div class="mb-3">
@@ -434,14 +430,4 @@ onMounted(loadPage);
 </script>
 
 <style scoped>
-.btn-close-modal {
-  background: transparent;
-  border: none;
-  font-size: 1.1rem;
-  color: var(--bs-secondary);
-  cursor: pointer;
-}
-.btn-close-modal:hover {
-  color: var(--bs-dark);
-}
 </style>

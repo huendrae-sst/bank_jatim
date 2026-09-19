@@ -106,9 +106,9 @@
     <div v-if="showApproveModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header">
-            <h6 class="modal-title fw-bold">Otorisasi Persetujuan Pemusnahan</h6>
-            <button type="button" class="btn-close" @click="showApproveModal = false"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold text-body mb-0">Otorisasi Persetujuan Pemusnahan</h6>
+            <button type="button" class="btn-close" @click="showApproveModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body fs-8 text-secondary">
             Apakah Anda menyetujui pemusnahan resmi sebanyak <strong>{{ formatNumber(destruction.total_qty) }} barang</strong> dengan total estimasi kerugian <strong>{{ formatRupiah(destruction.total_loss_value) }}</strong> di {{ destruction.warehouse_name }}?
@@ -125,9 +125,9 @@
     <div v-if="showExecuteModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header">
-            <h6 class="modal-title fw-bold text-dark">Eksekusi Pemusnahan Fisik</h6>
-            <button type="button" class="btn-close" @click="showExecuteModal = false"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold text-body mb-0">Eksekusi Pemusnahan Fisik</h6>
+            <button type="button" class="btn-close" @click="showExecuteModal = false" aria-label="Close"></button>
           </div>
           <div class="modal-body space-y-3 fs-8">
             <div class="alert alert-warning py-2 fs-8 border-0 mb-3">

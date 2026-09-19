@@ -588,9 +588,9 @@
     <div v-if="editVendorModalOpen" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-primary text-white d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-            <h6 class="modal-title fw-bold mb-0">Edit Vendor Rekanan</h6>
-            <button type="button" class="btn-close btn-close-white" @click="editVendorModalOpen = false" aria-label="Close"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Edit Vendor Rekanan</h6>
+            <button type="button" class="btn-close" @click="editVendorModalOpen = false" aria-label="Close"></button>
           </div>
 
           <form @submit.prevent="submitEditVendor">
@@ -671,9 +671,9 @@
     <div v-if="deleteVendorModalOpen" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
-            <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Vendor</h6>
-            <button type="button" class="btn-close btn-close-white" @click="deleteVendorModalOpen = false" aria-label="Close"></button>
+          <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
+            <h6 class="modal-title fw-bold mb-0 text-danger">Konfirmasi Hapus Vendor</h6>
+            <button type="button" class="btn-close" @click="deleteVendorModalOpen = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8" v-if="selectedVendor">
             <p class="text-secondary mb-0">Apakah Anda yakin ingin menghapus rekanan vendor ini dari master data?</p>
@@ -844,9 +844,9 @@
     <div v-if="editCourierModalOpen" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-primary text-white d-flex align-items-center justify-content-between py-2.5 px-4 border-bottom">
-            <h6 class="modal-title fw-bold mb-0">Edit Mitra Ekspedisi</h6>
-            <button type="button" class="btn-close btn-close-white" @click="editCourierModalOpen = false" aria-label="Close"></button>
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">Edit Mitra Ekspedisi</h6>
+            <button type="button" class="btn-close" @click="editCourierModalOpen = false" aria-label="Close"></button>
           </div>
 
           <form @submit.prevent="submitEditCourier">
@@ -921,9 +921,9 @@
     <div v-if="deleteCourierModalOpen" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border border-secondary-subtle shadow-2xl">
-          <div class="modal-header bg-danger text-white py-2.5 px-4 d-flex align-items-center justify-content-between">
-            <h6 class="modal-title fw-bold mb-0">Konfirmasi Hapus Ekspedisi</h6>
-            <button type="button" class="btn-close btn-close-white" @click="deleteCourierModalOpen = false" aria-label="Close"></button>
+          <div class="modal-header bg-danger-subtle text-danger d-flex align-items-center justify-content-between py-3 px-4 border-bottom border-danger-subtle">
+            <h6 class="modal-title fw-bold mb-0 text-danger">Konfirmasi Hapus Ekspedisi</h6>
+            <button type="button" class="btn-close" @click="deleteCourierModalOpen = false" aria-label="Close"></button>
           </div>
           <div class="modal-body p-4 space-y-3 fs-8" v-if="selectedCourier">
             <p class="text-secondary mb-0">Apakah Anda yakin ingin menghapus mitra ekspedisi ini dari master data?</p>

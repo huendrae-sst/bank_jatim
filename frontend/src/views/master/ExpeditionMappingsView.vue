@@ -61,11 +61,11 @@
     <div v-if="showModal" class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
-          <div class="modal-header bg-danger text-white py-2 px-3">
-            <h6 class="modal-title fw-bold">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold mb-0 text-body">
               {{ isEditMode ? 'Edit Pemetaan Rute Ekspedisi' : 'Tambah Pemetaan Rute Baru' }}
             </h6>
-            <button type="button" class="btn-close btn-close-white" @click="showModal = false"></button>
+            <button type="button" class="btn-close" @click="showModal = false" aria-label="Close"></button>
           </div>
           <form @submit.prevent="saveMapping">
             <div class="modal-body p-3 fs-8 space-y-3">

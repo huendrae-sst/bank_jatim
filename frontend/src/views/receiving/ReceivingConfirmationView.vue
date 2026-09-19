@@ -129,13 +129,11 @@
     <div v-if="selectedShipment" class="modal fade show d-block" tabindex="-1" style="background: rgba(0, 0, 0, 0.5); z-index: 1055;">
       <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
-          <div class="modal-header border-bottom bg-body d-flex justify-content-between align-items-center">
-            <h5 class="modal-title fw-bold text-body fs-6 mb-0">
+          <div class="modal-header bg-body-tertiary d-flex align-items-center justify-content-between py-3 px-4 border-bottom">
+            <h6 class="modal-title fw-bold text-body fs-6 mb-0">
               Konfirmasi Penerimaan: {{ selectedShipment.awb }}
-            </h5>
-            <button type="button" class="btn-close-modal" @click="selectedShipment = null" aria-label="Tutup">
-              <i class="bi bi-x-lg"></i>
-            </button>
+            </h6>
+            <button type="button" class="btn-close" @click="selectedShipment = null" aria-label="Close"></button>
           </div>
           <div class="modal-body p-3 fs-8 space-y-3">
             <div class="alert alert-light border shadow-xs p-3 mb-3">
@@ -280,14 +278,4 @@ onMounted(loadIncomingShipments);
 </script>
 
 <style scoped>
-.btn-close-modal {
-  background: transparent;
-  border: none;
-  font-size: 1.1rem;
-  color: var(--bs-secondary);
-  cursor: pointer;
-}
-.btn-close-modal:hover {
-  color: var(--bs-dark);
-}
 </style>
