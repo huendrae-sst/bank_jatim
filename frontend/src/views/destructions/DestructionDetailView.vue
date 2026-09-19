@@ -152,6 +152,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 
@@ -252,7 +253,7 @@ const fetchDestructionDetail = async () => {
 const approveDestruction = () => {
   destruction.value.status = 'APPROVED';
   showApproveModal.value = false;
-  alert('Pemusnahan barang telah disetujui.');
+  toast.success('Pemusnahan barang telah disetujui.');
 };
 
 const executeDestruction = async () => {
@@ -267,10 +268,10 @@ const executeDestruction = async () => {
     destruction.value.status = 'EXECUTED';
     destruction.value.executed_at = new Date().toLocaleString('id-ID');
     showExecuteModal.value = false;
-    alert('Eksekusi pemusnahan berhasil dicatat ke dalam buku besar persediaan!');
+    toast.success('Eksekusi pemusnahan berhasil dicatat ke dalam buku besar persediaan!');
   } catch (err) {
     console.error('Failed to execute destruction', err);
-    alert('Gagal mengeksekusi pemusnahan: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal mengeksekusi pemusnahan: ' + (err.response?.data?.message || err.message));
   }
 };
 

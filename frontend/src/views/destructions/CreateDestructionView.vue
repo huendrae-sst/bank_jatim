@@ -155,6 +155,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const router = useRouter();
 const submitting = ref(false);
@@ -218,11 +219,11 @@ const submitDestruction = async () => {
         notes: `${form.reason} - ${item.notes || form.reason_details || 'Pemusnahan barang persediaan'}`
       });
     }
-    alert('Pengajuan pemusnahan barang berhasil dikirim dan dicatat!');
+    toast.success('Pengajuan pemusnahan barang berhasil dikirim dan dicatat!');
     router.push('/destructions');
   } catch (err) {
     console.error('Failed to submit destruction', err);
-    alert('Gagal mengirim pengajuan pemusnahan: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal mengirim pengajuan pemusnahan: ' + (err.response?.data?.message || err.message));
   } finally {
     submitting.value = false;
   }

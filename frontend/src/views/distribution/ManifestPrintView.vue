@@ -108,10 +108,10 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
-const errorMessage = ref('');
 
 const shipment = ref({
   manifest_number: '',
@@ -150,7 +150,6 @@ const triggerPrint = () => {
 
 const fetchShipment = async () => {
   isLoading.value = true;
-  errorMessage.value = '';
   try {
     const res = await api.get(`/distribution/shipments/${route.params.id}`);
     const data = res.data.data || res.data;
@@ -178,7 +177,7 @@ const fetchShipment = async () => {
     };
   } catch (err) {
     console.error('Failed to load manifest print data', err);
-    errorMessage.value = 'Gagal memuat surat jalan manifest: ' + (err.response?.data?.message || err.message);
+    toast.error('Gagal memuat surat jalan manifest: ' + (err.response?.data?.message || err.message));
   } finally {
     isLoading.value = false;
   }

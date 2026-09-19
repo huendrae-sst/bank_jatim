@@ -18,15 +18,6 @@
       </div>
     </div>
 
-    <!-- Alert Message -->
-    <div v-if="alertMessage" :class="`alert alert-${alertType} alert-dismissible fade show fs-8 py-2.5 px-3 shadow-xs mb-3`">
-      <div class="d-flex align-items-center">
-        <i :class="alertType === 'success' ? 'bi bi-check-circle-fill me-2 fs-5' : 'bi bi-exclamation-triangle-fill me-2 fs-5'"></i>
-        <div class="flex-grow-1">{{ alertMessage }}</div>
-        <button type="button" class="btn-close" @click="alertMessage = ''"></button>
-      </div>
-    </div>
-
     <!-- Form Utama Inisiasi Distribusi Rutin -->
     <div class="card card-outline card-danger shadow-xs">
       <div class="card-header bg-body py-2.5 px-3 border-bottom">
@@ -430,9 +421,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
-const alertMessage = ref('');
-const alertType = ref('success');
 const submitting = ref(false);
 const loadingRefs = ref(false);
 
@@ -646,7 +636,7 @@ const applyPresetToBranch = (branch) => {
 const copyItemsToAllBranches = (sourceBranch) => {
   const valid = getBranchValidItems(sourceBranch);
   if (valid.length === 0) {
-    alert('Silakan pilih minimal 1 item barang yang valid pada cabang ini sebelum menyalin.');
+    toast.warn('Silakan pilih minimal 1 item barang yang valid pada cabang ini sebelum menyalin.');
     return;
   }
   const orgName = getOrgMeta(sourceBranch.orgId)?.name || 'cabang ini';
@@ -658,7 +648,7 @@ const copyItemsToAllBranches = (sourceBranch) => {
       b.items = valid.map(it => ({ itemId: it.itemId, qty: it.qty }));
     }
   });
-  alert(`Berhasil menyalin susunan barang ke seluruh ${formRoutine.value.branches.length - 1} cabang lainnya.`);
+  toast.success(`Berhasil menyalin susunan barang ke seluruh ${formRoutine.value.branches.length - 1} cabang lainnya.`);
 };
 
 const resetForm = () => {
@@ -679,7 +669,7 @@ const resetForm = () => {
 
 const submitRoutineDrop = async () => {
   if (validBranches.value.length === 0) {
-    alert('Silakan pilih minimal 1 kantor cabang tujuan dan tentukan barang alokasinya.');
+    toast.warn('Silakan pilih minimal 1 kantor cabang tujuan dan tentukan barang alokasinya.');
     return;
   }
 
@@ -687,7 +677,6 @@ const submitRoutineDrop = async () => {
   if (!confirm(confirmMsg)) return;
 
   submitting.value = true;
-  alertMessage.value = '';
 
   try {
     const branchAllocations = validBranches.value.map(b => ({
@@ -723,8 +712,7 @@ const submitRoutineDrop = async () => {
     const res = await api.post('/distribution/routine-drops', payload);
     const createdOrders = extractList(res);
 
-    alertType.value = 'success';
-    alertMessage.value = `Sukses! Berhasil menerbitkan Distribusi Rutin untuk ${createdOrders.length || validBranches.value.length} kantor cabang dengan rincian barang spesifik masing-masing. Seluruh order telah berstatus APPROVED dan langsung masuk ke Antrean Picking Gudang.`;
+    toast.success(`Sukses! Berhasil menerbitkan Distribusi Rutin untuk ${createdOrders.length || validBranches.value.length} kantor cabang dengan rincian barang spesifik masing-masing. Seluruh order telah berstatus APPROVED dan langsung masuk ke Antrean Picking Gudang.`);
 
     await loadRoutineHistory();
     formRoutine.value.branches = [{
@@ -734,9 +722,8 @@ const submitRoutineDrop = async () => {
     }];
   } catch (err) {
     console.error('Error submitRoutineDrop:', err);
-    alertType.value = 'danger';
     const serverErr = err?.response?.data?.message || err?.response?.data?.error || err?.message || err;
-    alertMessage.value = 'Gagal menerbitkan distribusi rutin: ' + serverErr;
+    toast.error('Gagal menerbitkan distribusi rutin: ' + serverErr);
   } finally {
     submitting.value = false;
   }

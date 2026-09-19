@@ -138,6 +138,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const router = useRouter();
 const submitting = ref(false);
@@ -202,11 +203,11 @@ const submitReturn = async () => {
         notes: it.notes
       }))
     });
-    alert('Pengajuan retur barang persediaan berhasil dikirim!');
+    toast.success('Pengajuan retur barang persediaan berhasil dikirim!');
     router.push('/returns');
   } catch (err) {
     console.error('Failed to submit return', err);
-    alert('Gagal mengirim pengajuan retur: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal mengirim pengajuan retur: ' + (err.response?.data?.message || err.message));
   } finally {
     submitting.value = false;
   }

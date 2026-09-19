@@ -235,6 +235,7 @@
 import { reactive, ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
@@ -340,10 +341,10 @@ const approveReturn = async () => {
     await api.post(`/returns/${returnData.value.id}/approve`);
     returnData.value.status = 'APPROVED';
     showApproveModal.value = false;
-    alert('Permohonan retur telah disetujui!');
+    toast.success('Permohonan retur telah disetujui!');
   } catch (err) {
     console.error('Failed to approve return', err);
-    alert('Gagal menyetujui retur: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menyetujui retur: ' + (err.response?.data?.message || err.message));
   }
 };
 
@@ -354,10 +355,10 @@ const rejectReturn = async () => {
     });
     returnData.value.status = 'REJECTED';
     showRejectModal.value = false;
-    alert('Permohonan retur telah ditolak.');
+    toast.info('Permohonan retur telah ditolak.');
   } catch (err) {
     console.error('Failed to reject return', err);
-    alert('Gagal menolak retur: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menolak retur: ' + (err.response?.data?.message || err.message));
   }
 };
 
@@ -372,10 +373,10 @@ const confirmShip = async () => {
     returnData.value.tracking_number = shipForm.tracking_number;
     returnData.value.shipped_at = new Date().toLocaleString('id-ID');
     showShipModal.value = false;
-    alert('Pengiriman barang retur berhasil dikonfirmasi!');
+    toast.success('Pengiriman barang retur berhasil dikonfirmasi!');
   } catch (err) {
     console.error('Failed to ship return', err);
-    alert('Gagal mengkonfirmasi kirim: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal mengkonfirmasi kirim: ' + (err.response?.data?.message || err.message));
   }
 };
 
@@ -389,10 +390,10 @@ const confirmReceive = async () => {
     await api.post(`/returns/${returnData.value.id}/receive`, { items });
     returnData.value.status = 'RECEIVED';
     showReceiveModal.value = false;
-    alert('Penerimaan retur di Gudang Pusat berhasil diverifikasi dan stok diperbarui!');
+    toast.success('Penerimaan retur di Gudang Pusat berhasil diverifikasi dan stok diperbarui!');
   } catch (err) {
     console.error('Failed to receive return', err);
-    alert('Gagal menyimpan penerimaan: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menyimpan penerimaan: ' + (err.response?.data?.message || err.message));
   }
 };
 

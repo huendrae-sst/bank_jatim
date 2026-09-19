@@ -317,6 +317,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const showCreateModal = ref(false);
@@ -437,10 +438,11 @@ const saveReturn = async () => {
       ]
     });
     showCreateModal.value = false;
+    toast.success('Pengajuan retur berhasil dibuat!');
     await fetchReturns();
   } catch (err) {
     console.error('Failed to save return', err);
-    alert('Gagal membuat retur: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal membuat retur: ' + (err.response?.data?.message || err.message));
   }
 };
 

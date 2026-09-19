@@ -323,6 +323,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const showCreateModal = ref(false);
@@ -399,10 +400,11 @@ const saveDestruction = async () => {
       notes: `${destructionForm.method} - ${destructionForm.notes || 'Pemusnahan fisik'}`
     });
     showCreateModal.value = false;
+    toast.success('Pengajuan pemusnahan berhasil disimpan!');
     await fetchDestructions();
   } catch (err) {
     console.error('Failed to save destruction', err);
-    alert('Gagal menyimpan pemusnahan: ' + (err.response?.data?.message || err.message));
+    toast.error('Gagal menyimpan pemusnahan: ' + (err.response?.data?.message || err.message));
   }
 };
 

@@ -18,9 +18,6 @@
       </div>
     </div>
 
-
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- Main Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- Card Header with Navigation Tabs & Action Button -->
@@ -285,6 +282,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 import PaginationFooter from '@/components/PaginationFooter.vue';
 
 const showCreateModal = ref(false);
@@ -296,7 +294,6 @@ const searchQuery = ref('');
 const activeTab = ref('all');
 const filterBranch = ref('ALL');
 const filterStatus = ref('ALL');
-const errorMessage = ref('');
 
 const resetFilters = () => {
   searchQuery.value = '';
@@ -326,7 +323,6 @@ const mapDiscrepancy = (record) => ({
 const records = ref([]);
 
 const loadDiscrepancies = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/receiving/discrepancies');
     const data = response.data?.content || response.data || [];
@@ -376,7 +372,7 @@ const openDetailModal = (r) => {
 };
 
 const saveDiscrepancy = () => {
-  errorMessage.value = 'Pembuatan BA selisih manual belum memiliki endpoint backend persistent. Gunakan alur konfirmasi penerimaan dengan diskrepansi agar tercatat di database.';
+  toast.warn('Pembuatan BA selisih manual belum memiliki endpoint backend persistent. Gunakan alur konfirmasi penerimaan dengan diskrepansi agar tercatat di database.');
   showCreateModal.value = false;
 };
 

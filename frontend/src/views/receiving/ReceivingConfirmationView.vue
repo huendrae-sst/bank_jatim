@@ -19,8 +19,6 @@
     </div>
 
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
@@ -198,6 +196,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const searchQuery = ref('');
 const currentPage = ref(1);
@@ -208,7 +207,6 @@ const discrepancyType = ref('DAMAGED');
 const discrepancyQty = ref(5);
 const discrepancyNotes = ref('');
 const receiverName = ref('Lutfi Anshari (Petugas Logistik Cabang)');
-const errorMessage = ref('');
 
 const mapShipment = (shipment) => ({
   id: shipment.id,
@@ -254,7 +252,7 @@ const submitReceipt = async () => {
   if (!selectedShipment.value) return;
 
   if (receiptCondition.value === 'DISKREPANSI') {
-    errorMessage.value = 'Konfirmasi dengan diskrepansi membutuhkan pilihan item/order item dari backend. Data tidak disimpan lokal.';
+    toast.warn('Konfirmasi dengan diskrepansi membutuhkan pilihan item/order item dari backend. Data tidak disimpan lokal.');
     return;
   }
 
@@ -267,10 +265,10 @@ const submitReceipt = async () => {
       discrepancies
     });
     await loadIncomingShipments();
-    alert('Barang resmi diterima di gudang cabang! Saldo persediaan cabang bertambah dan Berita Acara Penerimaan (BAP) tercatat.');
+    toast.success('Barang resmi diterima di gudang cabang! Saldo persediaan cabang bertambah dan Berita Acara Penerimaan (BAP) tercatat.');
     selectedShipment.value = null;
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal menyimpan konfirmasi penerimaan.';
+    toast.error(error?.message || error?.error || 'Gagal menyimpan konfirmasi penerimaan.');
   }
 };
 

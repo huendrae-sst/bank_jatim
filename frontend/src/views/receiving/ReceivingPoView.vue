@@ -19,8 +19,6 @@
     </div>
 
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
@@ -194,6 +192,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const showModal = ref(false);
 const selectedPo = ref(null);
@@ -204,7 +203,6 @@ const perPage = ref(10);
 const searchQuery = ref('');
 const filterStatus = ref('');
 const activeTab = ref('queue');
-const errorMessage = ref('');
 
 const toReceivingStatus = (status, qtyOrdered, qtyReceived) => {
   if (status === 'RECEIVED' || qtyReceived >= qtyOrdered && qtyOrdered > 0) return 'COMPLETED';
@@ -295,11 +293,11 @@ const openReceiptForm = (po) => {
 
 const submitReceipt = async () => {
   if (!receiveQty.value || receiveQty.value <= 0) {
-    alert('Jumlah fisik masuk harus lebih besar dari 0.');
+    toast.warn('Jumlah fisik masuk harus lebih besar dari 0.');
     return;
   }
   if (!deliveryNote.value) {
-    alert('Nomor Surat Jalan / DO Vendor wajib diisi.');
+    toast.warn('Nomor Surat Jalan / DO Vendor wajib diisi.');
     return;
   }
   if (!selectedPo.value) {
@@ -312,9 +310,9 @@ const submitReceipt = async () => {
     });
     await loadPurchaseOrders();
     showModal.value = false;
-    alert('Penerimaan barang sukses dicatat. Saldo stok Gudang Margomulyo telah bertambah.');
+    toast.success('Penerimaan barang sukses dicatat. Saldo stok Gudang Margomulyo telah bertambah.');
   } catch (error) {
-    errorMessage.value = error?.message || error?.error || 'Gagal mencatat penerimaan PO ke backend.';
+    toast.error(error?.message || error?.error || 'Gagal mencatat penerimaan PO ke backend.');
   }
 };
 

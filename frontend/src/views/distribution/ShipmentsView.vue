@@ -73,9 +73,6 @@
       </div>
     </div>
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-    <div v-if="successMessage" class="alert alert-success fs-8">{{ successMessage }}</div>
-
     <!-- Main Table Card -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- Card Header with Navigation Tabs & Action Button -->
@@ -420,6 +417,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const searchQuery = ref('');
 const activeTab = ref('queue');
@@ -430,8 +428,6 @@ const showCreateModal = ref(false);
 const showBulkModal = ref(false);
 const currentPage = ref(1);
 const perPage = ref(10);
-const errorMessage = ref('');
-const successMessage = ref('');
 const readyOrders = ref([]);
 const masterCouriers = ref([]);
 const selectedBulkOrderIds = ref([]);
@@ -592,7 +588,6 @@ const selectAllBulkOrders = () => {
 };
 
 const submitCreateShipment = async () => {
-  errorMessage.value = '';
   try {
     await api.post('/distribution/shipments', {
       orderId: newShipment.value.orderId,
@@ -601,18 +596,18 @@ const submitCreateShipment = async () => {
       trackingNumber: newShipment.value.trackingNumber,
       shippingCost: 0
     });
-    successMessage.value = 'Manifest pengiriman satuan berhasil diterbitkan!';
+    toast.success('Manifest pengiriman satuan berhasil diterbitkan!');
     await loadShipments();
     await loadCreateOptions();
     showCreateModal.value = false;
   } catch (error) {
-    errorMessage.value = error?.response?.data?.message || error?.message || 'Gagal menerbitkan manifest pengiriman.';
+    toast.error(error?.response?.data?.message || error?.message || 'Gagal menerbitkan manifest pengiriman.');
   }
 };
 
 const submitBulkShipment = async () => {
   if (selectedBulkOrderIds.value.length === 0) {
-    alert('Pilih minimal 1 order untuk diterbitkan manifest');
+    toast.warn('Pilih minimal 1 order untuk diterbitkan manifest');
     return;
   }
   submittingBulk.value = true;
@@ -627,12 +622,12 @@ const submitBulkShipment = async () => {
     };
     const res = await api.post('/distribution/shipments/bulk', payload);
     const created = res.data?.data || [];
-    successMessage.value = `Berhasil menerbitkan Batch Manifest (${bulkForm.value.batchManifestNumber}) untuk ${created.length} cabang tujuan!`;
+    toast.success(`Berhasil menerbitkan Batch Manifest (${bulkForm.value.batchManifestNumber}) untuk ${created.length} cabang tujuan!`);
     showBulkModal.value = false;
     await loadShipments();
     await loadCreateOptions();
   } catch (error) {
-    errorMessage.value = error?.response?.data?.message || error?.message || 'Gagal menerbitkan batch manifest pengiriman.';
+    toast.error(error?.response?.data?.message || error?.message || 'Gagal menerbitkan batch manifest pengiriman.');
   } finally {
     submittingBulk.value = false;
   }

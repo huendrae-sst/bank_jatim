@@ -59,10 +59,10 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
-const errorMessage = ref('');
 
 const label = ref({
   manifest_number: '',
@@ -81,7 +81,6 @@ const triggerPrint = () => {
 
 const fetchLabel = async () => {
   isLoading.value = true;
-  errorMessage.value = '';
   try {
     const res = await api.get(`/distribution/shipments/${route.params.id}`);
     const data = res.data.data || res.data;
@@ -97,7 +96,7 @@ const fetchLabel = async () => {
     };
   } catch (err) {
     console.error('Failed to load shipment label', err);
-    errorMessage.value = 'Gagal memuat data label pengiriman: ' + (err.response?.data?.message || err.message);
+    toast.error('Gagal memuat data label pengiriman: ' + (err.response?.data?.message || err.message));
   } finally {
     isLoading.value = false;
   }

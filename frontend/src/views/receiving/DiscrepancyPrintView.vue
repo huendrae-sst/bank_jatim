@@ -173,10 +173,10 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
-const errorMessage = ref('');
 
 const discrepancy = ref({
   ba_number: '',
@@ -237,7 +237,7 @@ const fetchDiscrepancy = async () => {
     };
   } catch (err) {
     console.error('Failed to load discrepancy print data', err);
-    errorMessage.value = 'Gagal memuat berita acara selisih: ' + (err.response?.data?.message || err.message);
+    toast.error('Gagal memuat berita acara selisih: ' + (err.response?.data?.message || err.message));
   } finally {
     isLoading.value = false;
   }

@@ -100,6 +100,7 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import api from '@/api/client';
+import { toast } from '@/utils/toast';
 
 const route = useRoute();
 const isLoading = ref(true);
@@ -170,6 +171,7 @@ const fetchDestruction = async () => {
     }
   } catch (err) {
     console.error('Failed to load destruction for berita acara', err);
+    toast.error('Gagal memuat berita acara pemusnahan');
   } finally {
     isLoading.value = false;
   }

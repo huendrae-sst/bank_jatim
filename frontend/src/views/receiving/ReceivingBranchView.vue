@@ -19,8 +19,6 @@
     </div>
 
 
-    <div v-if="errorMessage" class="alert alert-danger fs-8">{{ errorMessage }}</div>
-
     <!-- 3. Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs">
       <!-- 4. Card Header with Tabs & Tools -->
@@ -155,13 +153,13 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const currentPage = ref(1);
 const perPage = ref(10);
 const searchQuery = ref('');
 const filterCourier = ref('');
 const activeTab = ref('incoming');
-const errorMessage = ref('');
 
 const mapInbound = (shipment) => ({
   id: shipment.id,
@@ -176,7 +174,6 @@ const mapInbound = (shipment) => ({
 const inboundList = ref([]);
 
 const loadInboundShipments = async () => {
-  errorMessage.value = '';
   try {
     const response = await api.get('/distribution/shipments');
     const data = response.data?.content || response.data || [];
@@ -225,9 +222,9 @@ const confirmReceipt = async (item) => {
         discrepancies: []
       });
       await loadInboundShipments();
-      alert(`Paket ${item.shipmentNo} berhasil diverifikasi. Stok cabang telah bertambah secara otomatis.`);
+      toast.success(`Paket ${item.shipmentNo} berhasil diverifikasi. Stok cabang telah bertambah secara otomatis.`);
     } catch (error) {
-      errorMessage.value = error?.message || error?.error || 'Gagal mengonfirmasi penerimaan paket.';
+      toast.error(error?.message || error?.error || 'Gagal mengonfirmasi penerimaan paket.');
     }
   }
 };
