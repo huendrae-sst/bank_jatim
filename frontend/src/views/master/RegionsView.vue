@@ -18,18 +18,6 @@
       </div>
     </div>
 
-    <!-- Error Alert -->
-    <div v-if="errorMessage" class="alert alert-danger alert-dismissible fade show fs-8 mb-3" role="alert">
-      <i class="bi bi-exclamation-triangle-fill me-1"></i> {{ errorMessage }}
-      <button type="button" class="btn-close" @click="errorMessage = ''" aria-label="Close"></button>
-    </div>
-
-    <!-- Success Alert -->
-    <div v-if="successMessage" class="alert alert-success alert-dismissible fade show fs-8 mb-3" role="alert">
-      <i class="bi bi-check-circle-fill me-1"></i> {{ successMessage }}
-      <button type="button" class="btn-close" @click="successMessage = ''" aria-label="Close"></button>
-    </div>
-
     <!-- Main Card Outline -->
     <div class="card card-outline card-danger shadow-xs mb-3">
       <!-- Card Header with Tools -->
@@ -424,8 +412,22 @@ import { ref, reactive, computed, onMounted } from 'vue';
 import api from '@/api/client';
 import { useAuthStore } from '@/stores/auth';
 import PaginationFooter from '@/components/PaginationFooter.vue';
+import { toast } from '@/utils/toast';
 
 const authStore = useAuthStore();
+
+// Toast notification helper
+const showAlert = (msg, type = 'success') => {
+  if (type === 'success') {
+    toast.success(msg, 'Berhasil');
+  } else if (type === 'error') {
+    toast.error(msg, 'Gagal');
+  } else if (type === 'warn' || type === 'warning') {
+    toast.warn(msg, 'Peringatan');
+  } else {
+    toast.info(msg, 'Informasi');
+  }
+};
 
 // Permission check
 const canManage = computed(() => {
@@ -436,8 +438,6 @@ const canManage = computed(() => {
 // State
 const loading = ref(false);
 const submitting = ref(false);
-const errorMessage = ref('');
-const successMessage = ref('');
 const regions = ref([]);
 const branches = ref([]);
 
@@ -521,7 +521,6 @@ const filteredMappingBranches = computed(() => {
 // Fetch Data
 const loadData = async () => {
   loading.value = true;
-  errorMessage.value = '';
   try {
     const [regRes, orgRes] = await Promise.all([
       api.get('/master/regions'),
@@ -537,7 +536,7 @@ const loadData = async () => {
     branches.value = allOrgs.filter(o => o.type === 'MAIN_BRANCH' || o.type === 'CABANG_UTAMA');
   } catch (err) {
     console.error('Failed to load regions or organizations:', err);
-    errorMessage.value = err?.message || err?.error || 'Gagal memuat data master wilayah.';
+    showAlert(err?.message || err?.error || 'Gagal memuat data master wilayah.', 'error');
   } finally {
     loading.value = false;
   }
@@ -577,8 +576,6 @@ const openEditModal = (reg) => {
 // Save Region (Create / Edit)
 const saveRegion = async () => {
   submitting.value = true;
-  errorMessage.value = '';
-  successMessage.value = '';
   try {
     const payload = {
       code: form.code,
@@ -590,17 +587,17 @@ const saveRegion = async () => {
 
     if (isEditMode.value) {
       await api.put(`/master/regions/${editingRegionId.value}`, payload);
-      successMessage.value = `Wilayah ${form.name} berhasil diperbarui.`;
+      showAlert(`Wilayah ${form.name} berhasil diperbarui.`, 'success');
     } else {
       await api.post('/master/regions', payload);
-      successMessage.value = `Wilayah ${form.name} berhasil ditambahkan.`;
+      showAlert(`Wilayah ${form.name} berhasil ditambahkan.`, 'success');
     }
 
     showFormModal.value = false;
     await loadData();
   } catch (err) {
     console.error('Failed to save region:', err);
-    errorMessage.value = err?.message || err?.error || 'Gagal menyimpan data wilayah.';
+    showAlert(err?.message || err?.error || 'Gagal menyimpan data wilayah.', 'error');
   } finally {
     submitting.value = false;
   }
@@ -618,16 +615,14 @@ const openBranchMappingModal = (reg) => {
 const saveBranchMapping = async () => {
   if (!selectedRegion.value) return;
   submitting.value = true;
-  errorMessage.value = '';
-  successMessage.value = '';
   try {
     await api.put(`/master/regions/${selectedRegion.value.id}/branches`, mappingBranchIds.value);
-    successMessage.value = `Pemetaan cabang untuk ${selectedRegion.value.name} berhasil disimpan.`;
+    showAlert(`Pemetaan cabang untuk ${selectedRegion.value.name} berhasil disimpan.`, 'success');
     showMappingModal.value = false;
     await loadData();
   } catch (err) {
     console.error('Failed to assign branches:', err);
-    errorMessage.value = err?.message || err?.error || 'Gagal menyimpan pemetaan cabang.';
+    showAlert(err?.message || err?.error || 'Gagal menyimpan pemetaan cabang.', 'error');
   } finally {
     submitting.value = false;
   }
@@ -639,15 +634,13 @@ const confirmDelete = async (reg) => {
   if (!window.confirm(confirmMsg)) return;
 
   loading.value = true;
-  errorMessage.value = '';
-  successMessage.value = '';
   try {
     await api.delete(`/master/regions/${reg.id}`);
-    successMessage.value = `Wilayah ${reg.name} berhasil dihapus.`;
+    showAlert(`Wilayah ${reg.name} berhasil dihapus.`, 'success');
     await loadData();
   } catch (err) {
     console.error('Failed to delete region:', err);
-    errorMessage.value = err?.message || err?.error || 'Gagal menghapus wilayah.';
+    showAlert(err?.message || err?.error || 'Gagal menghapus wilayah.', 'error');
   } finally {
     loading.value = false;
   }
